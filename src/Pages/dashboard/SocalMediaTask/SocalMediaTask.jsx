@@ -1,6 +1,10 @@
+// SocalMediaTask.jsx
 import { useState } from 'react';
 import './SocalMediaTask.css';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '../../../api/apiClient';
+import toast from 'react-hot-toast';  // ✅ react-hot-toast
+import Toast from '../../../Componenets/ui/Toast';  // ✅ Toast Component
 
 const SocalMediaTask = () => {
   // State management
@@ -10,7 +14,6 @@ const SocalMediaTask = () => {
   });
   
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const navigate = useNavigate(); 
 
   // Handle input changes
@@ -22,27 +25,19 @@ const SocalMediaTask = () => {
     }));
   };
 
-  // Show toast function
-  const showToast = (message, type) => {
-    setToast({ show: true, message, type });
-    setTimeout(() => {
-      setToast({ show: false, message: '', type: '' });
-    }, 3000);
-  };
-
   // History button click handler
   const handleHistoryClick = () => {
     navigate('/dashboard/SocalMediaTaskHistory');
-  };;
+  };
 
-  // Handle form submit
+  // ✅ Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     // Validation
     if (!formData.url || !formData.appName) {
-      showToast('Please fill all fields', 'error');
+      toast.error('Please fill all fields');
       setLoading(false);
       return;
     }
@@ -50,119 +45,110 @@ const SocalMediaTask = () => {
     const regno = localStorage.getItem('Regno');
     
     if (!regno) {
-      showToast('Registration number not found in localStorage', 'error');
+      toast.error('Registration number not found');
       setLoading(false);
       return;
     }
     
     try {
-      const apiResponse = await fetch('https://api.apexmindai.in/api/Dashboard/SocialTask', {
-        method: 'POST',
-        headers: {
-          'accept': '*/*',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          regno: parseInt(regno),
-          url: formData.url,
-          appName: formData.appName
-        })
+      const response = await apiClient.post('/Dashboard/SocialTask', {
+        regno: parseInt(regno),
+        url: formData.url,
+        appName: formData.appName
       });
 
-      const data = await apiResponse.json();
+      const data = response.data;
+      console.log("API Response:", data);
       
-      if (data.result === "true") {
-        showToast(data.message || 'Url saved successfully', 'success');
+      if (data.result === "true" || data.result === true) {
+        toast.success(data.message || 'Url saved successfully');
         setFormData({ url: '', appName: '' });
       } else {
-        showToast(data.message || 'Something went wrong', 'error');
+        toast.error(data.message || 'Something went wrong');
       }
       
     } catch (err) {
-      showToast(err.message || 'Something went wrong', 'error');
+      console.error('Error submitting:', err);
+      const errorMessage = err.response?.data?.message || 
+                          err.message || 
+                          'Something went wrong';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="social-task-container">
-      {/* Toast Notification */}
-      {toast.show && (
-        <div className={`toast-notification ${toast.type}`}>
-          <div className="toast-content">
-            <span className="toast-icon">
-              {toast.type === 'success' ? '✓' : '✗'}
-            </span>
-            {toast.message}
-          </div>
-        </div>
-      )}
+    <>
+      {/* ✅ TOAST COMPONENT */}
+      <Toast />
 
-      {/* Main Form Card */}
-      <div className="form-card py-3 rounded-3">
-        {/* Header with History Button */}
-        <div className="d-flex justify-content-between px-3">
-          <div className="form-header">
-            <h2 className=" text-dark">Social Media Task</h2>
-          </div>
-          <button className="btn btn-primary" onClick={handleHistoryClick}>
-             History             
-          </button>
-        </div>
-
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="form-body01 px-4">
-          {/* URL Field */}
-          <div className="form-group">
-            <div className="text-dark mt-4">
-              🔗 URL Link
+      <div className="social-task-container">
+        {/* Main Form Card */}
+        <div className="form-card py-3 rounded-3">
+          {/* Header with History Button */}
+          <div className="d-flex justify-content-between px-3">
+            <div className="form-header">
+              <h2 className="text-dark"> Social Media Task</h2>
             </div>
-            <input
-              type="url"
-              name="url"
-              className="form-input"
-              value={formData.url}
-              onChange={handleChange}
-              placeholder="https://example.com"
-              required
-            />
+            <button className="btn btn-primary" onClick={handleHistoryClick}>
+               History             
+            </button>
           </div>
 
-          {/* App Name Field */}
-          <div className="form-group">
-            <div className="text-dark mt-3">
-              📱 App Name
+          {/* Form Body */}
+          <form onSubmit={handleSubmit} className="form-body01 px-4">
+            {/* URL Field */}
+            <div className="form-group">
+              <div className="text-dark mt-4">
+                🔗 URL Link
+              </div>
+              <input
+                type="url"
+                name="url"
+                className="form-input"
+                value={formData.url}
+                onChange={handleChange}
+                placeholder="https://example.com"
+                required
+              />
             </div>
-            <input
-              type="text"
-              name="appName"
-              className="form-input"
-              value={formData.appName}
-              onChange={handleChange}
-              placeholder="Enter app name"
-              required
-            />
-          </div>
 
-          {/* Submit Button */}
-          <button 
-            type="submit" 
-            className="submit-btn mb-5 mt-4"
-            disabled={loading}
-          >
-            {loading ? (
-              <span className="loading-spinner">
-                <span className="spinner"></span>
-                Submitting...
-              </span>
-            ) : (
-              'Submit Task →'
-            )}
-          </button>
-        </form>
+            {/* App Name Field */}
+            <div className="form-group">
+              <div className="text-dark mt-3">
+                 App Name
+              </div>
+              <input
+                type="text"
+                name="appName"
+                className="form-input"
+                value={formData.appName}
+                onChange={handleChange}
+                placeholder="Enter app name"
+                required
+              />
+            </div>
+
+            {/* Submit Button */}
+            <button 
+              type="submit" 
+              className="submit-btn mb-5 mt-4"
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="loading-spinner">
+                  <span className="spinner"></span>
+                  Submitting...
+                </span>
+              ) : (
+                'Submit Task →'
+              )}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

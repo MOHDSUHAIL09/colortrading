@@ -2,6 +2,7 @@ import  { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BsTwitterX } from "react-icons/bs";
 import { CiYoutube } from "react-icons/ci";
+import { GrNotes } from "react-icons/gr";
 import '../../assets/index.css';
 
 
@@ -33,7 +34,6 @@ import tryImg from '../../assets/images/try.png';
 
 // FAQ Section
 import faqImg from '../../assets/images/faq/faqimg-Photoroom.png';
-import { FaArrowDown } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 import { FaFacebook, FaInstagram, FaWhatsapp, FaYoutube } from 'react-icons/fa';
 
@@ -187,16 +187,16 @@ const LandingPage = () => {
     </Link>
   </div>
   
-  {/* Download Button */}
-  {/* <a 
-    className="btn-primary color-d " 
-    href="ApexmindaiAI.apk" 
+  {/* Download White Ppaer */}
+  <a 
+    className="btn-primary color-d" 
+    href="/Presentation.pdf" 
     download
   >
-    <FaArrowDown/>
+    <GrNotes/>
     <span className="hidden sm:inline">Download</span>
   </a>
-   */}
+  
   {/* Mobile Menu Button */}
   <button onClick={() => setMobileMenu(!mobileMenu)} className="text-2xl lg:hidden text-white">
     <i className="ti ti-menu-2"></i>

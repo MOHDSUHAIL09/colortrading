@@ -3,6 +3,7 @@ import CustomTable from "../../../Componenets/ui/customtable/CustomTable";
 import Pagination from "../../../Componenets/ui/pagination/Pagination";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import apiClient from "../../../api/apiClient";
 
 const SocialTaskReport = () => {
     const [records, setRecords] = useState([]);
@@ -41,17 +42,10 @@ const SocialTaskReport = () => {
 
         try {
             setLoading(true);
-            const response = await fetch(
-                `https://api.apexmindai.in/api/Dashboard/SocialTaskReport?regno=${regno}&transtype=${transtype}&pageIndex=${pageIndex}&pageSize=${itemsPerPage}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'accept': '*/*',
-                    }
-                }
-            );
+            const response = await apiClient.get(
+                `/Dashboard/SocialTaskReport?regno=${regno}&transtype=${transtype}&pageIndex=${pageIndex}&pageSize=${itemsPerPage}`);
 
-            const data = await response.json();
+            const data = response.data;
             console.log("API Response:", data);
 
             if (data.result === "true") {
@@ -115,9 +109,9 @@ const SocialTaskReport = () => {
             case 'completed':
                 return <span className="badge bg-success">✅ Completed</span>;
             case 'pending':
-                return <span className="badge bg-warning text-dark">⏳ Pending</span>;
+                return <span className="badge bg-warning text-dark"> Pending</span>;
             case 'failed':
-                return <span className="badge bg-danger">❌ Failed</span>;
+                return <span className="badge bg-danger"> Failed</span>;
             default:
                 return <span className="badge bg-secondary">{status || 'Pending'}</span>;
         }

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast';
 import { FaCopy, FaCheck, FaUser, FaIdCard, FaEye, FaEyeSlash } from "react-icons/fa";
 import './auth.css';
@@ -14,15 +14,28 @@ const Signup = () => {
   const [registeredUser, setRegisteredUser] = useState(null);
   const [copiedField, setCopiedField] = useState(null);
   
-  // ✅ State for countries
+  // State for countries
   const [countries, setCountries] = useState([]);
   const [countriesLoading, setCountriesLoading] = useState(false);
   
-  // ✅ State for password visibility
+  // State for password visibility
   const [showPassword, setShowPassword] = useState(false);
   
-  // ✅ State for country dropdown open/close
+  // State for country dropdown open/close
   const [open, setOpen] = useState(false);
+
+  // OTP States
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [storedOtp, setStoredOtp] = useState("");
+  const [isOtpMode, setIsOtpMode] = useState(false);
+  const [otpStatus, setOtpStatus] = useState(null); // null, 'success', 'error'
+  const [resendTimer, setResendTimer] = useState(0); // 5 minutes timer for resend
+  const emailInputRef = useRef(null);
+  const otpCheckTimeout = useRef(null);
+  const timerInterval = useRef(null);
 
   const [formData, setFormData] = useState({
     introRegNo: "",
@@ -41,7 +54,7 @@ const Signup = () => {
     countryCode: "",
   });
 
-  // ✅ Toast functions
+  // Toast functions
   const showSuccessToast = (message) => {
     toast.success(message, {
       duration: 4000,
@@ -76,7 +89,80 @@ const Signup = () => {
     });
   };
 
-  // ✅ Fetch countries on component mount
+  // Timer effect for resend button - 5 minutes
+  useEffect(() => {
+    if (resendTimer > 0) {
+      timerInterval.current = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      if (timerInterval.current) {
+        clearInterval(timerInterval.current);
+        timerInterval.current = null;
+      }
+    }
+    
+    return () => {
+      if (timerInterval.current) {
+        clearInterval(timerInterval.current);
+        timerInterval.current = null;
+      }
+    };
+  }, [resendTimer]);
+
+  // Auto-verify OTP when 6 digits are entered
+  useEffect(() => {
+    if (isOtpMode && otpValue.length === 6 && !otpVerified && !otpLoading) {
+      if (otpCheckTimeout.current) {
+        clearTimeout(otpCheckTimeout.current);
+      }
+      otpCheckTimeout.current = setTimeout(() => {
+        autoVerifyOTP();
+      }, 300);
+    }
+    
+    return () => {
+      if (otpCheckTimeout.current) {
+        clearTimeout(otpCheckTimeout.current);
+      }
+    };
+  }, [otpValue, isOtpMode]);
+
+  // Auto Verify OTP function
+  const autoVerifyOTP = () => {
+    if (!otpValue || otpValue.length !== 6) return;
+    
+    setOtpLoading(true);
+    try {
+      if (otpValue === storedOtp) {
+        setOtpStatus('success');
+        setOtpVerified(true);
+        showSuccessToast("OTP Verified Successfully!");
+        setTimeout(() => {
+          setOtpLoading(false);
+        }, 500);
+      } else {
+        setOtpStatus('error');
+        showErrorToast(" Invalid OTP! Try again.");
+        setTimeout(() => {
+          setOtpValue("");
+          setOtpStatus(null);
+          setOtpLoading(false);
+          emailInputRef.current?.focus();
+        }, 1000);
+      }
+    } catch (error) {
+      showErrorToast("Verification failed");
+      setOtpStatus('error');
+      setTimeout(() => {
+        setOtpValue("");
+        setOtpStatus(null);
+        setOtpLoading(false);
+      }, 1000);
+    }
+  };
+
+  // Fetch countries
   useEffect(() => {
     const fetchCountries = async () => {
       setCountriesLoading(true);
@@ -87,15 +173,6 @@ const Signup = () => {
         if (response.data?.result === "true" && Array.isArray(response.data.response)) {
           const activeCountries = response.data.response.filter(country => country.cActive === true);
           setCountries(activeCountries);
-          
-          // const india = activeCountries.find(c => c.CID === 96);
-          // if (india) {
-          //   setFormData(prev => ({
-          //     ...prev,
-          //     countryId: india.CID,
-          //     countryCode: india.CCode
-          //   }));
-          // }
         }
       } catch (error) {
         console.error("Error fetching countries:", error);
@@ -107,7 +184,7 @@ const Signup = () => {
     fetchCountries();
   }, []);
 
-  // ✅ Handle country selection - FIXED
+  // Handle country selection
   const handleCountrySelect = (country) => {
     setFormData(prev => ({
       ...prev,
@@ -117,12 +194,12 @@ const Signup = () => {
     setOpen(false);
   };
 
-  // ✅ Toggle password visibility
+  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  // ✅ Copy function
+  // Copy function
   const handleCopy = (text, field) => {
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text)
@@ -167,6 +244,61 @@ const Signup = () => {
     }
     
     document.body.removeChild(textArea);
+  };
+
+  // Format time for display (MM:SS)
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  // Send OTP - API CALL
+  const handleSendOTP = async () => {
+    if (!formData.email || !formData.email.includes('@')) {
+      showErrorToast("⚠️ Please enter a valid email address!");
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      const response = await apiClient.post(`/Auth/send-otp-to-gmail?eamil=${encodeURIComponent(formData.email)}`);
+      
+      console.log("OTP Response:", response.data);
+      
+      if (response.data?.data?.result === "true") {
+        const receivedOtp = response.data.otp || response.data.data?.otp;
+        if (receivedOtp) {
+          setStoredOtp(receivedOtp);
+          console.log("OTP stored:", receivedOtp);
+        }
+        
+        setOtpSent(true);
+        setIsOtpMode(true);
+        setOtpValue("");
+        setOtpStatus(null);
+        setOtpVerified(false);
+        setResendTimer(300); // 5 minutes timer start
+        showSuccessToast(`OTP sent to ${formData.email}`);
+        setTimeout(() => emailInputRef.current?.focus(), 300);
+      } else {
+        showErrorToast(response.data?.data?.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      console.error("OTP Error:", error);
+      showErrorToast("Failed to send OTP");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // Resend OTP - With timer check
+  const handleResendOTP = () => {
+    if (resendTimer > 0) {
+      showErrorToast(`⏳ Wait ${formatTime(resendTimer)} before resending`);
+      return;
+    }
+    handleSendOTP();
   };
 
   const fetchSponsorDetails = async (sponsorId) => {
@@ -224,8 +356,57 @@ const Signup = () => {
     if (name === "introRegNo") {
       setFormData((prev) => ({ ...prev, referrer_Id: value }));
       fetchSponsorDetails(value);
+    } else if (name === "email") {
+      if (isOtpMode) {
+        const numValue = value.replace(/\D/g, '');
+        if (numValue.length <= 6) {
+          setOtpValue(numValue);
+          if (otpStatus !== null) {
+            setOtpStatus(null);
+          }
+          if (otpVerified) {
+            setOtpVerified(false);
+          }
+        }
+      } else {
+        setFormData((prev) => ({ ...prev, email: value }));
+        if (otpSent || otpVerified) {
+          setOtpSent(false);
+          setOtpVerified(false);
+          setIsOtpMode(false);
+          setOtpValue("");
+          setStoredOtp("");
+          setOtpStatus(null);
+          setResendTimer(0);
+          if (timerInterval.current) {
+            clearInterval(timerInterval.current);
+            timerInterval.current = null;
+          }
+        }
+      }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Enter key press for OTP verification
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && isOtpMode && otpValue.length === 6 && !otpLoading && !otpVerified) {
+      e.preventDefault();
+      autoVerifyOTP();
+    }
+  };
+
+  // Clear OTP mode manually
+  const handleClearOtpMode = () => {
+    setIsOtpMode(false);
+    setOtpValue("");
+    setOtpStatus(null);
+    setOtpVerified(false);
+    setResendTimer(0);
+    if (timerInterval.current) {
+      clearInterval(timerInterval.current);
+      timerInterval.current = null;
     }
   };
 
@@ -241,28 +422,33 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     
+    if (!otpVerified) {
+      showErrorToast("⚠️ Please verify OTP first!");
+      return;
+    }
+
     if (!formData.sponsorName || formData.sponsorName === "Invalid Sponsor") {
       showErrorToast("⚠️ Please enter a valid Sponsor ID!");
       return;
     }
     
     if (!formData.mobile || formData.mobile.length !== 10) {
-      showErrorToast(" Valid 10-digit mobile number !");
+      showErrorToast("⚠️ Valid 10-digit mobile number required!");
       return;
     }
     
     if (!formData.email || !formData.email.includes('@')) {
-      showErrorToast(" Valid email address required!");
+      showErrorToast("⚠️ Valid email address required!");
       return;
     }
     
     if (!formData.password || formData.password.length < 8) {
-      showErrorToast(" Password must be at least 8 characters!");
+      showErrorToast("⚠️ Password must be at least 8 characters!");
       return;
     }
     
     if (!formData.countryId) {
-      showErrorToast(" Please select a country!");
+      showErrorToast("⚠️ Please select a country!");
       return;
     }
     
@@ -454,20 +640,128 @@ const Signup = () => {
                         </div>
                       </div>
                       
-                      <div className="col-lg-12">
-                        <div className="form-box">
-                          <input 
-                            type="email" 
-                            name="email" 
-                            placeholder="Email Address*" 
-                            value={formData.email} 
-                            onChange={handleChange} 
-                            required 
-                          />
-                        </div>
-                      </div>
+              {/* EMAIL + OTP in same field with Auto-verify and Status Icons */}
+<div className="col-lg-12">
+  <div className="d-flex gap-2 align-items-center w-100">
+    <div className="form-box flex-grow-1" style={{ position: 'relative' }}>
+      <input 
+        ref={emailInputRef}
+        type={isOtpMode ? "text" : "email"} 
+        name="email" 
+        placeholder={isOtpMode ? "Enter OTP" : "Email Address*"} 
+        value={isOtpMode ? otpValue : formData.email} 
+        onChange={handleChange}
+        onKeyPress={handleKeyPress}
+        required 
+        style={{ 
+          flex: 1,
+          letterSpacing: isOtpMode ? '8px' : 'normal',
+          fontWeight: isOtpMode ? '600' : 'normal',
+          fontSize: isOtpMode ? '18px' : '16px',
+          backgroundColor: isOtpMode ? '#f8f9fa' : 'transparent',
+          borderColor: isOtpMode 
+            ? (otpStatus === 'success' ? '#28a745' : otpStatus === 'error' ? '#dc3545' : otpValue.length === 6 ? '#ffc107' : undefined)
+            : undefined,
+          paddingRight: isOtpMode && otpValue.length >= 6 ? '95px' : '50px',
+          transition: 'border-color 0.3s ease'
+        }}
+      />
+      
+      {/* STATUS ICONS - Show only in OTP mode */}
+      {isOtpMode && otpValue.length >= 6 && (
+        <div style={{
+          position: 'absolute',
+          right: '12px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '5px',
+          pointerEvents: 'none',
+          zIndex: 2
+        }}>
+          {otpStatus === 'success' ? (
+            // Success Icon - Green Check
+            <span style={{ 
+              color: '#28a745', 
+              fontSize: '20px',
+              fontWeight: 'bold',
+              animation: 'fadeIn 0.3s ease',
+              marginTop: "-10px"
+            }}>
+              ✓
+            </span>
+          ) : otpStatus === 'error' ? (
+            // Error Icon - Red X
+            <span style={{ 
+              color: '#dc3545', 
+              fontSize: '20px',
+              fontWeight: 'bold',
+              animation: 'fadeIn 0.3s ease',
+              marginTop: "-10px"
+            }}>
+              ✕
+            </span>
+          ) : (
+            // Pending/Warning Icon - Yellow circle with clock
+            <span style={{ 
+              color: '#ffc107', 
+              fontSize: '18px',
+              fontWeight: 'bold',
+              animation: 'pulse 1s infinite',
+              marginTop: "-10px"
+            }}>
+              ⏳
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+    
+    {/* SEND OTP BUTTON - Only when not in OTP mode */}
+    {!isOtpMode && !otpVerified && (
+      <button 
+        type="button" 
+        className="btn btn-primary text-nowrap" 
+        onClick={handleSendOTP}
+        disabled={otpLoading || !formData.email || !formData.email.includes('@')}
+        style={{ 
+          padding: "10px  16px",
+          minWidth: "100px",
+          height: "44px",
+          marginTop: "-10px",
+          opacity: (otpLoading || !formData.email || !formData.email.includes('@')) ? 0.6 : 1,
+          cursor: (otpLoading || !formData.email || !formData.email.includes('@')) ? 'not-allowed' : 'pointer'
+        }}
+      >
+        {otpLoading ? "Sending..." : "Send OTP"}
+      </button>
+    )}
+    
+    {/* RESEND BUTTON - With 5 minute timer */}
+    {isOtpMode && !otpVerified && (
+      <button
+        type="button"
+        className="btn btn-primary text-nowrap"
+        onClick={handleResendOTP}
+        disabled={otpLoading || resendTimer > 0}
+        style={{
+          padding: "12px 16px",
+          height: "44px",
+          fontSize: '14px',
+          minWidth: '80px',
+          marginTop: "-10px",
+          opacity: (otpLoading || resendTimer > 0) ? 0.6 : 1,
+          cursor: (otpLoading || resendTimer > 0) ? 'not-allowed' : 'pointer'
+        }}
+      >
+        {resendTimer > 0 ? formatTime(resendTimer) : "Resend"}
+      </button>
+    )}
+  </div> 
+</div>
 
-                      {/* ✅ Custom Country Dropdown - FIXED */}
+                      {/* Custom Country Dropdown */}
                       <div className="col-lg-12 mb-2">
                         <div className="form-box">
                           <div className="country-wrapper" style={{ position: 'relative' }}>
@@ -490,7 +784,7 @@ const Signup = () => {
                                 color: formData.countryId ? '#333' : '#999',
                                 cursor: 'pointer',
                                 transition: 'border-color 0.3s ease',
-                                userSelect: 'none'
+                                userSelect: 'none',
                               }}
                             >
                               <span>
@@ -499,7 +793,7 @@ const Signup = () => {
                                   : '-- Select Country --'}
                               </span>
                               <span style={{ fontSize: '14px', color: '#666' }}>
-                                <IoIosArrowDropdown  style={{fontSize: "22px"}}/>
+                                <IoIosArrowDropdown style={{ fontSize: "22px" }}/>
                               </span>
                             </div>
 
@@ -560,6 +854,7 @@ const Signup = () => {
                         </div>
                       </div>
                       
+                      {/* Mobile - Without disable */}
                       <div className="col-lg-12">
                         <div className="form-box d-flex" style={{ gap: "10px", alignItems: "center" }}>
                           <div>
@@ -585,35 +880,18 @@ const Signup = () => {
                             value={formData.mobile} 
                             onChange={handleChange} 
                             required 
-                            style={{ flex: 1 }} 
+                            style={{ flex: 1 }}
                           />
                         </div>
                       </div>
 
-{/*       
-<div className="d-flex gap-2 align-items-center w-100">
-    <div className="form-box flex-grow-1">
-        <input 
-            type="text" 
-            name="mobile" 
-            className="form-control"
-            placeholder="Send Your OTP" 
-            maxLength="10" 
-            required 
-        />
-    </div>
-    <button className="btn btn-primary text-nowrap mb-2" style={{padding: "10px",}}>
-        Send
-    </button>
-</div>               */}
-                      
-                      {/* ✅ Password with Eye Icon */}
+                      {/* Password with Eye Icon */}
                       <div className="col-lg-12">
                         <div className="form-box" style={{ position: 'relative' }}>
                           <input 
                             type={showPassword ? "text" : "password"} 
                             name="password" 
-                            placeholder="Create Password" 
+                            placeholder="Create Password (min 8 characters)" 
                             value={formData.password} 
                             onChange={handleChange} 
                             required 
@@ -641,8 +919,12 @@ const Signup = () => {
                               transition: 'all 0.2s ease'
                             }}
                             aria-label={showPassword ? "Hide password" : "Show password"}
-                            onMouseEnter={(e) => e.currentTarget.style.background = '#f0f0f0'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background = '#f0f0f0';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.background = 'transparent';
+                            }}
                           >
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                           </button>
@@ -660,7 +942,15 @@ const Signup = () => {
                       </div>
                       
                       <div className="col-lg-12 mt-4">
-                        <button type="submit" className="laboix-btn" disabled={loading}>
+                        <button 
+                          type="submit" 
+                          className="laboix-btn" 
+                          disabled={loading || !otpVerified}
+                          style={{
+                            opacity: (loading || !otpVerified) ? 0.6 : 1,
+                            cursor: (loading || !otpVerified) ? 'not-allowed' : 'pointer'
+                          }}
+                        >
                           {loading ? "Creating Account..." : "Signup Now"}
                         </button>
                       </div>
@@ -701,13 +991,11 @@ const Signup = () => {
             padding: '0'
           }}>
             <div className="modal-header02" style={{
-              padding: '24px 28px',
-              borderBottom: '2px solid #f0f0f0',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
               position: 'relative',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: '#667eea',
               borderRadius: '24px 24px 0 0'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -745,141 +1033,311 @@ const Signup = () => {
               }}>×</button>
             </div>
             
-            <div className="modal-body02" style={{ padding: '28px' }}>
-              <div className="user-details-card02" style={{
-                background: '#f8f9fa',
-                borderRadius: '16px',
-                padding: '20px',
-                marginBottom: '20px'
-              }}>
-                <div className="Account-text" style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  marginBottom: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  color: '#333'
-                }}>
-                  <FaIdCard style={{ color: '#4CAF50' }} /> Your Account Details
-                </div>
+<div className="modal-body02" style={{ 
+  padding: '20px 16px',
+  maxWidth: '100%',
+  overflow: 'hidden'
+}}>
+  <div className="user-details-card02" style={{
+    background: 'linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)',
+    borderRadius: '16px',
+    padding: '20px 16px',
+    marginBottom: '20px',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+    border: '1px solid #f0f0f0'
+  }}>
+    
+    {/* HEADER */}
+    <div className="Account-text" style={{
+      fontSize: '15px',
+      fontWeight: '700',
+      marginBottom: '18px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      color: '#1a1a1a',
+      paddingBottom: '12px',
+      borderBottom: '2px solid #667eea',
+      letterSpacing: '0.3px'
+    }}>
+      <FaIdCard style={{ color: '#667eea', fontSize: '18px', flexShrink: 0 }} /> 
+      <span style={{ whiteSpace: 'nowrap' }}>Your Account Details</span>
+    </div>
 
-                <div className="detail-row02" style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '10px 0',
-                  borderBottom: '1px solid #e8e8e8'
-                }}>
-                  <div className="detail-label02" style={{ fontWeight: '500', color: '#555' }}>
-                    <FaUser style={{ marginRight: '6px', color: '#667eea' }} /> Login ID:
-                  </div>
-                  <div className="detail-value02" style={{ fontWeight: '600', color: '#1a1a1a' }}>
-                    {registeredUser.loginId}
-                    <button className="copy-btn02" onClick={() => handleCopy(registeredUser.loginId, "Login ID")} style={{
-                      marginLeft: '10px',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: copiedField === "Login ID" ? '#4CAF50' : '#667eea',
-                      fontSize: '16px',
-                      transition: 'all 0.3s ease'
-                    }}>
-                      {copiedField === "Login ID" ? <FaCheck /> : <FaCopy />}
-                    </button>
-                  </div>
-                </div>
+    {/* ====== ROW 1: Login ID ====== */}
+    <div className="detail-row02" style={{
+      display: 'flex',
+      alignItems: 'center',
+      padding: '12px 0',
+      borderBottom: '1px solid #f0f0f0',
+      gap: '10px',
+      flexWrap: 'nowrap',
+      minHeight: '44px'
+    }}>
+      <div className="detail-label02" style={{ 
+        fontWeight: '600', 
+        color: '#555',
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
+        fontSize: '13px',
+        width: '100px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px'
+      }}>
+        <FaUser style={{ color: '#667ea5', fontSize: '13px' }} /> 
+        <span>Login ID</span>
+        <span style={{ color: '#999', fontSize: '12px' }}>:</span>
+      </div>
+      <div className="detail-value02" style={{ 
+        fontWeight: '600', 
+        color: '#1a1a1a',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        flex: 1,
+        minWidth: 0,
+        fontSize: '14px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        gap: '6px'
+      }}>
+        <span style={{ 
+          display: 'block',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          maxWidth: '120px'
+        }}>
+          {registeredUser.loginId}
+        </span>
+        <button className="copy-btn02" onClick={() => handleCopy(registeredUser.loginId, "Login ID")} style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: copiedField === "Login ID" ? '#4CAF50' : '#667ea5',
+          fontSize: '15px',
+          transition: 'all 0.3s ease',
+          padding: '4px 6px',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          borderRadius: '4px',
+          background: copiedField === "Login ID" ? 'rgba(76, 175, 80, 0.1)' : 'transparent'
+        }}>
+          {copiedField === "Login ID" ? <FaCheck /> : <FaCopy />}
+        </button>
+      </div>
+    </div>
 
-                <div className="detail-row02" style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '10px 0',
-                  borderBottom: '1px solid #e8e8e8'
-                }}>
-                  <div className="detail-label02" style={{ fontWeight: '500', color: '#555' }}>
-                    <FaUser style={{ marginRight: '6px', color: '#667eea' }} /> Sponsor ID:
-                  </div>
-                  <div className="detail-value02" style={{ fontWeight: '600', color: '#1a1a1a' }}>
-                    {registeredUser.sponsorId}
-                    <button className="copy-btn02" onClick={() => handleCopy(registeredUser.sponsorId, "Sponsor ID")} style={{
-                      marginLeft: '10px',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: copiedField === "Sponsor ID" ? '#4CAF50' : '#667eea',
-                      fontSize: '16px',
-                      transition: 'all 0.3s ease'
-                    }}>
-                      {copiedField === "Sponsor ID" ? <FaCheck /> : <FaCopy />}
-                    </button>
-                  </div>
-                </div>
+    {/* ====== ROW 2: Sponsor ID ====== */}
+    <div className="detail-row02" style={{
+      display: 'flex',
+      alignItems: 'center',
+      padding: '12px 0',
+      borderBottom: '1px solid #f0f0f0',
+      gap: '10px',
+      flexWrap: 'nowrap',
+      minHeight: '44px'
+    }}>
+      <div className="detail-label02" style={{ 
+        fontWeight: '600', 
+        color: '#555',
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
+        fontSize: '13px',
+        width: '100px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px'
+      }}>
+        <FaUser style={{ color: '#667ea5', fontSize: '13px' }} /> 
+        <span>Sponsor ID</span>
+        <span style={{ color: '#999', fontSize: '12px' }}>:</span>
+      </div>
+      <div className="detail-value02" style={{ 
+        fontWeight: '600', 
+        color: '#1a1a1a',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        flex: 1,
+        minWidth: 0,
+        fontSize: '14px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        gap: '6px'
+      }}>
+        <span style={{ 
+          display: 'block',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          maxWidth: '120px'
+        }}>
+          {registeredUser.sponsorId}
+        </span>
+        <button className="copy-btn02" onClick={() => handleCopy(registeredUser.sponsorId, "Sponsor ID")} style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: copiedField === "Sponsor ID" ? '#4CAF50' : '#667ea5',
+          fontSize: '15px',
+          transition: 'all 0.3s ease',
+          padding: '4px 6px',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          borderRadius: '4px',
+          background: copiedField === "Sponsor ID" ? 'rgba(76, 175, 80, 0.1)' : 'transparent'
+        }}>
+          {copiedField === "Sponsor ID" ? <FaCheck /> : <FaCopy />}
+        </button>
+      </div>
+    </div>
 
-                <div className="detail-row02" style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '10px 0',
-                  borderBottom: '1px solid #e8e8e8'
-                }}>
-                  <div className="detail-label02" style={{ fontWeight: '500', color: '#555' }}>
-                    <FaUser style={{ marginRight: '6px', color: '#667eea' }} /> Sponsor Name:
-                  </div>
-                  <div className="detail-value02" style={{ fontWeight: '600', color: '#1a1a1a' }}>
-                    {registeredUser.sponsorName}
-                  </div>
-                </div>
+    {/* ====== ROW 3: Sponsor Name ====== */}
+    <div className="detail-row02" style={{
+      display: 'flex',
+      alignItems: 'center',
+      padding: '12px 0',
+      borderBottom: '1px solid #f0f0f0',
+      gap: '10px',
+      flexWrap: 'nowrap',
+      minHeight: '44px'
+    }}>
+      <div className="detail-label02" style={{ 
+        fontWeight: '600', 
+        color: '#555',
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
+        fontSize: '13px',
+        width: '100px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px'
+      }}>
+        <FaUser style={{ color: '#667ea5', fontSize: '13px' }} /> 
+        <span>Sponsor Name</span>
+        <span style={{ color: '#999', fontSize: '12px' }}>:</span>
+      </div>
+      <div className="detail-value02" style={{ 
+        fontWeight: '600', 
+        color: '#1a1a1a',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        flex: 1,
+        minWidth: 0,
+        fontSize: '14px',
+        textAlign: 'right',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end'
+      }}>
+        <span style={{ 
+          display: 'block',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          maxWidth: '150px'
+        }}>
+          {registeredUser.sponsorName}
+        </span>
+      </div>
+    </div>
 
-                <div className="detail-row02" style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '10px 0'
-                }}>
-                  <div className="detail-label02" style={{ fontWeight: '500', color: '#555' }}>
-                    <FaUser style={{ marginRight: '6px', color: '#667eea' }} /> Password:
-                  </div>
-                  <div className="detail-value02" style={{ fontWeight: '600', color: '#1a1a1a' }}>
-                    {"•".repeat(8)}
-                    <button className="copy-btn02" onClick={() => handleCopy(registeredUser.password, "Password")} style={{
-                      marginLeft: '10px',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: copiedField === "Password" ? '#4CAF50' : '#667eea',
-                      fontSize: '16px',
-                      transition: 'all 0.3s ease'
-                    }}>
-                      {copiedField === "Password" ? <FaCheck /> : <FaCopy />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="modal-actions02" style={{
-                display: 'flex',
-                gap: '12px',
-                justifyContent: 'center',
-                flexWrap: 'wrap'
-              }}>
-                <button className="btn-dashboard02" onClick={handleGoToLogin} style={{
-                  padding: '14px 48px',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '12px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  minWidth: '160px',
-                  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
-                }}>
-                  GO TO LOGIN
-                </button>
-              </div>  
-            </div>
+    {/* ====== ROW 4: Password ====== */}
+    <div className="detail-row02" style={{
+      display: 'flex',
+      alignItems: 'center',
+      padding: '12px 0',
+      gap: '10px',
+      flexWrap: 'nowrap',
+      minHeight: '44px'
+    }}>
+      <div className="detail-label02" style={{ 
+        fontWeight: '600', 
+        color: '#555',
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
+        fontSize: '13px',
+        width: '100px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px'
+      }}>
+        <FaUser style={{ color: '#667ea5', fontSize: '13px' }} /> 
+        <span>Password</span>
+        <span style={{ color: '#999', fontSize: '12px' }}>:</span>
+      </div>
+      <div className="detail-value02" style={{ 
+        fontWeight: '600', 
+        color: '#1a1a1a',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        flex: 1,
+        minWidth: 0,
+        fontSize: '14px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        gap: '6px'
+      }}>
+        <span style={{ 
+          display: 'block',
+          letterSpacing: '2px',
+          fontSize: '16px'
+        }}>
+          {"•".repeat(8)}
+        </span>
+        <button className="copy-btn02" onClick={() => handleCopy(registeredUser.password, "Password")} style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: copiedField === "Password" ? '#4CAF50' : '#667ea5',
+          fontSize: '15px',
+          transition: 'all 0.3s ease',
+          padding: '4px 6px',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          borderRadius: '4px',
+        }}>
+          {copiedField === "Password" ? <FaCheck /> : <FaCopy />}
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  {/* BUTTON */}
+  <div className="modal-actions02" style={{
+    display: 'flex',
+    gap: '12px',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '8px 0'
+  }}>
+    <button className="btn-dashboard02" onClick={handleGoToLogin} style={{
+      background: '#667eea',
+      color: 'white',
+      border: 'none',
+      borderRadius: '12px',
+      fontSize: '15px',
+      fontWeight: '700',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',  
+      width: '100%',
+      boxShadow: '0 6px 20px  rgba(161, 138, 216, 0.35)',
+      letterSpacing: '1px',
+      whiteSpace: 'nowrap',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}> GO TO LOGIN
+    </button>
+  </div>  
+</div>
           </div>
         </div>
       )}

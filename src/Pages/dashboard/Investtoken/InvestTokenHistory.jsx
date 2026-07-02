@@ -4,6 +4,7 @@ import CustomTable from "../../../Componenets/ui/customtable/CustomTable";
 import Pagination from "../../../Componenets/ui/pagination/Pagination";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import apiClient from "../../../api/apiClient";
 
 const InvestTokenHistory = () => {
     const [records, setRecords] = useState([]);
@@ -49,18 +50,11 @@ const InvestTokenHistory = () => {
 
         try {
             setLoading(true);
-            const response = await fetch(
-                `https://api.apexmindai.in/TokenMiningHistoryAsync?regno=${regno}&type=${type}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'accept': '*/*',
-                    }
-                }
-            );
-
-            const data = await response.json();
-            console.log("API Response:", data);
+// ✅ New apiClient
+const response = await apiClient.get('/Token/TokenMiningHistoryAsync', {
+    params: { regno, type }
+}); 
+const data = response.data;
 
             if (data.result === "true" || data.result === true) {
                 const historyData = data.data || [];

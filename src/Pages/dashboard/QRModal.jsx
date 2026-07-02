@@ -10,7 +10,7 @@ const QRModal = ({ isOpen, onClose }) => {
     const [copySuccess, setCopySuccess] = useState('');
     const [isMobile, setIsMobile] = useState(false);
 
-    // ✅ Detect mobile device
+    // Detect mobile device
     useEffect(() => {
         const checkMobile = () => {
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
@@ -31,24 +31,21 @@ const QRModal = ({ isOpen, onClose }) => {
             const loginid = userData?.loginid;
             const baseUrl = 'http://apexmindai.in';
             const link = `${baseUrl}/signup?ref=${loginid}`;
-            console.log("🔗 Generated Referral Link:", link);
             setReferralLink(link);
         } catch (error) {
-            console.error("❌ Error generating referral link:", error);
+            console.error("Error generating referral link:", error);
             setReferralLink('http://apexmindai.in/signup');
         }
     };
 
-    // ✅ COPY FUNCTION - Only copy, no share logic
+    // COPY FUNCTION - Only copy, no share logic
     const copyReferralLink = async () => {
-        console.log("📋 Copy function called");
         
         try {
             // Try modern clipboard API
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 await navigator.clipboard.writeText(referralLink);
                 setCopySuccess('✅ Copied!');
-                console.log("📋 Copied using Clipboard API");
                 setTimeout(() => setCopySuccess(''), 2000);
                 return;
             }
@@ -73,29 +70,24 @@ const QRModal = ({ isOpen, onClose }) => {
             
             if (successful) {
                 setCopySuccess('✅ Copied!');
-                console.log("📋 Copied using execCommand");
             } else {
-                setCopySuccess('❌ Copy failed');
+                setCopySuccess('Copy failed');
                 alert(`Please copy manually:\n${referralLink}`);
             }
             setTimeout(() => setCopySuccess(''), 2000);
         } catch (error) {
-            console.error("❌ Copy failed:", error);
-            setCopySuccess('❌ Copy failed');
+            console.error("Copy failed:", error);
+            setCopySuccess('Copy failed');
             alert(`Please copy manually:\n${referralLink}`);
             setTimeout(() => setCopySuccess(''), 2000);
         }
     };
 
-    // ✅ SHARE FUNCTION - Only share, NO copy unless user confirms
+    // SHARE FUNCTION - Only share, NO copy unless user confirms
     const handleShare = async () => {
-        console.log("📤 Share button clicked");
-        console.log("📱 Is Mobile:", isMobile);
-        console.log("🌐 navigator.share available:", !!navigator.share);
 
-        // ✅ If share is not available, fallback to copy
+        // If share is not available, fallback to copy
         if (!navigator.share) {
-            console.log("⚠️ Share not supported, using copy fallback");
             await copyReferralLink();
             return;
         }
@@ -107,35 +99,31 @@ const QRModal = ({ isOpen, onClose }) => {
         };
 
         try {
-            console.log("📤 Attempting native share...");
             await navigator.share(shareData);
-            console.log("✅ Shared successfully!");
             setCopySuccess('✅ Shared successfully!');
             setTimeout(() => setCopySuccess(''), 2000);
             
         } catch (error) {
-            console.log("📤 Share error:", error);
             
-            // ✅ User cancelled - Don't copy automatically!
+            // User cancelled - Don't copy automatically!
             if (error.name === 'AbortError') {
-                console.log("👤 User cancelled share");
                 setCopySuccess('⏹️ Share cancelled');
                 setTimeout(() => setCopySuccess(''), 2000);
                 return;
             }
             
-            // ✅ Other errors - Ask user if they want to copy
-            console.error("❌ Share failed with error:", error.message);
+            // Other errors - Ask user if they want to copy
+            console.error("Share failed with error:", error.message);
             
-            // ❌ DON'T auto-copy - Ask user instead
+            // DON'T auto-copy - Ask user instead
             const shouldCopy = window.confirm(
-                '❌ Share failed. Would you like to copy the link instead?'
+                'Share failed. Would you like to copy the link instead?'
             );
             
             if (shouldCopy) {
                 await copyReferralLink();
             } else {
-                setCopySuccess('❌ Share failed');
+                setCopySuccess('Share failed');
                 setTimeout(() => setCopySuccess(''), 2000);
             }
         }
@@ -186,7 +174,7 @@ const QRModal = ({ isOpen, onClose }) => {
                         animation: slideDown 0.4s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
                     }
                     
-                    /* ✅ Mobile touch improvements */
+                    /* Mobile touch improvements */
                     .btn-share, .btn-copy {
                         touch-action: manipulation;
                         -webkit-tap-highlight-color: transparent;
@@ -310,7 +298,7 @@ const QRModal = ({ isOpen, onClose }) => {
                             value={referralLink}
                             readOnly
                             onClick={() => {
-                                // ✅ Tap on input to copy (mobile friendly)
+                                // Tap on input to copy (mobile friendly)
                                 if (isMobile) {
                                     copyReferralLink();
                                 }
@@ -345,7 +333,7 @@ const QRModal = ({ isOpen, onClose }) => {
                         </div>
                     )}
 
-                    {/* ✅ IMPROVED Buttons */}
+                    {/* IMPROVED Buttons */}
                     <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
                         <button
                             onClick={handleShare}

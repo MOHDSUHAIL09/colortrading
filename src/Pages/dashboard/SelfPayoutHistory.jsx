@@ -5,11 +5,12 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import apiClient from "../../api/apiClient";
 
-const SelfPayoutHistory = () => {
+const SeftradingHistory = () => {
     const [records, setRecords] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [totalAmount, setTotalAmount] = useState(0);
+    const [recordCount, setRecordCount] = useState(0);
 
     // Pagination state
     const [pageIndex, setPageIndex] = useState(1);
@@ -21,14 +22,18 @@ const SelfPayoutHistory = () => {
     // Format Date
     const formatDate = (dateString) => {
         if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleString('en-IN', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-IN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch {
+            return '-';
+        }
     };
 
     // Format Amount
@@ -39,8 +44,8 @@ const SelfPayoutHistory = () => {
         })}`;
     };
 
-    // ✅ Fetch Self Trading Payout History
-    const fetchSelfPayoutHistory = async () => {
+    // ✅ Fetch Self Trading Payout History - FIXED with query params
+    const fetchSelfTradingHistory = async () => {
         if (!regno) {
             toast.error('Registration number not found');
             setLoading(false);
@@ -49,55 +54,70 @@ const SelfPayoutHistory = () => {
 
         try {
             setLoading(true);
+            
+            // ✅ POST with query parameters
             const response = await apiClient.post(
-                `/Trading/SelfTradingPayoutHistory?regno=${regno}&pageNumber=${pageIndex}&pageSize=${itemsPerPage}`
+                '/Trading/SelfTradingPayoutHistory',
+                null, // No body
+                {
+                    params: {
+                        regno: parseInt(regno),
+                        pageNumber: pageIndex,
+                        pageSize: itemsPerPage
+                    }
+                }
             );
 
-            console.log("API Response:", response.data);
-
-            if (response.data?.result === "true") {
-                const allData = response.data?.response || [];
-                
-                // ✅ Filter only "Fund Withdrawal" records
-                const fundWithdrawalData = allData.filter(item => 
-                    item.Designation?.toLowerCase().includes("fund withdrawal")
-                );
-                
-                setRecords(fundWithdrawalData);
+            // ✅ Axios automatically parses JSON
+            const data = response.data;
+            if (data.result === "true" || data.result === true) {
+                const historyData = data.response || data.data || [];
+                setRecords(historyData);
+                setRecordCount(historyData.length);
                 
                 // Calculate total amount
-                const total = fundWithdrawalData.reduce((sum, item) => {
-                    return sum + (parseFloat(item.Amount) || parseFloat(item.debit) || 0);
+                const total = historyData.reduce((sum, item) => {
+                    return sum + (parseFloat(item.payoutAmount) || parseFloat(item.Amount) || parseFloat(item.amount) || 0);
                 }, 0);
                 setTotalAmount(total);
             } else {
-                toast.error(response.data?.message || 'Failed to fetch report');
+                toast.error(data.message || 'Failed to fetch history');
                 setRecords([]);
                 setTotalAmount(0);
+                setRecordCount(0);
             }
         } catch (err) {
             console.error('Error fetching report:', err);
-            toast.error(err.response?.data?.message || err.message || 'Something went wrong');
+            
+            const errorMessage = err.response?.data?.message || 
+                                err.message || 
+                                'Something went wrong';
+            toast.error(errorMessage);
             setRecords([]);
             setTotalAmount(0);
+            setRecordCount(0);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchSelfPayoutHistory();
+        fetchSelfTradingHistory();
     }, [pageIndex, itemsPerPage]);
 
-    // Filter records based on search term (local search)
+    // Filter records based on search term
     const filteredRecords = records.filter((row) => {
         const searchLower = searchTerm.toLowerCase();
         return (
             (row.EntryDate?.toLowerCase().includes(searchLower)) ||
-            (row.Designation?.toLowerCase().includes(searchLower)) ||
+            (row.date?.toLowerCase().includes(searchLower)) ||
+            (row.payoutDate?.toLowerCase().includes(searchLower)) ||
             (row.Amount?.toString().toLowerCase().includes(searchLower)) ||
-            (row.debit?.toString().toLowerCase().includes(searchLower)) ||
-            (row.MRID?.toString().toLowerCase().includes(searchLower))
+            (row.payoutAmount?.toString().toLowerCase().includes(searchLower)) ||
+            (row.amount?.toString().toLowerCase().includes(searchLower)) ||
+            (row.remark?.toLowerCase().includes(searchLower)) ||
+            (row.lcount?.toString().toLowerCase().includes(searchLower)) ||
+            (row.status?.toLowerCase().includes(searchLower))
         );
     });
 
@@ -107,15 +127,16 @@ const SelfPayoutHistory = () => {
     const startIndex = (pageIndex - 1) * itemsPerPage;
     const currentRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
 
-    // Reset to first page when search term or items per page changes
+    // Reset to first page when search term changes
     useEffect(() => {
         setPageIndex(1);
-    }, [searchTerm, itemsPerPage]);
+    }, [searchTerm]);
 
     const columns = [
         "Sl.No.",
         "Date",
-        "Debit",
+        "Payout Amount",
+        "Remaining Amount",
         "Remark",
     ];
 
@@ -124,16 +145,19 @@ const SelfPayoutHistory = () => {
             <ToastContainer position="top-right" />
             <div className="Table-container royalty-main-wrapper mb-5 p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-                    <h3 className="mb-0 text-dark">Self Trading Payout History</h3>
-                    <div className="total-income-box">
-                        <span className="text-muted">Total Amount: </span>
-                        <strong className="text-success">{formatAmount(totalAmount)}</strong>
-                    </div>
+                    <h3 className="mb-0 text-dark"> Self Trading Payout History</h3>
+                    {/* {totalAmount > 0 && (
+                        <div className="total-income-badge">
+                            <span className="text-dark">Total Payout: </span>
+                            <span style={{ color: "#10b981", fontWeight: "bold", fontSize: "18px" }}>
+                                {formatAmount(totalAmount)}
+                            </span>
+                        </div>
+                    )} */}
                 </div>
 
                 {/* Filters Row */}
                 <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3 entries-search-bar">
-                    {/* Show Entries */}
                     <div className="entries-control d-flex align-items-center gap-2">
                         <label className="text-dark mb-0">Show entries:</label>
                         <select 
@@ -149,7 +173,6 @@ const SelfPayoutHistory = () => {
                         </select>
                     </div>
 
-                    {/* Search Records */}
                     <div className="search-wrapper">
                         <input
                             className="form-control search-input"
@@ -165,34 +188,46 @@ const SelfPayoutHistory = () => {
                     <CustomTable columns={columns} loading={loading}>
                         {currentRecords.length > 0 ? (
                             currentRecords.map((row, index) => (
-                                <tr key={row.MRID || index}>
+                                <tr key={row.id || row.Rid || index}>
                                     <td className="text-center">
                                         <div className="sr-no-circle">
                                             {startIndex + index + 1}
                                         </div>
                                     </td>
-                                    <td>
-                                        {formatDate(row.EntryDate)}
+                                    <td style={{ color: "#6b7280", fontSize: "13px" }}>
+                                        {formatDate(row.EntryDate || row.date || row.payoutDate)}
                                     </td>
-                                    <td style={{ color: "#d60d0d", fontWeight: "600" }}>
-                                        {formatAmount(row.Amount || row.debit || "0")}
+                                    <td style={{ color: "#10b981", fontWeight: "600" }}>
+                                        {formatAmount(row.Amount || row.payoutAmount || row.amount || 0)}
                                     </td>
-                                    <td style={{ color: "#6b7280", fontSize: "13px" }} title={row.Designation || "-"}>
-                                        {row.Designation || "-"}
+                                    <td style={{ color: "#8b5cf6", fontWeight: "600" }}>
+                                        {formatAmount(row.lcount || row.remainingAmount || row.balance || 0)}
+                                    </td>                       
+                                    <td style={{ 
+                                        color: "#6b7280", 
+                                        fontSize: "13px", 
+                                        maxWidth: "300px",
+                                        wordBreak: "break-word"
+                                    }} 
+                                    title={row.remark || row.Remark || "-"}>
+                                        {row.remark || row.Remark ? (
+                                            (row.remark || row.Remark).length > 50 ? 
+                                            (row.remark || row.Remark).substring(0, 50) + '...' : 
+                                            (row.remark || row.Remark)
+                                        ) : "-"}
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
                                 <td colSpan={columns.length} className="text-center py-4">
-                                    {loading ? "Loading..." : "No Fund Withdrawal records found"}
+                                    {loading ? "⏳ Loading..." : "📭 No records found"}
                                 </td>
                             </tr>
                         )}
                     </CustomTable>
 
-                    {/* Pagination Component */}
-                    {totalPages > 1 && (
+                    {!loading && totalPages > 1 && (
                         <Pagination
                             currentPage={pageIndex}
                             totalPages={totalPages}
@@ -202,8 +237,29 @@ const SelfPayoutHistory = () => {
                     )}
                 </div>
             </div>
+
+            <style jsx>{`
+                .sr-no-circle {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    background: #f3f4f6;
+                    color: #4b5563;
+                    font-size: 13px;
+                    font-weight: 600;
+                }
+                .total-income-badge {
+                    background: #f0fdf4;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    border: 1px solid #bbf7d0;
+                }
+            `}</style>
         </>
     );
 };
 
-export default SelfPayoutHistory;
+export default SeftradingHistory;

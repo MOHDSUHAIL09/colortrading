@@ -1,4 +1,4 @@
-// InvestToken.jsx - Fixed API URL
+// InvestToken.jsx - Complete Fixed Code
 import React, { useState } from "react";
 import "./InvestToken.css";
 import { Link } from "react-router-dom";
@@ -12,13 +12,11 @@ const ApexMiningProgram = () => {
   const [loadingTier1, setLoadingTier1] = useState(false);
   const [loadingTier2, setLoadingTier2] = useState(false);
   const [loadingTier3, setLoadingTier3] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successData, setSuccessData] = useState({});
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
 
-   const { userData } = useUser();
+  const { userData, refreshData } = useUser();
 
-  // Show Toast
+  // ✅ Show Toast
   const showToast = (message, type = "success") => {
     setToast({ show: true, message, type });
     setTimeout(() => {
@@ -26,16 +24,15 @@ const ApexMiningProgram = () => {
     }, 3000);
   };
 
-  // ✅ API Call Function - FIXED URL
+  // ✅ API Call Function
   const callInvestAPI = async (regno, miningAmt, uregno, slotNum, setLoading) => {
     try {
       setLoading(true);
 
       console.log("📤 Sending Request:", { regno, miningAmt, uregno, slotNum });
 
-      // ✅ FIX: Use full URL or remove extra slash
-      // Option 1: Use full URL (Recommended)
-      const response = await apiClient.post(`https://api.apexmindai.in/TokenMiningAsync`, null, {
+      // ✅ API Call - Using base URL from apiClient
+      const response = await apiClient.post(`/Token/TokenMiningAsync`, null, {
         params: {
           Regno: regno,
           MiningAmt: miningAmt,
@@ -44,42 +41,27 @@ const ApexMiningProgram = () => {
         }
       });
 
-      // ✅ Option 2: If base URL is https://api.apexmindai.in/api/
-      // const response = await apiClient.post(`/TokenMiningAsync`, null, {
-      //   params: {
-      //     Regno: regno,
-      //     MiningAmt: miningAmt,
-      //     URegno: uregno,
-      //     SlotNum: slotNum
-      //   }
-      // });
-
-      console.log("📡 API Response:", response);
-      console.log("📊 Result:", response.data?.result);
-      console.log("💬 Message:", response.data?.message);
+      console.log("📡 API Response:", response.data);
 
       // ✅ Check response - result can be boolean or string
       if (response.data?.result === true || response.data?.result === "true") {
-        setSuccessData({
-          message: response.data.message || "Investment Successful!",
-          amount: miningAmt,
-          tier: slotNum === 10 ? "Tier 1" : slotNum === 8 ? "Tier 2" : "Tier 3",
-          months: slotNum,
-          returnRate: "2X"
-        });
-        setShowSuccessModal(true);
-        showToast("✅ Investment Successful!", "success");
+        // ✅ SUCCESS - API ka exact message dikhao
+        showToast(`✅ ${response.data?.message || 'Investment Successful!'}`, "success");
+        
+        // ✅ Refresh data - balance update
+        await refreshData();
+        
+        // ✅ Amount clear karo
         return response.data;
       } else {
+        // ✅ ERROR - API ka exact message dikhao
         showToast(`❌ ${response.data?.message || 'Transaction failed'}`, "error");
         return null;
       }
     } catch (error) {
       console.error("❌ API Error:", error);
-      console.error("❌ Error Response:", error.response?.data);
-      console.error("❌ Error Status:", error.response?.status);
-      console.error("❌ Error URL:", error.config?.url);
       
+      // ✅ ERROR - API ka exact message dikhao
       let errorMsg = error.response?.data?.message || error.message || "Something went wrong";
       showToast(`❌ ${errorMsg}`, "error");
       return null;
@@ -131,7 +113,7 @@ const ApexMiningProgram = () => {
     if (loading) return;
 
     if (!amount || amount <= 0) {
-      showToast(`Please enter a valid amount for ${tier}`, "error");
+      showToast(`⚠️ Please enter a valid amount for ${tier}`, "error");
       return;
     }
 
@@ -179,14 +161,10 @@ const ApexMiningProgram = () => {
     }
   };
 
-  const resetModal = () => {
-    setShowSuccessModal(false);
-    setSuccessData({});
-  };
-
   return (
     <div className="Table-container apex-mining-app"> 
       
+      {/* ✅ Toast Notification */}
       {toast.show && (
         <div className={`apex-toast ${toast.type}`}>
           {toast.message}
@@ -194,56 +172,56 @@ const ApexMiningProgram = () => {
       )}
 
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 apex-header">
-  <div>
-    <h1 className="apex-title mb-1">APEX MINING PROGRAM</h1> 
-  </div>
-  
-  {/* ✅ Mobile me inline, desktop me alag */}
-  <div className="d-flex align-items-center gap-2">
-    {/* Deposit Button */}
-    <div 
-      className="d-inline-flex align-items-center"
-      style={{
-        gap: '6px',
-        background: '#0d6efd',
-        color: '#fff',
-        padding: '6px 12px',
-        borderRadius: '6px',
-        fontSize: '13px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      <span>Deposit</span>
-      <span style={{
-        background: '#fff',
-        color: "green",
-        padding: '1px 8px',
-        borderRadius: '10px',
-        fontSize: '12px',
-        fontWeight: '700',
-      }}>
-        ${userData?.Depositfund || 0}
-      </span>
-    </div>
+        <div>
+          <h1 className="apex-title mb-1">APEX MINING PROGRAM</h1> 
+        </div>
+        
+        {/* ✅ Mobile me inline, desktop me alag */}
+        <div className="d-flex align-items-center gap-2">
+          {/* Deposit Button */}
+          <div 
+            className="d-inline-flex align-items-center"
+            style={{
+              gap: '6px',
+              background: '#0d6efd',
+              color: '#fff',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              fontSize: '13px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span>Deposit Fund</span>
+            <span style={{
+              background: '#fff',
+              color: "green",
+              padding: '1px 8px',
+              borderRadius: '10px',
+              fontSize: '12px',
+              fontWeight: '700',
+            }}>
+              ${userData?.Depositfund || 0}
+            </span>
+          </div>
 
-    {/* History Button */}
-    <Link to="/dashboard/InvestTokenHistory">
-      <button 
-        className="btn btn-primary"
-        style={{
-          padding: '6px 14px',
-          fontSize: '13px',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        History
-      </button>
-    </Link>
-  </div>
-</div>
+          {/* History Button */}
+          <Link to="/dashboard/InvestTokenHistory">
+            <button 
+              className="btn btn-primary"
+              style={{
+                padding: '6px 14px',
+                fontSize: '13px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              History
+            </button>
+          </Link>
+        </div>
+      </div>
 
       <div className="apex-tiers-row">        
         {/* Tier 1 */}
@@ -264,7 +242,7 @@ const ApexMiningProgram = () => {
               onClick={() => handleInvest("Tier 1", tier1Amount)} 
               disabled={loadingTier1}
             >
-              {loadingTier1 ? 'Processing...' : 'Invest'}
+              {loadingTier1 ? '⏳ Processing...' : 'Invest'}
             </button>
           </div>
         </div>
@@ -287,7 +265,7 @@ const ApexMiningProgram = () => {
               onClick={() => handleInvest("Tier 2", tier2Amount)} 
               disabled={loadingTier2}
             >
-              {loadingTier2 ? 'Processing...' : 'Invest'}
+              {loadingTier2 ? '⏳ Processing...' : 'Invest'}
             </button>
           </div>
         </div>
@@ -310,31 +288,11 @@ const ApexMiningProgram = () => {
               onClick={() => handleInvest("Tier 3", tier3Amount)} 
               disabled={loadingTier3}
             >
-              {loadingTier3 ? 'Processing...' : 'Invest'}
+              {loadingTier3 ? '⏳ Processing...' : 'Invest'}
             </button>
           </div>
         </div>
       </div>
-
-      {/* ✅ Success Modal */}
-      {showSuccessModal && (
-        <div className="apex-modal-overlay" onClick={resetModal}>
-          <div className="apex-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="apex-modal-icon">✅</div>
-            <h2>Investment Successful!</h2>
-            <div className="apex-modal-details">
-              <p><strong>Amount:</strong> ${successData.amount}</p>
-              <p><strong>Plan:</strong> {successData.tier}</p>
-              <p><strong>Lock-up:</strong> {successData.months} Months</p>
-              <p><strong>Return:</strong> {successData.returnRate} in APEX Tokens</p>
-            </div>
-            <p className="apex-modal-message">{successData.message}</p>
-            <button className="apex-modal-btn" onClick={resetModal}>
-              Done
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -8,7 +8,12 @@ const UserProfile = () => {
   const { userData } = useUser();
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [showMasterPassword, setShowMasterPassword] = useState(false);
+
+  // ✅ OTP States
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     loginId: "",
@@ -30,13 +35,13 @@ const UserProfile = () => {
     setFormData(prev => ({
       ...prev,
       loginId: localStorage.getItem("loginId") || userData?.loginid || "",
-      address: prev.address || userData?.TokenAddress || "",
+      address: userData?.TokenAddress || userData?.address || "",
       fullName: prev.fullName || fullName,
       firstName: prev.firstName || nameParts[0] || "",
       lastName: prev.lastName || nameParts.slice(1).join(" "),
       emailId: prev.emailId || userData?.email || "",
       mobileNumber: prev.mobileNumber || userData?.MobileNo || userData?.mobile || "",
-      walletAddress: userData?.walletid || "",
+      walletAddress: prev.walletAddress || userData?.walletid || userData?.walletAddress || "",
     }));
 
     setLoading(false);
@@ -47,6 +52,75 @@ const UserProfile = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // ✅ Send OTP Function
+  const handleSendOTP = async () => {
+    try {
+      const loginId = localStorage.getItem("loginId");
+      const regNo = localStorage.getItem("Regno");
+
+      if (!loginId || !regNo) {
+        toast.error("Login ID or Registration number not found");
+        return;
+      }
+
+      setOtpLoading(true);
+      setOtpVerified(false);
+      setOtp(""); // Clear previous OTP
+      
+      const response = await apiClient.post('/Auth/genrate-otp', null, {
+        params: { loginid: loginId, regno: regNo }
+      });
+
+      if (response.data.result === "true") {
+        toast.success(response.data.message || "OTP sent successfully!");
+        setOtpSent(true);
+      } else {
+        toast.error(response.data.message || "Failed to send OTP");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // ✅ Verify OTP Function
+  const handleVerifyOTP = async () => {
+    try {
+      if (!otp || otp.length < 6) {
+        toast.error("Please enter valid 6-digit OTP");
+        return;
+      }
+
+      const loginId = localStorage.getItem("loginId");
+      const regNo = localStorage.getItem("Regno");
+
+      if (!loginId || !regNo) {
+        toast.error("Login ID or Registration number not found");
+        return;
+      }
+
+      setOtpLoading(true);
+      const response = await apiClient.post('/Auth/verify-otp', null, {
+        params: { loginid: loginId, regno: regNo, otp: otp }
+      });
+
+      if (response.data.result === "true") {
+        toast.success("OTP Verified Successfully");
+        setOtpVerified(true);
+        setOtpSent(false); // Hide OTP input after verification
+      } else {
+        setOtpVerified(false);
+        toast.error(response.data.message || "Invalid OTP");
+      }
+    } catch (error) {
+      setOtpVerified(false);
+      toast.error(error?.response?.data?.message || "OTP verification failed");
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -55,14 +129,16 @@ const UserProfile = () => {
       return;
     }
 
+    // ✅ Check if OTP is verified
+    if (!otpVerified) {
+      toast.error("Please verify OTP first before updating profile");
+      return;
+    }
+
     if (!formData.fullName) {
       toast.error("Full name is required");
       return;
     }
-    // if (!formData.address) {
-    //   toast.error("Token Address is required");
-    //   return;
-    // }
     if (!formData.emailId) {
       toast.error("Email ID is required");
       return;
@@ -77,14 +153,12 @@ const UserProfile = () => {
     try {
       const regNo = localStorage.getItem("Regno");
 
-
       if (!regNo) {
         toast.error("Registration number not found!");
         setIsUpdating(false);
         return;
       }
 
-      // Split full name into first and last name
       const nameParts = formData.fullName.trim().split(' ');
       const firstName = nameParts[0] || "";
       const lastName = nameParts.slice(1).join(' ') || "";
@@ -100,7 +174,7 @@ const UserProfile = () => {
         cityId: 0,
         pinCode: "0",
         alternateContactNo: "",
-        walletAddress: formData.walletAddress || "" // Use formData se
+        walletAddress: formData.walletAddress || ""
       };
 
       console.log("Sending to API:", JSON.stringify(requestData, null, 2));
@@ -114,12 +188,19 @@ const UserProfile = () => {
 
         toast.success("✅ Profile updated successfully!");
 
-        // Update localStorage with new data
         localStorage.setItem("userName", formData.fullName);
         localStorage.setItem("userEmail", formData.emailId);
         if (formData.walletAddress) {
           localStorage.setItem("walletAddress", formData.walletAddress);
         }
+        if (formData.address) {
+          localStorage.setItem("tokenAddress", formData.address);
+        }
+
+        // ✅ Reset OTP states after successful update
+        setOtp("");
+        setOtpSent(false);
+        setOtpVerified(false);
 
         setTimeout(() => {
           window.location.reload();
@@ -168,7 +249,8 @@ const UserProfile = () => {
 
                   <div className="mb-3">
                     <label>Login ID</label>
-                    <input style={{ color: "green" }}
+                    <input 
+                      style={{ color: "green" }}
                       type="text"
                       value={formData.loginId}
                       className="form-control bg-light"
@@ -192,7 +274,7 @@ const UserProfile = () => {
                   <div className="mb-3">
                     <label>Email ID *</label>
                     <input
-                      type="email"
+                      type="email"  
                       name="emailId"
                       value={formData.emailId}
                       onChange={handleChange}
@@ -218,7 +300,6 @@ const UserProfile = () => {
                     />
                   </div>
 
-                  {/* Wallet Address - Always Show */}
                   <div className="mb-3">
                     <label>Income Payout Wallet Address</label>
                     <input
@@ -230,46 +311,99 @@ const UserProfile = () => {
                       style={{ color: formData.walletAddress ? "green" : "#999" }}
                       placeholder="Enter your wallet address"
                     />
-                    <small className="text-muted">Enter your income payout wallet address</small>
                   </div>
 
                   <div className="mb-3">
                     <label>Token Payout Address</label>
                     <input
                       type="text"
-                      placeholder='Enter Token Addresh'
+                      placeholder='Enter Token Address'
                       name="address"
-                      value={formData.address}
+                      value={formData.address || ""}
                       onChange={handleChange}
                       className="form-control"
+                      style={{ color: formData.address ? "green" : "#999" }}
                     />
                   </div>
 
-                  {/* <div className="mb-3">
-                    <label>Login Password</label>
-                    <div className="input-group">
-                      <input
-                        type={showMasterPassword ? "text" : "password"}
-                        name="masterPassword"
-                        placeholder="Enter your password "
-                        value={formData.masterPassword}
-                        onChange={handleChange}
-                        className="form-control"
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary"
-                        onClick={() => setShowMasterPassword(!showMasterPassword)}
-                      >
-                        <i className={showMasterPassword ? "ti ti-eye-off" : "ti ti-eye"}></i>
-                      </button>
+                  {/* ✅ OTP SECTION - IMPROVED */}
+                  <div className="mb-3 p-3" style={{ 
+                    backgroundColor: otpVerified ? '#d4edda' : '#f8f9fa',
+                    borderRadius: '8px',
+                  }}>
+                    <label className="fw-bold mb-2">
+                      OTP Verification 
+                    </label>
+                    
+                    <div className="d-flex gap-2">
+                      <div className="flex-grow-1">
+                        <input
+                          type="number"
+                          className="form-control"
+                          placeholder="Enter 6-digit OTP"
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value)}
+                          disabled={!otpSent || otpVerified}
+                          maxLength="6"                      
+                        />
+                      </div>
+                      
+                      {!otpVerified && (
+                        !otpSent ? (
+                          <button
+                            type="button"
+                            className="btn btn-primary text-nowrap"
+                            onClick={handleSendOTP}
+                            disabled={otpLoading}
+                          >
+                            {otpLoading ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm me-1"></span>
+                                Sending...
+                              </>
+                            ) : (
+                              "Send OTP"
+                            )}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn btn-success text-nowrap"
+                            onClick={handleVerifyOTP}
+                            disabled={otpLoading || otp.length < 6}
+                          >
+                            {otpLoading ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm me-1"></span>
+                                Verifying...
+                              </>
+                            ) : (
+                              "Verify OTP"
+                            )}
+                          </button>
+                        )
+                      )}
                     </div>
-                  </div> */}
 
+                  </div>
+
+                  {/* ✅ UPDATE BUTTON - COMPLETELY DISABLED UNTIL OTP VERIFIED */}
                   <button
                     type="submit"
                     className="btn btn-primary w-100"
-                    disabled={isUpdating}
+                    style={{
+                      backgroundColor: otpVerified ? '#007bff' : '#6c757d',
+                      color: 'white',
+                      cursor: otpVerified ? 'pointer' : 'not-allowed',
+                      opacity: otpVerified ? 1 : 0.7,
+                      transition: 'all 0.3s ease'
+                    }}
+                    disabled={isUpdating || !otpVerified}
+                    onMouseEnter={(e) => {
+                      if (!otpVerified) {
+                        e.target.title = "Please verify OTP first";
+                      }
+                    }}
                   >
                     {isUpdating ? (
                       <>
@@ -277,9 +411,13 @@ const UserProfile = () => {
                         UPDATING...
                       </>
                     ) : (
-                      "UPDATE PROFILE"
+                      <>
+                        {otpVerified ? ' UPDATE PROFILE' : 'UPDATE PROFILE'}
+                      </>
                     )}
                   </button>
+
+  
                 </div>
               </div>
             </form>

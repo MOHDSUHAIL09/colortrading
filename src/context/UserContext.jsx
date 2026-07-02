@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useContext } from "react";
+import { createContext, useState, useEffect, useContext, useCallback, useRef } from "react";
 import apiClient from "../api/apiClient";
 
 const UserContext = createContext();
@@ -13,24 +13,45 @@ export const UserProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [stakeData, setStakeData] = useState(null);
   const [payoutData, setPayoutData] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  // ================= LOAD FROM LOCALSTORAGE =================
-  useEffect(() => {
-    const savedUserData = localStorage.getItem("userData");
-    if (savedUserData) {
-      try {
-        const parsed = JSON.parse(savedUserData);
-        setUserData(parsed);
-      } catch (e) {
-        console.error("Error loading from localStorage:", e);
-      }
-    }
-  }, []);
+  const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  // ✅ ADD THIS - isAuthenticated state
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const regno = localStorage.getItem('Regno');
+    return !!(regno);
+  });
+  
+  const isFetching = useRef(false);
+  const initialLoadDone = useRef(false);
+  const isMounted = useRef(true);
 
   // ================= Dashboard Fetch =================
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (force = false) => {
+    if (!isMounted.current) {
+      console.log("⏭️ Component unmounted, skipping API call");
+      return null;
+    }
+
+    if (!force && isFetching.current) {
+      console.log("⏳ API call already in progress, skipping...");
+      return null;
+    }
+
+    if (!force && userData && Object.keys(userData).length > 0) {
+      console.log("✅ Data already loaded, skipping API call");
+      return userData;
+    }
+
+    isFetching.current = true;
+    
+    if (force) {
+      setIsRefreshing(true);
+      console.log("🔄 Refresh started...");
+    } else {
+      setLoading(true);
+      console.log("📥 Initial load started...");
+    }
     
     try {
       let Regno = localStorage.getItem('regno');
@@ -40,16 +61,26 @@ export const UserProvider = ({ children }) => {
       
       if (!Regno) {
         console.error("❌ No regno found in localStorage");
-        setLoading(false);
+        if (force) {
+          setIsRefreshing(false);
+        } else {
+          setLoading(false);
+        }
+        isFetching.current = false;
+        setIsAuthenticated(false);
         return null;
       }
       
       const response = await apiClient.get(`/Dashboard/Dashboard/${Regno}`);     
-      console.log("Dashboard Api:", response.data);
+      console.log("✅ Dashboard API Response received");
+      
+      if (!isMounted.current) {
+        console.log("⏭️ Component unmounted during API call, ignoring response");
+        return null;
+      }
       
       if (response.data?.result === "true" && response.data?.response) {
         const apiData = response.data.response;
-        
         
         const newUserData = {
           fname: apiData.fname,
@@ -123,34 +154,84 @@ export const UserProvider = ({ children }) => {
           tokenBonusOnUpgrade: apiData.tokenBonusOnUpgrade,       
           walletid: apiData.walletid,
           TotalEarnTokenInWallet: apiData.TotalEarnTokenInWallet || 0,
-          NameAppearOncheque:apiData.NameAppearOncheque,
+          NameAppearOncheque: apiData.NameAppearOncheque,
           TokenAddress: apiData.tokenAddress || 0,
-
+          TradingLevelIncome: apiData.TradingLevelIncome || 0
         };
       
         setUserData(newUserData);
-        localStorage.setItem("userData", JSON.stringify(newUserData));       
+        localStorage.setItem("userData", JSON.stringify(newUserData));
+        console.log("✅ UserData updated - Depositfund:", newUserData.Depositfund);
+        
+        // ✅ SET isAuthenticated to TRUE
+        setIsAuthenticated(true);
+        
         return newUserData;
       } else {
         console.error("❌ Dashboard API error:", response.data);
+        setIsAuthenticated(false);
         return null;
       }
     } catch (error) {
       console.error("❌ Dashboard Fetch Error:", error);
+      setIsAuthenticated(false);
       return null;
     } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        if (force) {
+          setIsRefreshing(false);
+          console.log("🔄 Refresh complete");
+        } else {
+          setLoading(false);
+        }
+        isFetching.current = false;
+      }
     }
-  };
+  }, [user?.loginid]);
 
   // ================= RESTORE SESSION ON MOUNT =================
   useEffect(() => {
-    const restoreSession = async () => {      
-      const storedRegno = localStorage.getItem('regno') || localStorage.getItem('Regno');
+    isMounted.current = true;
+    
+    // ✅ Check if already authenticated
+    const regno = localStorage.getItem('Regno');
+    if (regno) {
+      setIsAuthenticated(true);
+    }
+    
+    if (initialLoadDone.current) {
+      console.log("⏭️ Initial load already done, skipping...");
+      return;
+    }
+
+    if (userData && Object.keys(userData).length > 0) {
+      console.log("✅ UserData already exists, skipping initial load");
+      initialLoadDone.current = true;
+      setLoading(false);
+      setIsAuthenticated(true);
+      return;
+    }
+
+    const restoreSession = async () => {
+      if (initialLoadDone.current) {
+        console.log("⏭️ Initial load already done (double check), skipping...");
+        return;
+      }
+      
+      console.log("🔄 Initial session restore started");
+      initialLoadDone.current = true;
+      
+      const storedRegno = localStorage.getItem('Regno');
       const storedUser = localStorage.getItem('user');
       
-      if (storedRegno) {
+      if (storedRegno && storedUser) {
         await fetchData();
+      } else {
+        console.log("ℹ️ No user found, setting loading to false");
+        if (isMounted.current) {
+          setLoading(false);
+          setIsAuthenticated(false);
+        }
       }
       
       if (storedUser && !user) {
@@ -163,11 +244,24 @@ export const UserProvider = ({ children }) => {
       }
     };
     
-    restoreSession();
-  }, []); // Runs once on component mount
+    const timer = setTimeout(() => {
+      restoreSession();
+    }, 50);
+    
+    return () => {
+      clearTimeout(timer);
+      isMounted.current = false;
+      console.log("🧹 Cleanup: Component unmounting");
+    };
+  }, []);
 
   // ================= LOGIN =================
-  const loginUser = (userData ) => {    
+  const loginUser = useCallback((userData) => {
+    console.log("🔐 Login called");
+    
+    initialLoadDone.current = true;
+    isFetching.current = false;
+    
     let regnoValue = userData.regno || userData.Regno || userData.regNo;
     
     if (!regnoValue && userData.introregno) {
@@ -180,26 +274,40 @@ export const UserProvider = ({ children }) => {
       localStorage.setItem("Regno", String(regnoValue));
     } else {
       console.error("❌ No regno found in userData:", userData);
-    } 
+    }
+    
+    if (userData.token) {
+      localStorage.setItem("token", userData.token);
+    }
+    
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("loginId", userData.loginid || userData.LoginID || userData.me);
     localStorage.setItem("isLoggedIn", "true");
     
     setUser(userData);
     
+    // ✅ SET isAuthenticated to TRUE
+    setIsAuthenticated(true);
+    
     setTimeout(() => {
       console.log("⏰ Fetching data after login...");
-      fetchData();
-    }, 100);
-  };
+      fetchData(true);
+    }, 200);
+  }, [fetchData]);
 
   // ================= LOGOUT =================
-  const logoutUser = () => {
+  const logoutUser = useCallback(() => {
     console.log("🚪 Logging out user");
     setUser(null);
     setUserData(null);
     setStakeData(null);
     setPayoutData(null);
+    setLoading(false);
+    setIsRefreshing(false);
+    setIsAuthenticated(false);
+    isFetching.current = false;
+    initialLoadDone.current = false;
+    
     localStorage.removeItem("user");
     localStorage.removeItem("regno");
     localStorage.removeItem("Regno");
@@ -207,15 +315,16 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem("isLoggedIn");
     localStorage.removeItem("loginId");
     localStorage.removeItem("NameAppearOnCheque");
-  };
+    localStorage.removeItem("token");
+  }, []);
 
   // ================= REFRESH =================
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     console.log("🔄 Manual refresh triggered");
-    return await fetchData();
-  };
+    return await fetchData(true);
+  }, [fetchData]);
 
-  const refreshUserData = async () => {
+  const refreshUserData = useCallback(async () => {
     const savedData = localStorage.getItem("userData");
     if (savedData) {
       const parsed = JSON.parse(savedData);
@@ -223,23 +332,25 @@ export const UserProvider = ({ children }) => {
       return parsed;
     }
     return userData;
+  }, [userData]);
+
+  const contextValue = {
+    user,
+    userData,
+    stakeData,
+    payoutData,
+    refreshData,
+    refreshUserData,
+    loginUser,
+    logoutUser,
+    loading,
+    isRefreshing,
+    isAuthenticated, // ✅ ADD THIS
+    fetchData
   };
 
   return (
-    <UserContext.Provider
-      value={{
-        user,
-        userData,
-        stakeData,
-        payoutData,
-        refreshData,
-        refreshUserData,
-        loginUser,
-        logoutUser,
-        loading,
-        fetchData
-      }}
-    >
+    <UserContext.Provider value={contextValue}>
       {children}
     </UserContext.Provider>
   );

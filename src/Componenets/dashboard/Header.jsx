@@ -54,7 +54,7 @@ const Header = ({ toggleSidebar }) => {
         userData={userData}
       />
 
-      <div className="topbar px-3">
+      <div className="topbar px-4">
         <nav className="navbar navbar-expand p-0"> {/* Changed from navbar-expand-lg to navbar-expand */}
           {/* Left side - Menu Icon for Sidebar Toggle */}
           <ul className="navbar-nav">
@@ -79,28 +79,28 @@ const Header = ({ toggleSidebar }) => {
             <ul className="navbar-nav flex-row align-items-center" style={{ flexDirection: 'row', display: 'flex' }}>
 
 
-<a href='ApexmindaiAI.apk' download >
-               <li className="nav-item ">
-                <div
-                  className="btn01"
-                  style={{
-                    width: "45px",
-                    height: "45px",
-                    borderRadius: "50%",
-                    border: "none",
-                    background: 'var(--bs-primary-bg-subtle)',
-                    color: "#3e51a5",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "20px",
-                    cursor: "pointer",
-                  }}
-                >
-                  <FaArrowDown />
-                </div>
-              </li>
-              </a>
+     <a href="/App.apk" download>
+  <li className="nav-item ">
+    <div
+      className="btn01"
+      style={{
+        width: "45px",
+        height: "45px",
+        borderRadius: "50%",
+        border: "none",
+        background: 'var(--bs-primary-bg-subtle)',
+        color: "#3e51a5",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: "20px",
+        cursor: "pointer",
+      }}
+    >
+      <FaArrowDown />
+    </div>
+  </li>
+</a>
 
 
 
@@ -214,17 +214,6 @@ const Header = ({ toggleSidebar }) => {
                       }}
                     >
                       <div className="profile-dropdown position-relative" data-simplebar>
-                        <div className="py-3 px-7 pb-0">
-                          <div className="d-flex justify-content-between align-items-center">
-                            <h5 className="mb-0 fw-semibold">My Profile</h5>
-                            <button
-                              onClick={() => setProfileDropdownOpen(false)}
-                              className="btn-close"
-                              style={{ fontSize: '12px' }}
-                            />
-                          </div>
-                        </div>
-
                         {/* User Info Section */}
                         <div className="d-flex align-items-center py-9 mx-7 border-bottom">
                           <img
@@ -247,33 +236,33 @@ const Header = ({ toggleSidebar }) => {
                         </div>
 
                         <div className="message-body">
-                          <Link to="/dashboard/changepassword" className="py-8 px-7 d-flex align-items-center" style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setProfileDropdownOpen(false)}>
+                          <Link to="/dashboard/changepassword" className=" px-7 d-flex align-items-center" style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setProfileDropdownOpen(false)}>
                             <span className="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6">
                               <img src="https://bootstrapdemos.adminmart.com/modernize/dist/assets/images/svgs/icon-tasks.svg" alt="icon" width="24" height="24" />
                             </span>
                             <div className="w-100 ps-3">
                               <h6 className="mb-1  fw-semibold lh-base">Change Password</h6>
-                              <span className="d-block text-body-secondary">Forget Password</span>
+                              {/* <span className="d-block text-body-secondary">Forget Password</span> */}
                             </div>
                           </Link>
 
-                          <Link to="/dashboard/support" className="py-8 px-7 d-flex align-items-center" style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setProfileDropdownOpen(false)}>
+                          <Link to="/dashboard/support" className=" px-7 d-flex align-items-center" style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setProfileDropdownOpen(false)}>
                             <span className="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6">
                               <img src="https://bootstrapdemos.adminmart.com/modernize/dist/assets/images/svgs/icon-inbox.svg" alt="icon" width="24" height="24" />
                             </span>
                             <div className="w-100 ps-3">
                               <h6 className="mb-1  fw-semibold lh-base">Support</h6>
-                              <span className=" d-block text-body-secondary">Messages & Emails</span>
+                              {/* <span className=" d-block text-body-secondary">Messages & Emails</span> */}
                             </div>
                           </Link>
 
-                          <Link to="/dashboard/profile" className="py-8 px-7 d-flex align-items-center" style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setProfileDropdownOpen(false)}>
+                          <Link to="/dashboard/profile" className="px-7 d-flex align-items-center" style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => setProfileDropdownOpen(false)}>
                             <span className="d-flex align-items-center justify-content-center text-bg-light rounded-1 p-6">
                               <img src="https://bootstrapdemos.adminmart.com/modernize/dist/assets/images/svgs/icon-tasks.svg" alt="icon" width="24" height="24" />
                             </span>
                             <div className="w-100 ps-3">
-                              <h6 className="mb-1  fw-semibold lh-base">Profile</h6>
-                              <span className="d-block text-body-secondary">Update profile</span>
+                              <h6 className="fw-semibold lh-base">Profile</h6>
+                              {/* <span className="d-block text-body-secondary">Update profile</span> */}
                             </div>
                           </Link>
                         </div>

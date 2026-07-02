@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import apiClient from "../../api/apiClient";
 import CustomTable from "../../Componenets/ui/customtable/CustomTable";
 import Pagination from "../../Componenets/ui/pagination/Pagination";
@@ -7,13 +7,14 @@ const BotTradingHistory = () => {
     const [records, setRecords] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
-    const [totalBalance, setTotalBalance] = useState(0);
+    // const [totalBalance, setTotalBalance] = useState(0);
 
     // Pagination state
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const regno = localStorage.getItem("Regno");
+    const intervalRef = useRef(null);
 
     // Format date function
     const formatDate = (dateString) => {
@@ -43,7 +44,7 @@ const BotTradingHistory = () => {
 
     // Get status badge class
     const getStatusBadge = (status) => {
-        switch(status) {
+        switch (status) {
             case 1:
                 return "bg-success"; // Active/Running
             case 0:
@@ -55,7 +56,7 @@ const BotTradingHistory = () => {
 
     // Get status text
     const getStatusText = (status) => {
-        switch(status) {
+        switch (status) {
             case 1:
                 return "Open";
             case 0:
@@ -68,60 +69,121 @@ const BotTradingHistory = () => {
     };
 
     // Fetch Deposit Wallet Data
-    useEffect(() => {
-        const fetchDepositHistory = async () => {
-            try {
-                setLoading(true);
-                const res = await apiClient.get(
-                    `/Trading/BotReport`,
-                    {
-                        params: {
-                            regno: regno,
-                            PageIndex: 1,
-                            PageSize: 10000
-                        },
-                    }
-                );
-                
-                // 🔍 DEBUG
-                console.log("bothistory:", res);
-
-                
-                // Extract data from response
-                if (res.data?.result === "true") {
-                    const data = res.data.response?.data || [];
-                    console.log("✅ Extracted Data:", data);
-                    console.log("📊 Number of records:", data.length);
-                    
-                    setRecords(data);
-                    
-                    // Calculate total balance (betAmount + earnings)
-                    const balance = data.reduce((sum, item) => {
-                        const betAmount = parseFloat(item.betAmount) || 0;
-                        const earnings = parseFloat(item.TotalEarnings) || 0;
-                        return sum + betAmount + earnings;
-                    }, 0);
-                    setTotalBalance(balance);
-                    console.log("💰 Total Balance:", balance);
-                } else {
-                    console.warn("⚠️ API result is not true");
-                    setRecords([]);
+    const fetchDepositHistory = async () => {
+        try {
+            setLoading(true);
+            const res = await apiClient.get(
+                `/Trading/BotReport`,
+                {
+                    params: {
+                        regno: regno,
+                        PageIndex: 1,
+                        PageSize: 10000
+                    },
                 }
-            } catch (error) {
-                console.error("❌ API Error:", error.response || error);
+            );
+
+            if (res.data?.result === "true") {
+                const data = res.data.response?.data || [];
+                setRecords(data);
+
+                // Calculate total balance (betAmount + earnings)
+                // const balance = data.reduce((sum, item) => {
+                //     const betAmount = parseFloat(item.betAmount) || 0;
+                //     const earnings = parseFloat(item.TotalEarnings) || 0;
+                //     return sum + betAmount + earnings;
+                // }, 0);
+                // setTotalBalance(balance);
+            } else {
+                console.warn(" API result is not true");
                 setRecords([]);
-            } finally {
-                setLoading(false);
             }
-        };
-        
+        } catch (error) {
+            console.error(" API Error:", error.response || error);
+            setRecords([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 🔄 Interval function to update values (only for Open status)
+    const startInterval = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
+
+        intervalRef.current = setInterval(() => {
+            setRecords(prevRecords => {
+                return prevRecords.map(record => {
+                    // Only update if status is Open (1)
+                    if (record.status === 1) {
+                        const currentEarnings = parseFloat(record.TotalEarnings) || 0;
+                        // const perdayroi = parseFloat(record.perdayroi) || 0;
+                        // const betAmount = parseFloat(record.betAmount) || 0;
+
+                        // 🔥 0.000008 increment/decrement per second
+                        const increment = 0.000008;
+
+                        // Randomly decide to increase or decrease (50% chance)
+                        const shouldIncrease = Math.random() < 0.5;
+
+                        let newEarnings;
+                        if (shouldIncrease) {
+                            newEarnings = currentEarnings + increment;
+                        } else {
+                            newEarnings = currentEarnings - increment;
+                        }
+
+                        // Also update perdayroi slightly
+                        let newPerdayRoi = parseFloat(record.perdayroi) || 0;
+                        const roiChange = (Math.random() < 0.5 ? 1 : -1) * 0.0001;
+                        newPerdayRoi = newPerdayRoi + roiChange;
+
+                        return {
+                            ...record,
+                            TotalEarnings: newEarnings,
+                            perdayroi: newPerdayRoi
+                        };
+                    }
+                    return record;
+                });
+            });
+        }, 1000); // Every 1 second
+    };
+
+    // Stop interval
+    const stopInterval = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+    };
+
+    // Initial fetch and interval setup
+    useEffect(() => {
         if (regno) {
             fetchDepositHistory();
         } else {
-            console.warn("⚠️ No Regno found");
+            console.warn(" No Regno found");
             setLoading(false);
         }
+
+        // Cleanup interval on unmount
+        return () => {
+            stopInterval();
+        };
     }, [regno]);
+
+    // Start interval automatically when records are loaded
+    useEffect(() => {
+        if (records.length > 0) {
+            startInterval();
+        }
+
+        return () => {
+            stopInterval();
+        };
+    }, [records.length]);
 
     // Filter records
     const filteredRecords = records.filter((row) => {
@@ -144,17 +206,17 @@ const BotTradingHistory = () => {
     const currentRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
 
     // Reset to first page when search term or items per page changes
-    useEffect(() => {
-        setPageIndex(1);
-    }, [searchTerm, itemsPerPage]);
+    // useEffect(() => {
+    //     setPageIndex(1);
+    // }, [searchTerm, itemsPerPage]);
 
-    // ✅ Updated columns
     const columns = [
         "Sl.No.",
         "BotStart Date",
         "BotEnd Date",
         "Amount",
-        "Upto Bot Roi",
+        "Bot Roi/Day",
+        "Bot Earn",
         "Currency",
         "Currency Rate",
         "Slot",
@@ -166,15 +228,14 @@ const BotTradingHistory = () => {
         <div className="Table-container royalty-main-wrapper mb-5 p-4">
             <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
                 <h3 className="mb-0">Bot Trading History</h3>
-
             </div>
 
             <div className="d-flex justify-content-between entries-search-bar entries-control mb-3">
                 <div className="entries-control">
                     <label>Show entries:</label>
-                    <select 
-                        className="form-select" 
-                        value={itemsPerPage} 
+                    <select
+                        className="form-select"
+                        value={itemsPerPage}
                         onChange={e => setItemsPerPage(Number(e.target.value))}
                     >
                         {[10, 25, 50, 75, 100].map(n => <option key={n} value={n}>{n}</option>)}
@@ -190,12 +251,18 @@ const BotTradingHistory = () => {
                 </div>
             </div>
 
-
-
             <div className="report-card">
                 <CustomTable columns={columns} loading={loading}>
                     {currentRecords.length > 0 ? (
                         currentRecords.map((row, index) => {
+                            const currentEarnings = parseFloat(row.TotalEarnings) || 0;
+                            const perdayroi = parseFloat(row.perdayroi) || 0;
+                            const betAmount = parseFloat(row.betAmount) || 0;
+
+                            // 🔥 Check if earnings is negative
+                            const isEarningsNegative = currentEarnings < 0;
+                            const isRoiNegative = perdayroi < 0;
+
                             return (
                                 <tr key={index}>
                                     <td className="text-center">
@@ -203,27 +270,44 @@ const BotTradingHistory = () => {
                                             {startIndex + index + 1}
                                         </div>
                                     </td>
-                                    {/* ✅ BotStart Date */}
                                     <td>{formatDate(row.entryDate)}</td>
-                                    {/* ✅ BotEnd Date */}
                                     <td>{formatDate(row.endtime)}</td>
-                                    {/* ✅ Amount (Bet Amount) */}
                                     <td style={{ color: "#3b82f6", fontWeight: "600" }}>
-                                        {formatAmount(row.betAmount || 0)}
+                                        {formatAmount(betAmount)}
                                     </td>
-                                     <td style={{ color: "#3b82f6", fontWeight: "600" }}>
-                                        %{(row.roi || 0)}
-                                    </td>
-                                    {/* ✅ Currency */}
+
+                                    {getStatusText(row.status) === "Open" ? (
+                                        <>
+                                            <td style={{ color: "#3b82f6", fontWeight: "600" }}>
+                                                -
+                                            </td>
+                                            <td style={{
+                                                color: isEarningsNegative ? "#dc3545" : "#3b82f6",
+                                                fontWeight: "600"
+                                            }}>
+                                                ${currentEarnings.toFixed(8)}
+                                            </td>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <td style={{
+                                                color: isRoiNegative ? "#dc3545" : "#3b82f6",
+                                                fontWeight: "600"
+                                            }}>
+                                                {perdayroi.toFixed(4)}%
+                                            </td>
+                                            <td style={{
+                                                color: isEarningsNegative ? "#dc3545" : "#3b82f6",
+                                                fontWeight: "600"
+                                            }}>
+                                                ${(perdayroi * betAmount).toFixed(4)}
+                                            </td>
+                                        </>
+                                    )}
                                     <td>{row.currency?.toUpperCase() || "-"}</td>
-                                    {/* ✅ Currency Rate */}
                                     <td>{row.currencyRate || "-"}</td>
-                                    {/* ✅ Slot */}
                                     <td>{row.slot || "-"} H</td>
-                                    {/* ✅ Status */}
-                                           <td>                                     
-                                        {row.predict}
-                                    </td>
+                                    <td>{row.predict || "-"}</td>
                                     <td>
                                         <span className={`badge ${getStatusBadge(row.status)}`}>
                                             {getStatusText(row.status)}

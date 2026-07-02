@@ -1,361 +1,221 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
+import { Wallet, History, Copy, Share2, Smartphone, Info, AlertCircle, CheckCircle } from 'lucide-react';
+import { toast, Toaster } from 'react-hot-toast';
 import apiClient from '../../api/apiClient';
+
 
 const DepositFund = () => {
     const [walletAddress, setWalletAddress] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [confirmLoading, setConfirmLoading] = useState(false);
     const [copySuccess, setCopySuccess] = useState('');
     const [error, setError] = useState(null);
 
-    // ✅ FIXED: useEffect properly defined
+    const regno = localStorage.getItem('Regno');
+
+    // 1. Fetch Wallet Address logic (GET API)
     useEffect(() => {
         const fetchAddress = async () => {
             try {
-                console.log("🔍 Searching for wallet address...");
                 setLoading(true);
                 setError(null);
-                
-                // ✅ METHOD 1: Check localStorage userData
+
+                // Pehle LocalStorage check karein
                 const userData = localStorage.getItem('userData');
                 if (userData) {
                     try {
                         const parsed = JSON.parse(userData);
                         const userAddress = parsed?.NameAppearOnCheque;
-                        if (userAddress && userAddress !== 'null' && userAddress !== null && userAddress !== '') {
+                        if (userAddress && userAddress !== 'null' && userAddress !== '') {
                             setWalletAddress(userAddress);
-                            console.log("✅ Address found in userData:", userAddress);
                             setLoading(false);
                             return;
                         }
-                    } catch (e) {
-                        console.warn("⚠️ Error parsing userData:", e);
-                    }
+                    } catch (e) { console.warn(e); }
                 }
 
-                // ✅ METHOD 2: Check localStorage NameAppearOnCheque
-                const NameAppearOnCheque = localStorage.getItem('NameAppearOnCheque');
-                if (NameAppearOnCheque && NameAppearOnCheque !== 'null' && NameAppearOnCheque !== '') {
-                    console.log("✅ Using NameAppearOnCheque from localStorage:", NameAppearOnCheque);
-                    setWalletAddress(NameAppearOnCheque);
-                    setLoading(false);
-                    return;
-                }
-
-                // ✅ METHOD 3: API Call
-                const regno = localStorage.getItem('Regno');
                 if (!regno) {
-                    console.warn("⚠️ No regno found in localStorage");
                     setError("Registration number not found");
                     setLoading(false);
                     return;
                 }
 
-                console.log("📡 No address in localStorage, fetching from API...");
-                
+                // API se address layein
                 const response = await apiClient.get(`/DepositReport/DepositAddress/${regno}`);
-                console.log("📦 Full API Response:", response);
-                console.log("📦 Response Data:", response.data);
-                
-                // ✅ FIXED: response.data.result check karo
                 if (response.data?.result === "true") {
-                    const apiData = response.data.response;
-                    console.log("📦 API Data:", apiData);
-                    
-                    // ✅ FIXED: walletid object se walletId nikaalo
-                    const walletId = apiData?.walletid?.walletId;
-                    
-                    console.log("💰 Found Wallet ID:", walletId);
-                    
-                    if (walletId && walletId !== 'null' && walletId !== null && walletId !== '') {
+                    const walletId = response.data.response?.walletid;
+                    if (walletId && walletId !== 'null') {
                         setWalletAddress(walletId);
-                        console.log("✅ Address found in API response:", walletId);
-                        
-                        // Save to localStorage for future use
-                        localStorage.setItem('NameAppearOnCheque', walletId);
-                        console.log("💾 Saved NameAppearOnCheque to localStorage");
-                    } else {
-                        console.warn("⚠️ No walletId in API response");
-                        setError("No wallet address found in API response");
-                        setWalletAddress(null);
-                    }
+                    } else { setError("No wallet address found"); }
                 } else {
-                    console.warn("⚠️ API response not successful:", response.data?.message || "Unknown error");
-                    setError(response.data?.message || "Failed to fetch wallet address");
-                    setWalletAddress(null);
+                    setError(response.data?.message || "Failed to fetch address");
                 }
-            } catch (error) {
-                console.error("❌ Error getting wallet address:", error);
-                setError(error.message || "Failed to fetch wallet address");
-                setWalletAddress(null);
+            } catch (err) {
+                setError(err.message || "Something went wrong");
             } finally {
                 setLoading(false);
             }
         };
-        
         fetchAddress();
-    }, []); // ✅ Empty dependency array - runs once on mount
+    }, [regno]);
+
+    // 2. Confirm Deposit logic (POST API)
+    const handleConfirmDeposit = async () => {
+        if (!walletAddress || !regno) {
+            toast.error("Required data missing");
+            return;
+        }
+
+        setConfirmLoading(true);
+        try {
+            const response = await apiClient.post('/DepositReport/ConfirmDeposit', {
+                walletAddress: walletAddress,
+                regno: parseInt(regno) 
+            });
+
+            if (response.data.result === "true") {
+                toast.success(response.data.message || "Deposit confirmed successfully!");
+            } else {
+                toast.error(response.data.message || "Confirmation failed");
+            }
+        } catch (err) {
+            console.error("Confirm error:", err);
+            toast.error("Server error. Please try again.");
+        } finally {
+            setConfirmLoading(false);
+        }
+    };
 
     const handleCopy = async () => {
         if (!walletAddress) return;
         try {
             await navigator.clipboard.writeText(walletAddress);
-            setCopySuccess('✅ Copied!');
-            console.log("📋 Address copied:", walletAddress);
+            setCopySuccess('Copied!');
+            toast.success("Address Copied!");
             setTimeout(() => setCopySuccess(''), 2000);
-        } catch (error) {
-            console.error("❌ Copy failed:", error);
+        } catch (err) {
             const textArea = document.createElement('textarea');
             textArea.value = walletAddress;
             document.body.appendChild(textArea);
             textArea.select();
             document.execCommand('copy');
             document.body.removeChild(textArea);
-            setCopySuccess('✅ Copied!');
-            setTimeout(() => setCopySuccess(''), 2000);
+            toast.success("Address Copied!");
         }
     };
 
     const handleShare = async () => {
         if (!walletAddress) return;
         const shareData = {
-            title: 'Deposit Wallet Address',
-            text: `Please send payment to this wallet address: ${walletAddress}`,
+            title: 'Deposit Wallet',
+            text: `Wallet Address: ${walletAddress}`,
+            url: window.location.href
         };
-        
-        try {
-            if (navigator.share) {
-                await navigator.share(shareData);
-                console.log("📤 Shared successfully");
-            } else {
-                await navigator.clipboard.writeText(`Wallet Address: ${walletAddress}`);
-                alert('📋 Wallet address copied to clipboard!');
-            }
-        } catch (error) {
-            console.error("❌ Share failed:", error);
-            await navigator.clipboard.writeText(`Wallet Address: ${walletAddress}`);
-            alert('📋 Wallet address copied to clipboard!');
-        }
+        if (navigator.share) {
+            try { await navigator.share(shareData); } catch (e) { console.log(e); }
+        } else { handleCopy(); }
     };
 
     const truncateAddress = (address) => {
         if (!address) return '';
-        if (address.length <= 20) return address;
-        return `${address.slice(0, 10)}...${address.slice(-8)}`;
-    };
-
-    const handleRetry = () => {
-        setLoading(true);
-        setError(null);
-        // Clear localStorage so it fetches fresh
-        localStorage.removeItem('NameAppearOnCheque');
-        setTimeout(() => {
-            window.location.reload();
-        }, 500);
+        if (address.length <= 22) return address;
+        return `${address.slice(0, 11)}...${address.slice(-11)}`;
     };
 
     return (
-        <div className="">
-            <div className="modal-content">
-                <div className="modal-header">
-                    <h4>Deposit Fund</h4>
-                    <Link to="/dashboard/DepositHistory">
-                        <button type="button" className="btn btn-primary">History</button>
+        <div className="unique-df-main-wrapper">
+            <Toaster position="top-center" reverseOrder={false} />
+            <div className="unique-df-card-container">
+                
+                {/* Image style Blue Header */}
+                <div className="unique-df-top-header">
+                    <div className="unique-df-header-left">
+                        <div className="unique-df-wallet-bg">
+                            <Wallet size={24} color="white" fill="white" />
+                        </div>
+                        <div className="unique-df-header-texts">
+                            <h2>Deposit Fund</h2>
+                            <p>Scan the QR code or copy wallet address to deposit funds</p>
+                        </div>
+                    </div>
+                    <Link to="/dashboard/DepositHistory" className="btn btn-primary gap-1">
+                        <History size={18} />
+                        <span>History</span>
                     </Link>
                 </div>
 
-                <div className="modal-body">
+                <div className="unique-df-content-body">
                     {/* QR Code Section */}
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        flexDirection: 'column',
-                        height: '100%',
-                        width: '100%',
-                        padding: '20px 0',
-                        minHeight: '250px'
-                    }}>
-                        {loading ? (
-                            // ✅ Loading State
-                            <>
-                                <div className="spinner-border text-primary" role="status" style={{ width: '50px', height: '50px' }}>
-                                    <span className="visually-hidden">Loading...</span>
-                                </div>
-                                <p style={{ marginTop: '15px', color: '#6c757d', fontSize: '14px' }}>
-                                    ⏳ Fetching wallet address...
-                                </p>
-                                <p style={{ color: '#6c757d', fontSize: '12px' }}>
-                                    Please wait while we load your wallet details
-                                </p>
-                            </>
-                        ) : walletAddress ? (
-                            // ✅ QR Code Show
-                            <>
-                                <QRCodeSVG
-                                    value={walletAddress}
-                                    size={200}
-                                    bgColor={"#ffffff"}
-                                    fgColor={"#000000"}
-                                    level={"H"}
-                                    includeMargin={true}
-                                    style={{
-                                        maxWidth: '100%',
-                                        height: 'auto',
-                                        border: '2px solid #e2e8f0',
-                                        borderRadius: '12px',
-                                        padding: '10px'
-                                    }}
-                                />
-                                <p style={{
-                                    marginTop: '10px',
-                                    fontSize: '12px',
-                                    color: '#6c757d'
-                                }}>
-                                </p>
-                            </>
-                        ) : (
-                            // ❌ No Address Found
-                            <>
-                                <div style={{
-                                    fontSize: '50px',
-                                    marginBottom: '10px'
-                                }}>
-                                    ❌
-                                </div>
-                                <p style={{
-                                    color: '#dc3545',
-                                    fontSize: '16px',
-                                    fontWeight: '600'
-                                }}>
-                                    Wallet Address Not Found
-                                </p>
-                                {error && (
-                                    <p style={{
-                                        color: '#6c757d',
-                                        fontSize: '13px',
-                                        textAlign: 'center',
-                                        maxWidth: '300px'
-                                    }}>
-                                        {error}
-                                    </p>
-                                )}
-                                <button 
-                                    className="btn btn-primary mt-2"
-                                    onClick={handleRetry}
-                                >
-                                    🔄 Retry
-                                </button>
-                            </>
-                        )}
+                    <div className="unique-df-qr-section">
+                        <div className="unique-df-qr-frame">
+                            {loading ? (
+                                <div className="unique-df-spinner"></div>
+                            ) : walletAddress ? (
+                                <QRCodeSVG value={walletAddress} size={180} level="H" includeMargin={true} />
+                            ) : (
+                                <div className="unique-df-error-msg">{error || "Address Not Found"}</div>
+                            )}
+                        </div>
+                        <div className="unique-df-scan-pay-badge">
+                            <Smartphone size={16} />
+                            <span>Scan to Pay</span>
+                        </div>
                     </div>
 
-                    {/* Wallet Address Section - Only show if address exists */}
+                    {/* Address Detail Card (Same as Image) */}
                     {walletAddress && (
-                        <>
-                            <div
-                                style={{
-                                    background: "#f8f9fa",
-                                    border: "1px solid #dee2e6",
-                                    borderRadius: "10px",
-                                    padding: "12px",
-                                    marginTop: "10px",
-                                    lineHeight: "1.8",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        color: "#0d6efd",
-                                        fontSize: "11px",
-                                        fontWeight: "600",
-                                        marginBottom: "8px",
-                                        textAlign: "center",
-                                    }}
-                                >
-                                    Scan QR Code or copy the wallet address below to make payment
-                                </div>
+                        <div className="unique-df-address-info-card">
 
-                                <div className='text-center'>
-                                    <span
-                                        style={{
-                                            fontWeight: "700",
-                                            color: "#212529",
-                                            marginRight: "8px",
-                                            textAlign: "center",
-                                        }}
-                                    >
-                                        Wallet Address:
-                                    </span>
-
-                                    <span
-                                        style={{
-                                            color: "#198754",
-                                            fontFamily: "monospace",
-                                            fontSize: "13px",
-                                            fontWeight: "600",
-                                            background: "#e8f5e9",
-                                            padding: "4px 8px",
-                                            borderRadius: "5px",
-                                            wordBreak: "break-all",
-                                            textAlign: "center",
-                                            display: 'inline-block',
-                                            maxWidth: '100%'
-                                        }}
-                                    >
-                                        {truncateAddress(walletAddress)}
-                                    </span>
-                                </div>
+                            <div className="unique-df-address-input-pill">
+                                <span className="unique-df-label">Wallet Address</span>
+                                <div className="unique-df-divider"></div>
+                                <span className="unique-df-address-text">{truncateAddress(walletAddress)}</span>
+                                  
+                                <button className="unique-df-copy-icon-btn" onClick={handleShare}>
+                                    <Share2 size={18} />
+                                </button>
+                                <button className="unique-df-copy-icon-btn ms-2" onClick={handleCopy}>
+                                    <Copy size={18} />
+                                </button>
 
                             </div>
 
-                            {/* SHARE & COPY BUTTONS */}
-                            <div className='d-flex gap-3 justify-content-center mt-3'>
-                                <button
-                                    className="btn btn-success px-4 py-2"
-                                    onClick={handleShare}
-                                    style={{
-                                        fontWeight: '600',
-                                        borderRadius: '8px'
-                                    }}
-                                >
-                                 Share
+                            {/* Share & Copy Buttons */}
+                            {/* <div className="unique-df-action-row">
+                                <button className="unique-df-btn-share" onClick={handleShare}>
+                                    <Share2 size={18} />
+                                    <span>Share</span>
                                 </button>
-                                <button
-                                    className="btn btn-primary px-4 py-2"
-                                    onClick={handleCopy}
-                                    style={{
-                                        fontWeight: '600',
-                                        borderRadius: '8px',
-                                        position: 'relative'
-                                    }}
+                                <button className="unique-df-btn-copy" onClick={handleCopy}>
+                                    <Copy size={18} />
+                                    <span>{copySuccess || 'Copy'}</span>
+                                </button>
+                            </div> */}
+
+                            {/* Confirm Deposit Main Button */}
+                            <div className="unique-df-confirm-container">
+                                <button 
+                                    className={`btn btn-primary unique-df-confirm-btn ${confirmLoading ? 'loading' : ''}`}
+                                    onClick={handleConfirmDeposit}
+                                    disabled={confirmLoading}
                                 >
-                                     {copySuccess || 'Copy'}
+                                    {confirmLoading ? (
+                                        <div className="df-mini-spinner"></div>
+                                    ) : (
+                                        <><CheckCircle size={20} /> Confirm Deposit</>
+                                    )}
                                 </button>
                             </div>
-
-                            {copySuccess && (
-                                <div className="text-center mt-2">
-                                    <span style={{ color: '#28a745', fontSize: '14px', fontWeight: '600' }}>
-                                        {copySuccess}
-                                    </span>
-                                </div>
-                            )}
-                        </>
+                        </div>
                     )}
 
-                    <span
-                        style={{
-                            display: "block",
-                            marginTop: "10px",
-                            fontSize: "12px",
-                            fontWeight: "600",
-                            textAlign: "center",
-                            color: "red"
-                        }}
-                    >
-                        Note: If your wallet balance is not updated immediately, please wait a few minutes and try again.
-                    </span>
+                    {/* Footer Warning Note */}
+                    <div className="unique-df-bottom-note">
+                        <AlertCircle size={18} />
+                        <p>Note: If your wallet balance is not updated immediately, please wait a few minutes and try again.</p>
+                    </div>
                 </div>
             </div>
         </div>

@@ -30,7 +30,6 @@ const DepositHistory = () => {
         const typeFromUrl = queryParams.get('type');
         
         if (typeFromUrl) {
-            console.log("📌 Type from URL:", typeFromUrl);
             setSelectedType(typeFromUrl);
         }
     }, [location.search]); 
@@ -76,7 +75,6 @@ const DepositHistory = () => {
                 setLoading(true);
                 setError(null);
 
-                console.log("🔑 Fetching wallet report for regno:", regno);
 
                 // ✅ CORRECT: Use path parameter
                 let url = `/DepositReport/WalletReport/${regno}`;
@@ -88,8 +86,6 @@ const DepositHistory = () => {
 
                 if (res.data?.result === "true") {
                     const data = res.data.response?.walletData || [];
-                    console.log("✅ Extracted Data:", data);
-                    console.log("📊 Number of records:", data.length);
 
                     setRecords(data);
                 } else {
@@ -98,7 +94,7 @@ const DepositHistory = () => {
                     setError("No data found");
                 }
             } catch (error) {
-                console.error("❌ API Error:", error.response || error);
+                console.error(" API Error:", error.response || error);
                 setError(error.response?.data?.message || "Failed to fetch data");
                 setRecords([]);
             } finally {
@@ -154,53 +150,65 @@ const DepositHistory = () => {
     ];
 
     return (
+
         <div className="Table-container royalty-main-wrapper mb-5 p-4">
             <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-                <h3 className="mb-0">Deposit History</h3>
+                <h3 className="mb-4">Deposit History</h3>
             </div>
 
-            <div className="d-flex justify-content-between entries-search-bar entries-control mb-3">
-                <div className="entries-control">
-                    <label>Show entries:</label>
-                    <select
-                        className="form-select"
-                        value={itemsPerPage}
-                        onChange={e => setItemsPerPage(Number(e.target.value))}
-                    >
-                        {[10, 25, 50, 75, 100].map(n => <option key={n} value={n}>{n}</option>)}
-                    </select>
-                </div>
-                <div className="entries-control d-flex align-items-center gap-2">
-                    <label className="text-dark mb-0 fw-semibold">Income Type:</label>
-                    <select
-                        className="form-select"
-                        value={selectedType}
-                        onChange={handleChange}
-                        disabled={loading}
-                        style={{
-                            width: '220px',
-                            borderRadius: "8px",
-                            border: "1px solid rgba(102, 126, 234, 0.2)",
-                            padding: "6px 12px"
-                        }}
-                    >
-                        <option value="all">{loading ? "Loading types..." : "All"}</option>
-                        {!loading && incomeTypes.map((item, index) => (
-                            <option key={index} value={item.transType}>
-                                {item.transType}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="search-wrapper mt-3">
-                    <input
-                        className="form-control search-input"
-                        placeholder="Search records..."
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                    />
-                </div>
-            </div>
+          <div className="row g-2 g-md-3  entries-search-bar mb-3">
+    {/* Show entries */}
+    <div className="col-12 col-sm-6 col-md-3 col-lg-auto entries-control">
+        <div className="d-flex align-items-center gap-2">
+            <label className="text-nowrap fw-semibold" style={{fontSize: "14px"}}>
+                Show entries:
+            </label>
+            <select
+                className="form-select form-select-sm"
+                value={itemsPerPage}
+                onChange={e => setItemsPerPage(Number(e.target.value))}
+                style={{width: "auto", minWidth: "70px"}}
+            >
+                {[10, 25, 50, 75, 100].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+        </div>
+    </div>
+    {/* Income Type */}
+    <div className="col-12 col-sm-6 col-md-4 col-lg-auto">
+        <div className="d-flex align-items-center gap-2">
+            <label className="text-dark fw-semibold text-nowrap" style={{fontSize: "14px"}}>
+                Income Type:
+            </label>
+            <select
+                className="form-select form-select-sm"
+                value={selectedType}
+                onChange={handleChange}
+                disabled={loading}
+                style={{minWidth: "120px", width: "100%"}}
+            >
+                <option value="all">{loading ? "Loading types..." : "All"}</option>
+                {!loading && incomeTypes.map((item, index) => (
+                    <option key={index} value={item.transType}>
+                        {item.transType}
+                    </option>
+                ))}
+            </select>
+        </div>
+    </div>
+
+    {/* Search */}
+    <div className="col-12 col-md-5 col-lg-4 ms-auto">
+        <div className="search-wrapper">
+            <input
+                className="form-control form-control-sm"
+                placeholder="Search records..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                style={{borderRadius: "8px"}}
+            />
+        </div>
+    </div>
+</div>
 
             {/* Error Display */}
             {error && (

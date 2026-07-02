@@ -6,7 +6,6 @@ import apiClient from "../../api/apiClient";
 
 /**
  * TREE COMPONENT - Network tree visualization with expand/collapse
- * Data comes from API, not hardcoded
  */
 const TreeComponent = () => {
   // ==================== STATE MANAGEMENT ====================
@@ -39,6 +38,8 @@ const TreeComponent = () => {
         loginid: item.loginid || "",
         regno: item.regno,
         status: item.STATUS || item.BotStatus || "Active",
+        childCount: item.totaldirect || 0, // 🔥 USE totaldirect FROM API
+        totaldirect: item.totaldirect || 0,
       };
     });
 
@@ -50,6 +51,7 @@ const TreeComponent = () => {
       if (parentRegNo && parentNode) {
         parentNode.children.push(currentNode);
         parentNode._children.push(currentNode);
+        parentNode.childCount = (parentNode.childCount || 0) + 1;
       } else if (!rootNode && currentNode) {
         rootNode = currentNode;
       }
@@ -106,7 +108,9 @@ const TreeComponent = () => {
                   name: child.Name || child.name || "Member",
                   loginid: child.loginid || child.regno,
                   regno: child.regno,
-                  status: child.STATUS || child.BotStatus || "Active"
+                  status: child.STATUS || child.BotStatus || "Active",
+                  childCount: child.totaldirect || 0,
+                  totaldirect: child.totaldirect || 0,
                 };
               });
               apiChildren.forEach(child => {
@@ -117,6 +121,7 @@ const TreeComponent = () => {
                   );
                   if (!exists) {
                     childNodes[childParentRegNo]._children.push(childNodes[child.regno]);
+                    childNodes[childParentRegNo].childCount = (childNodes[childParentRegNo].childCount || 0) + 1;
                   }
                 }
               });
@@ -126,10 +131,12 @@ const TreeComponent = () => {
               console.log(`✅ Found ${directChildren.length} direct children for`, clickedRegNo);
               d3Node.data._children = directChildren;
               d3Node.data.children = directChildren;
+              d3Node.data.childCount = directChildren.length;
               d3Node.data.loading = false;
               setTreeData({...treeData});
             } else {
               d3Node.data.loading = false;
+              d3Node.data.childCount = 0;
               setTreeData({...treeData});
             }
           });
@@ -155,7 +162,6 @@ const fetchTreeData = useCallback(async (regno) => {
     const response = await apiClient.post("/Dashboard/TreeView", { mregNo: regno });
     console.log("API Response:", response.data);
     
-    // ✅ FIXED: API returns { result: "true", response: [...] }
     const flatData = response.data?.response || [];
     
     if (!Array.isArray(flatData) || flatData.length === 0) {
@@ -168,8 +174,12 @@ const fetchTreeData = useCallback(async (regno) => {
     console.log(`✅ Received ${flatData.length} records from API`);
     const tree = buildTree(flatData);
     if (tree) {
-      console.log("🌳 Tree built successfully, expanding root node:", regno);
+      console.log("🌳 Tree built successfully");
+      
+      // 🔥 ROOT AUTO-EXPAND - root open rahega
       setExpandedNodes(new Set([regno]));
+      
+      // 🔥 Root ke children visible rahenge
       tree.children = tree._children || [];
     }
     setTreeData(tree);
@@ -184,7 +194,6 @@ const fetchTreeData = useCallback(async (regno) => {
 useEffect(() => {
   const loadInitialData = () => {
     try {
-      // ✅ FIXED: Direct regno from localStorage (no JSON parsing)
       const regno = localStorage.getItem("Regno");
       
       if (!regno) {
@@ -194,7 +203,7 @@ useEffect(() => {
       }
       
       console.log("👤 Logged in user regno:", regno);
-      fetchTreeData(parseInt(regno)); // Convert to number
+      fetchTreeData(parseInt(regno));
     } catch (error) {
       console.error("❌ Error:", error);
       setError("Invalid user data format");
@@ -203,11 +212,12 @@ useEffect(() => {
   };
   loadInitialData();
 }, [fetchTreeData]);
+
   // ==================== D3 TREE RENDERING ====================
   useEffect(() => {
     if (!treeData || !chartRef.current || loading) return;
 
-    console.log("🎨 Rendering D3 tree with", Object.keys(treeData).length, "nodes");
+    console.log("🎨 Rendering D3 tree");
     d3.select(chartRef.current).selectAll("*").remove();
 
     const containerWidth = chartRef.current.parentElement.clientWidth - 40;
@@ -277,17 +287,17 @@ useEffect(() => {
           .attr("stroke-width", 2);
       });
 
-    // Helper function to get color based on status (only RED, GREEN, BLUE)
+    // Helper function to get color based on status
     const getStatusColor = (status) => {
-      if (!status) return "#2ecc71"; // default green
+      if (!status) return "#2ecc71";
       const upperStatus = status.toUpperCase();
-      if (upperStatus === "RED") return "#ef4444";   // red
-      if (upperStatus === "GREEN") return "#22c55e"; // green
-      if (upperStatus === "BLUE") return "#3b82f6";  // blue
-      return "#2ecc71"; // default green for other statuses
+      if (upperStatus === "RED") return "#ef4444";
+      if (upperStatus === "GREEN") return "#22c55e";
+      if (upperStatus === "BLUE") return "#3b82f6";
+      return "#2ecc71";
     };
 
-    // Circles - color based solely on status (no orange for expanded, no special root color)
+    // Circles
     node.append("circle")
       .attr("fill", d => {
         if (d.data.loading) return "#ff9800";
@@ -296,20 +306,51 @@ useEffect(() => {
       })
       .attr("r", d => {
         if (d.data.loading) return 10;
-        return 6; // fixed radius, no size change on expand
+        return 6;
       })
       .attr("stroke", "#fff")
       .attr("stroke-width", 2);
 
-    // Expand/collapse indicators (+/-)
-    node.filter(d => d.data._children && d.data._children.length > 0 && !d.data.loading)
+    // 🔥 FIXED: + icon using totaldirect from API
+    // Show + icon if totaldirect > 0 OR _children has data
+    node.filter(d => {
+      const hasChildren = d.data._children && d.data._children.length > 0;
+      const hasDirectChildren = d.data.totaldirect && d.data.totaldirect > 0;
+      const isExpanded = expandedNodes.has(d.data.regno) && d.data.children && d.data.children.length > 0;
+      
+      // Show + if has children (from API totaldirect or cached _children) and NOT expanded
+      return (hasChildren || hasDirectChildren) && !isExpanded && !d.data.loading;
+    })
       .append("text")
       .attr("dy", "-0.8em")
       .attr("x", 0)
       .attr("text-anchor", "middle")
-      .text(d => expandedNodes.has(d.data.regno) ? "−" : "+")
+      .text(d => {
+        // Use totaldirect if available, otherwise count from _children
+        const count = d.data.totaldirect || d.data._children?.length || 0;
+        return `+${count}`;
+      })
       .attr("fill", "#fff")
-      .attr("font-size", "12px")
+      .attr("font-size", "10px")
+      .attr("font-weight", "bold")
+      .attr("stroke", "#333")
+      .attr("stroke-width", "0.5");
+
+    // Show - for expanded nodes
+    node.filter(d => {
+      const isExpanded = expandedNodes.has(d.data.regno) && d.data.children && d.data.children.length > 0;
+      return isExpanded && !d.data.loading;
+    })
+      .append("text")
+      .attr("dy", "-0.8em")
+      .attr("x", 0)
+      .attr("text-anchor", "middle")
+      .text(d => {
+        const count = d.data.children?.length || 0;
+        return `−${count}`;
+      })
+      .attr("fill", "#fff")
+      .attr("font-size", "10px")
       .attr("font-weight", "bold")
       .attr("stroke", "#333")
       .attr("stroke-width", "0.5");
@@ -329,8 +370,14 @@ useEffect(() => {
     // Name labels
     node.append("text")
       .attr("dy", "0.31em")
-      .attr("x", d => d.children && d.children.length > 0 ? -12 : 12)
-      .attr("text-anchor", d => d.children && d.children.length > 0 ? "end" : "start")
+      .attr("x", d => {
+        const isExpanded = expandedNodes.has(d.data.regno) && d.data.children && d.data.children.length > 0;
+        return isExpanded ? -12 : 12;
+      })
+      .attr("text-anchor", d => {
+        const isExpanded = expandedNodes.has(d.data.regno) && d.data.children && d.data.children.length > 0;
+        return isExpanded ? "end" : "start";
+      })
       .text(d => {
         const name = d.data.name || d.data.Name || "Member";
         return name.length > 15 ? name.substring(0, 12) + "..." : name;
@@ -345,8 +392,14 @@ useEffect(() => {
     // Login ID below name
     node.append("text")
       .attr("dy", "1.5em")
-      .attr("x", d => d.children && d.children.length > 0 ? -12 : 12)
-      .attr("text-anchor", d => d.children && d.children.length > 0 ? "end" : "start")
+      .attr("x", d => {
+        const isExpanded = expandedNodes.has(d.data.regno) && d.data.children && d.data.children.length > 0;
+        return isExpanded ? -12 : 12;
+      })
+      .attr("text-anchor", d => {
+        const isExpanded = expandedNodes.has(d.data.regno) && d.data.children && d.data.children.length > 0;
+        return isExpanded ? "end" : "start";
+      })
       .text(d => d.data.loginid || d.data.regno || "")
       .attr("fill", "#64748b")
       .attr("stroke", "white")
@@ -354,15 +407,15 @@ useEffect(() => {
       .attr("paint-order", "stroke")
       .style("font-size", "15px");
 
-    // Tooltips
+    // Tooltips - using totaldirect
     node.append("title")
       .text(d => {
         const name = d.data.name || d.data.Name || "Member";
         const loginid = d.data.loginid || "";
         const status = d.data.STATUS || d.data.BotStatus || "Active";
-        const children = d.data._children ? d.data._children.length : 0;
+        const children = d.data.totaldirect || d.data._children?.length || 0;
         const hasMore = children > 0;
-        return `${name}\nLogin ID: ${loginid}\nStatus: ${status}\nChildren: ${children}\n\n${hasMore ? 'Click to expand/collapse' : 'No children to expand'}`;
+        return `User Name: ${name}\nLogin ID: ${loginid}\nStatus: ${status}\nDirect ID: ${children}\n`;
       });
 
     const style = document.createElement('style');
@@ -377,27 +430,23 @@ useEffect(() => {
   }, [treeData, loading, handleNodeClick, expandedNodes]);
 
   // ==================== UI RENDERING ====================
-//   if (loading) {
-//     return <Preloader />;
-//   }
 
   return (
     <div className="tree-page">
-<div className="d-flex justify-content-between align-items-center tree-header">
-    <div>
-        <h2 className="fw-bold mb-0" style={{ color: "#2A3547" }}>Tree View</h2>
-    </div>
-    <div className="header-actions">
-        <button 
+      <div className="d-flex justify-content-between align-items-center tree-header">
+        <div>
+          <h2 className="fw-bold mb-0" style={{ color: "#2A3547" }}>Tree View</h2>
+        </div>
+        <div className="header-actions">
+          <button 
             className="btn btn-primary rounded-2" 
             onClick={() => navigate("/dashboard")}
-
-        >
+          >
             <i className="ti ti-dashboard me-2"></i>
             Dashboard
-        </button>
-    </div>
-</div>
+          </button>
+        </div>
+      </div>
 
       {error && !loading && (
         <div className="error-container">
@@ -425,7 +474,6 @@ useEffect(() => {
             fontFamily: "sans-serif",
             boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
             margin: "20px",
-
           }}
         >
           <span style={{ marginRight: "10px", fontSize: "16px"}}>🔍</span> 

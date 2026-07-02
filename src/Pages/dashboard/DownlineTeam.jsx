@@ -3,6 +3,7 @@ import CustomTable from '../../Componenets/ui/customtable/CustomTable';
 import Pagination from '../../Componenets/ui/pagination/Pagination';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import apiClient from '../../api/apiClient';
 
 const DownlineTeam = () => {
   const [loading, setLoading] = useState(false);
@@ -56,38 +57,29 @@ const DownlineTeam = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(
-        'https://api.apexmindai.in/api/Dashboard/DownLineTeam',
+      // ✅ FIX: Remove leading space and use proper axios POST
+      const response = await apiClient.post(
+        '/Dashboard/DownLineTeam',
         {
-          method: 'POST',
-          headers: {
-            'accept': '*/*',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            mregno: parseInt(regno),
-            findlvl: findlvl,
-            pageIndex: currentPage,
-            pageSize: pageSize
-          })
-        }
+          mregno: parseInt(regno),
+          findlvl: findlvl,
+          pageIndex: currentPage,
+          pageSize: pageSize
+        },
+     
       );
 
-      // ✅ FIX: response.json() use karo
-      const data = await response.json();
+      // ✅ FIX: Axios automatically parses JSON, so response.data is the parsed object
+      const data = response.data;
 
-      console.log("📡 API Response:", data);
-
-      if (data.result === "true") {
+      if (data.result === "true" || data.result === true) {
         const teamData = data.response?.data || [];
-        setDownlineData(teamData);
-        setRecordCount(teamData.length);
+        const totalCount = data.response?.recordCount || teamData.length;
+        const totalBiz = data.response?.totalBusiness || 0;
         
-        // Calculate total business
-        const total = teamData.reduce((sum, item) => {
-          return sum + (parseFloat(item.kitPrice) || parseFloat(item.Stake) || 0);
-        }, 0);
-        setTotalBusiness(total);
+        setDownlineData(teamData);
+        setRecordCount(totalCount);
+        setTotalBusiness(totalBiz);
       } else {
         toast.error(data.message || 'Failed to fetch downline team');
         setDownlineData([]);
@@ -95,8 +87,14 @@ const DownlineTeam = () => {
         setTotalBusiness(0);
       }
     } catch (error) {
-      console.error("❌ Error fetching downline team:", error);
-      toast.error(error.message || 'Something went wrong');
+      console.error(" Error fetching downline team:", error);
+      
+      // Better error handling
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Something went wrong';
+      toast.error(errorMessage);
+      
       setDownlineData([]);
       setRecordCount(0);
       setTotalBusiness(0);
@@ -133,24 +131,13 @@ const DownlineTeam = () => {
           <div>
             <h4 className="fw-bold" style={{ color: "#2A3547" }}>Downline Team</h4>
           </div>
-          
-          {/* Summary Cards */}
-          <div className="d-flex gap-3">
-            <div className="bg-primary-subtle rounded-3 p-3 text-center" style={{ minWidth: "120px" }}>
-              <span className="text-muted">Total Members</span>
-              <h5 className="fw-bold mb-0 text-primary">{recordCount}</h5>
-            </div>
-            <div className="bg-success-subtle rounded-3 p-3 text-center" style={{ minWidth: "150px" }}>
-              <span className="text-muted">Team Business</span>
-              <h5 className="fw-bold mb-0 text-success">{formatAmount(totalBusiness)}</h5>
-            </div>
-          </div>
         </div>
 
-        {/* Filters Section */}
+        {/* Filters + Summary Cards */}
         <div className="card border-0 shadow-sm mb-4">
           <div className="card-body p-3">
             <div className="row g-3 align-items-center">
+              {/* Level Filter */}
               <div className="col-md-3">
                 <label className="form-label fw-semibold mb-1">Select Level</label>
                 <select 
@@ -162,6 +149,20 @@ const DownlineTeam = () => {
                     <option key={level} value={level}>Level {level}</option>
                   ))}
                 </select>
+              </div>
+              
+              {/* Summary Cards */}
+              <div className="col-md-9">
+                <div className="d-flex gap-3 justify-content-end flex-wrap">
+                  <div className="bg-primary-subtle rounded-3 p-3 text-center" style={{ minWidth: "130px" }}>
+                    <span className="text-muted" style={{ fontSize: "12px" }}>Total Members</span>
+                    <h5 className="fw-bold mb-0 text-primary">{recordCount}</h5>
+                  </div>
+                  <div className="bg-success-subtle rounded-3 p-3 text-center" style={{ minWidth: "150px" }}>
+                    <span className="text-muted" style={{ fontSize: "12px" }}>Team Business</span>
+                    <h5 className="fw-bold mb-0 text-success">{formatAmount(totalBusiness)}</h5>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -206,8 +207,8 @@ const DownlineTeam = () => {
           ))}
         </CustomTable>
 
-        {/* Pagination Section */}
-        {!loading && recordCount > 0 && totalPages > 1 && (
+        {/* Pagination */}
+        {!loading && totalPages > 1 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -216,6 +217,33 @@ const DownlineTeam = () => {
           />
         )}
       </div>
+
+      <style jsx>{`
+      
+        .badge {
+          padding: 6px 12px;
+          font-weight: 500;
+          border-radius: 5px;
+        }
+        .bg-success {
+          background-color: #10b981 !important;
+          color: white;
+        }
+        .bg-danger {
+          background-color: #ef4444 !important;
+          color: white;
+        }
+        .bg-secondary {
+          background-color: #6b7280 !important;
+          color: white;
+        }
+        .bg-primary-subtle {
+          background-color: #dbeafe;
+        }
+        .bg-success-subtle {
+          background-color: #d1fae5;
+        }
+      `}</style>
     </>
   );
 };

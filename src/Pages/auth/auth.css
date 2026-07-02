@@ -367,7 +367,6 @@ h4 {
   }
   
   .detail-row02 {
-    flex-direction: column;
     align-items: flex-start;
     gap: 6px;
   }
@@ -533,3 +532,6 @@ h4 {
 .country-item:hover {
   background: #f3f4f6;
 }
+
+
+

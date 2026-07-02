@@ -1,274 +1,210 @@
-// InvestFund.jsx
-import { useState } from 'react';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import './Invest.css';
+import React, { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import { Wallet, History, ShieldCheck, TrendingUp, ArrowRight, Zap, Headphones, BarChart3 } from 'lucide-react';
 import apiClient from '../../../api/apiClient';
 import { useUser } from '../../../context/UserContext';
+import Toast from '../../../Componenets/ui/Toast';
+import './Invest.css';
 
 const InvestFund = () => {
-  // 🔥 Dono bots ke liye alag states
-  const { fetchData } = useUser();
+  const { fetchData, userData } = useUser();
   const [bot1Amount, setBot1Amount] = useState('');
   const [bot2Amount, setBot2Amount] = useState('');
   const [loadingBot1, setLoadingBot1] = useState(false);
   const [loadingBot2, setLoadingBot2] = useState(false);
 
-  const { userData } = useUser();
+  const regno = localStorage.getItem("Regno");
 
-
-  const regno = localStorage.getItem("Regno")
-  // 🔥 Common function – dono bots ke liye same logic
   const investInBot = async (botId, amount) => {
-    // Validation
     if (!amount || parseFloat(amount) <= 0) {
-      toast.error(' Please enter a valid amount.');
+      toast.error('Please enter a valid amount.');
       return;
     }
-
     if (botId === 1 && (parseFloat(amount) < 100 || parseFloat(amount) > 999)) {
-      toast.error(' Bot 1: Amount must be between $100 and $999.');
-      return;
+      toast.error('Bot 1: Amount must be between $100 and $999.'); return;
     }
     if (botId === 2 && (parseFloat(amount) < 1000 || parseFloat(amount) > 5000)) {
-      toast.error('❌ Bot 2: Amount must be between $1000 and $5000.');
-      return;
+      toast.error('Bot 2: Amount must be between $1000 and $5000.'); return;
     }
 
-    // 🔥 Sirf usi bot ka loading true
-    if (botId === 1) setLoadingBot1(true);
-    else setLoadingBot2(true);
-
-    const payload = {
-      regno: regno,
-      rkprice: parseFloat(amount),
-      uRegno: 0,
-    };
-
+    botId === 1 ? setLoadingBot1(true) : setLoadingBot2(true);
     try {
-      // ✅ FIXED: axios automatically parses response
-      const response = await apiClient.post('/Dashboard/Investment', payload);
-
-      const data = response.data;
-
-      if (data.result === 'true') {
-        toast.success(` ${data.message}`);
-        // 🔥 Sirf usi bot ka amount clear
+      const response = await apiClient.post('/Dashboard/Investment', {
+        regno: regno,
+        rkprice: parseFloat(amount),
+        uRegno: 0,
+      });
+      if (response.data.result === 'true') {
+        toast.success(response.data.message);
         await fetchData();
-        if (botId === 1) setBot1Amount('');
-        else setBot2Amount('');
+        botId === 1 ? setBot1Amount('') : setBot2Amount('');
       } else {
-        toast.error(`❌ ${data.message || 'Something went wrong'}`);
+        toast.error(response.data.message);
       }
     } catch (error) {
-      console.error('API Error:', error);
-      toast.error('❌ Network error. Please try again.');
+      toast.error('Something went wrong!');
     } finally {
-      // 🔥 Sirf usi bot ka loading false
-      if (botId === 1) setLoadingBot1(false);
-      else setLoadingBot2(false);
+      setLoadingBot1(false); setLoadingBot2(false);
     }
   };
 
   return (
-    <>
-      <div className='Table-container'>
-        {/* Header */}
-        <div className="header-container">
-          <div className="d-flex justify-content-between align-items-center p-3 p-md-4 bg-white rounded-3 shadow-sm mb-4 border border-light flex-wrap gap-2">
-            <h2 className="text-dark fw-bold mb-0" style={{ fontSize: "clamp(18px, 3vw, 28px)" }}>
-              Invest Bot
-            </h2>
-
-            {/* ✅ Mobile me inline */}
-            <div className="d-flex align-items-center gap-2 flex-wrap">
-              <div className="investment-display d-inline-flex align-items-center" style={{ gap: '4px' }}>
-                <span style={{ fontSize: '14px' }}>Deposit Fund:</span>
-                <span style={{
-                  background: '#fff',
-                  color: "green",
-                  padding: '1px 8px',
-                  borderRadius: '10px',
-                  fontSize: '12px',
-                  fontWeight: '700',
-                }}>
-                  ${userData?.Depositfund || 0}
-                </span>
-              </div>
-
-              <Link to="/dashboard/InvestmentHistory">
-                <button type="button" className="btn btn-primary px-3 px-md-4 py-2" style={{ whiteSpace: 'nowrap' }}>
-                  History
-                </button>
-              </Link>
-            </div>
+    <div className="invest-container">
+      <Toast />
+      
+      {/* Top Navigation Bar - Fully Responsive */}
+      <div className="invest-header">
+        <div className="header-left">
+          <div className="logo-box">
+            <img 
+              src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" 
+              alt="bot" 
+            />
+          </div>
+          <div className="title-box">
+            <h1>Invest <span>Bot</span></h1>
+            <p>Smart bots. Better returns.</p>
           </div>
         </div>
-
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="colored"
-        />
-        {/* Cards Grid - Fully Responsive */}
-        <div className="row g-3 g-md-4 px-3">
-          {/* ==================== BOT 1 ==================== */}
-          <div className="col-12 col-md-6 col-lg-6 d-flex align-items-stretch">
-            <div className="invest-card w-100">
-
-              {/* Card Header - INLINE STYLE */}
-              <div
-                className="card-header"
-                style={{
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  padding: "14px 20px",
-                  textAlign: "center",
-                  borderBottom: "none",
-                  borderRadius: "16px 16px 0 0"
-                }}
-              >
-                <span
-                  className="bot-name"
-                  style={{
-                    color: "#ffffff",
-                    fontSize: "20px",
-                    fontWeight: "700",
-                    letterSpacing: "0.5px",
-                    margin: 0
-                  }}
-                >
-                  🤖 Bot 1
-                </span>
-              </div>
-
-              <div className="image-wrapper">
-                <img
-                  src="https://i.pinimg.com/1200x/18/39/fe/1839fe826cbbda43160f5aa76031d9a3.jpg"
-                  alt="Bot 1"
-                  className="bot-image"
-                />
-              </div>
-
-              <div className="c-box">
-                <div className="card-body01 p-2 p-md-3">
-                  <div className="input-group02">
-                    <span className="currency-icon">$</span> |
-                    <input
-                      type="number"
-                      placeholder="Enter Amount"
-                      className="amount-input"
-                      value={bot1Amount}
-                      onChange={(e) => setBot1Amount(e.target.value)}
-                      disabled={loadingBot1}
-                    />
-                  </div>
-
-                  <div className="note-section d-flex">
-                    <span className="note-label">Note:</span>
-                    <p className="mb-0">A member will get upto 2.5% profit on equity deposit weekly.</p>
-                  </div>
-
-                  <div className="limit-section">
-                    <span className="limit-label">Limit:</span>
-                    <span className="limit-text">Min deposit $100 | Max $999</span>
-                  </div>
-
-                  <button
-                    className="invest-btn w-100"
-                    onClick={() => investInBot(1, bot1Amount)}
-                    disabled={loadingBot1}
-                  >
-                    {loadingBot1 ? '⏳ Processing...' : 'Invest Now'}
-                  </button>
-                </div>
-              </div>
+        <div className="header-right">
+          <div className="deposit-card">
+            <Wallet size={18} className="wallet-icon" />
+            <div className="deposit-info">
+              <span className="value">${userData?.Depositfund?.toLocaleString() || 0}</span>
             </div>
           </div>
-
-          {/* ==================== BOT 2 ==================== */}
-          <div className="col-12 col-md-6 col-lg-6 d-flex align-items-stretch">
-            <div className="invest-card w-100">
-
-              {/* Card Header - INLINE STYLE */}
-              <div
-                className="card-header"
-                style={{
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                  padding: "14px 20px",
-                  textAlign: "center",
-                  borderBottom: "none",
-                  borderRadius: "16px 16px 0 0"
-                }}
-              >
-                <span
-                  className="bot-name"
-                  style={{
-                    color: "#ffffff",
-                    fontSize: "20px",
-                    fontWeight: "700",
-                    letterSpacing: "0.5px",
-                    margin: 0
-                  }}
-                >
-                  🤖 Bot 2
-                </span>
-              </div>
-
-              <div className="image-wrapper">
-                <img
-                  src="https://i.pinimg.com/736x/2f/a9/af/2fa9afe7803e88bf73727ba5d83d25a9.jpg"
-                  alt="Bot 2"
-                  className="bot-image"
-                />
-              </div>
-
-              <div className="c-box">
-                <div className="card-body02 p-2 p-md-3">
-                  <div className="input-group02">
-                    <span className="currency-icon">$</span> |
-                    <input
-                      type="number"
-                      placeholder="Enter Amount"
-                      className="amount-input"
-                      value={bot2Amount}
-                      onChange={(e) => setBot2Amount(e.target.value)}
-                      disabled={loadingBot2}
-                    />
-                  </div>
-
-                  <div className="note-section d-flex">
-                    <span className="note-label">Note:</span>
-                    <p className="mb-0">A member will get upto 3% profit on equity deposit weekly.</p>
-                  </div>
-
-                  <div className="limit-section">
-                    <span className="limit-label">Limit:</span>
-                    <span className="limit-text">Min deposit $1000 | Max $5000</span>
-                  </div>
-
-                  <button
-                    className="invest-btn w-100"
-                    onClick={() => investInBot(2, bot2Amount)}
-                    disabled={loadingBot2}
-                  >
-                    {loadingBot2 ? ' Processing...' : ' Invest Now'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
+          <Link to="/dashboard/InvestmentHistory" className="history-btn">
+            <History size={18} />
+            <span>History</span>
+          </Link>
         </div>
       </div>
-    </>
+
+
+      <div className="bot-grid">
+        {/* Bot 1 - Purple Theme */}
+        <div className="bot-card purple-theme">
+          <div className="card-header">          
+            <div className="bot-details">    
+              <h3>BOT 1 </h3>   
+            </div>
+            <div className="top-shield"><ShieldCheck size={18} /></div>
+          </div>
+
+          <div className="card-middle">
+            <div className="bot-visual">
+               <div className="bot-glow"></div>
+               <img src="https://i.pinimg.com/1200x/18/39/fe/1839fe826cbbda43160f5aa76031d9a3.jpg" alt="bot1" />
+            </div>
+            <div className="profit-box">
+              <p className="profit-label">Expected Weekly Profit</p>
+              <h2 className="profit-value">UPTO <span>2.5%</span></h2>
+              <div className="info-row01 mt-2">
+                <p style={{maxWidth: "300px"}}> <span style={{color: "green"}}>Note: </span>A member will get upto 2.5% profit on equity deposit weekly.</p>
+              </div>
+              <div className="info-row01 mt-2">
+                <p><span style={{color: 'green'}}>Limit:</span> Min deposit <span>$100</span> | Max <span>$999</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-group03">
+            <label className="form-label mb-1">AMOUNT *</label>
+            <div className="amount-input-wrapper mb-3">
+              <span className="currency-sign">$</span>
+              <input 
+                className='amount-input-field' 
+                type="number" 
+                placeholder="Enter Amount" 
+                value={bot1Amount} 
+                onChange={(e) => setBot1Amount(e.target.value)} 
+              />
+            </div>
+            <button 
+              className="invest-now-btn" 
+              onClick={() => investInBot(1, bot1Amount)} 
+              disabled={loadingBot1}
+            >
+              <div className="btn-dots"><span></span><span></span><span></span></div>
+              {loadingBot1 ? "PROCESSING..." : "INVEST NOW"}
+              <div className="arrow-circle"><ArrowRight size={16} /></div>
+            </button>
+          </div>
+        </div>
+
+        {/* Bot 2 - Blue Theme */}
+        <div className="bot-card blue-theme">
+          <div className="card-header">
+            {/* <div className="bot-num">02</div> */}
+            <div className="bot-details">
+              <h3>BOT 2</h3>
+            </div>
+            <div className="top-shield"><ShieldCheck size={18} /></div>
+          </div>
+
+          <div className="card-middle">
+            <div className="bot-visual">
+               <div className="bot-glow"></div>
+               <img src="https://i.pinimg.com/736x/2f/a9/af/2fa9afe7803e88bf73727ba5d83d25a9.jpg" alt="bot2" />
+            </div>
+            <div className="profit-box">
+              <p className="profit-label">Expected Weekly Profit</p>
+              <h2 className="profit-value">UPTO <span>3%</span></h2>
+              <div className="info-row01 mt-2">
+                <p style={{maxWidth: "300px"}}><span style={{color: "green"}}>Note:</span> A member will get upto 3% profit on equity deposit weekly.</p>
+              </div>
+              <div className="info-row01 mt-2">
+                <p><span style={{color: "green"}}>Limit:</span> Min deposit <span>$1000</span> | Max <span>$5000</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-group03">
+            <label className="form-label mb-1">AMOUNT *</label>
+            <div className="amount-input-wrapper mb-3">
+              <span className="currency-sign">$</span>
+              <input 
+                className='amount-input-field' 
+                type="number" 
+                placeholder="Enter Amount" 
+                value={bot2Amount} 
+                onChange={(e) => setBot2Amount(e.target.value)} 
+              />
+            </div>
+            <button 
+              className="invest-now-btn" 
+              onClick={() => investInBot(2, bot2Amount)} 
+              disabled={loadingBot2}
+            >
+              <div className="btn-dots"><span></span><span></span><span></span></div>
+              {loadingBot2 ? "PROCESSING..." : "INVEST NOW"}
+              <div className="arrow-circle"><ArrowRight size={16} /></div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Features Bar */}
+      <div className="features-row">
+        <div className="f-item">
+          <div className="f-icon purple"><ShieldCheck /></div>
+          <div className="f-text"><h3>Secure & Safe</h3><p>Your investments are protected</p></div>
+        </div>
+        <div className="f-item">
+          <div className="f-icon purple"><BarChart3 /></div>
+          <div className="f-text"><h3>Weekly Profit</h3><p>Earn profit every week</p></div>
+        </div>
+        <div className="f-item">
+          <div className="f-icon blue"><Zap /></div>
+          <div className="f-text"><h3>Instant Start</h3><p>Get started in few clicks</p></div>
+        </div>
+        <div className="f-item">
+          <div className="f-icon green"><Headphones /></div>
+          <div className="f-text"><h3>24/7 Support</h3><p>We are here for you</p></div>
+        </div>
+      </div>
+    </div>
   );
 };
 

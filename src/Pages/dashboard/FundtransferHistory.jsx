@@ -30,8 +30,6 @@ const Fundtransferhistory = () => {
                 setLoading(true);
                 setError(null);
                 
-                console.log("🔑 Fetching wallet report for regno:", regno);
-
                 // ✅ CORRECT: Use path parameter
                 const res = await apiClient.get(
                     `/DepositReport/WalletReport/${regno}`
@@ -41,15 +39,11 @@ const Fundtransferhistory = () => {
                     // ✅ CORRECT: Data is in response.walletData
                   const data = res.data.response?.walletData || [];
 
-console.log("✅ Extracted Data:", data);
-console.log("📊 Number of records:", data.length);
-
 // Sirf FUND TRANSFER data
 const newData = data.filter(
   (item) => item.transType === "FUND TRANSFER"
 );
 
-console.log("🎯 Filtered Data:", newData);
 
 setRecords(newData);
                 } else {
