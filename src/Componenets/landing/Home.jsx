@@ -251,7 +251,7 @@ const LandingPage = () => {
       <div className="bubble-ring ring-2"></div>
       <div className="bubble-ring ring-3"></div>
       
-      <a
+      {/* <a
         href="https://wa.me/447400402001"
         target="_blank"
         rel="noopener noreferrer"
@@ -259,7 +259,7 @@ const LandingPage = () => {
         aria-label="Chat on WhatsApp"
       >
         <FaWhatsapp />
-      </a>
+      </a> */}
     </div>
 
       {/* Main Content */}

@@ -36,8 +36,8 @@ const Fundtransfer = () => {
     const [otpSent2, setOtpSent2] = useState(false);
     const [otpVerified2, setOtpVerified2] = useState(false);
 
-    const loginId = localStorage.getItem("loginId");
-    const regNo = localStorage.getItem("Regno");
+    const loginId = sessionStorage.getItem("loginId");
+    const regNo = sessionStorage.getItem("Regno");
     const debounceTimer1 = useRef(null);
 
     const depositOptions = [100, 300, 500, 1000, 10000, 50000];
@@ -225,7 +225,7 @@ const Fundtransfer = () => {
             };
 
             const response = await apiClient.post('/IncomePayout/deposit-to-deposit', payload);
-            
+
             if (response.data?.success === true || response.data?.result === "true") {
                 Swal.fire({
                     icon: 'success',
@@ -345,7 +345,7 @@ const Fundtransfer = () => {
                 amount: Number(amount2)
             };
             const response = await apiClient.post('/IncomePayout/income-transfer', payload);
-            
+
             if (response.data?.success === true || response.data?.result === "true") {
                 Swal.fire({
                     icon: 'success',
@@ -376,7 +376,7 @@ const Fundtransfer = () => {
     return (
         <>
             <Toast />
-            
+
             <div className="deposit-to-deposit-container">
                 <div className="container-fluid">
                     <div className="row g-4">
@@ -389,19 +389,20 @@ const Fundtransfer = () => {
                                         <RiP2pFill size={24} className="transfer-icon" />
                                         <h5>Fund Transfer</h5>
                                     </div>
-                                    <FaHistory
-                                        size={20}
-                                        className="history-icon"
-                                        onClick={() => gotodepositHistory("Fund Transfer")}
-                                        title="Deposit To Deposit History"
-                                    />
+
+                                    <button className="btn-primary" onClick={() => gotodepositHistory("Fund Transfer")}>
+                                        <span className="d-flex">
+
+                                            History
+                                        </span>
+                                    </button>
                                 </div>
                                 <div className="transfer-card-body">
                                     {/* Wallet Info */}
                                     <div className="wallet-info">
                                         <span className="wallet-label">Deposit Wallet</span>
                                         <span className="wallet-amount text-primary">
-                                            {formatBalance(userData?.Depositfund || userData?.WorkingWallet)}
+                                            {formatBalance(userData?.Depositfund || "00")}
                                         </span>
                                     </div>
 
@@ -431,7 +432,7 @@ const Fundtransfer = () => {
                                         <label className="form-label mt-3 mb-1">QUICK AMOUNT</label>
                                         <div className="quick-amount-grid">
                                             {depositOptions.map((opt) => (
-                                                <button
+                                                <button 
                                                     key={opt}
                                                     className={`quick-amount-btn ${amount1 === opt ? "active" : ""}`}
                                                     onClick={() => setAmount1(opt)}
@@ -481,7 +482,7 @@ const Fundtransfer = () => {
                                             </div>
                                             {!otpSent1 ? (
                                                 <button
-                                                
+
                                                     className="btn btn-primary text-nowrap"
                                                     onClick={handleSendOTP1}
                                                     disabled={otpLoading1 || !validUser1}
@@ -530,13 +531,12 @@ const Fundtransfer = () => {
                                         <RiP2pFill size={24} className="transfer-icon" />
                                         <h5>Income → Deposit</h5>
                                     </div>
-                                    <FaHistory
-                                        size={20}
-                                        className="history-icon"
-                                        title="Income to Deposit History"
-                                        onClick={() => goToFundInvest("USDT Transfer")}
-                                    />
+
+                                    <button className="btn-primary" onClick={() => goToFundInvest("USDT Transfer")}>
+                                        History
+                                    </button>
                                 </div>
+
                                 <div className="transfer-card-body">
                                     {/* Wallet Info */}
                                     <div className="wallet-info">

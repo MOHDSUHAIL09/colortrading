@@ -1,25 +1,18 @@
 import React, { useEffect, useState } from "react";
-  import apiClient from "../../api/apiClient";
-
+import apiClient from "../../api/apiClient";
+import { FaRankingStar } from "react-icons/fa6";
 import { useUser } from "../../context/UserContext";
 
 
 const Reward = () => {
-   const { fetchData, userData } = useUser();
+  const { fetchData, userData } = useUser();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const rewardImages = [
-    "https://i.pinimg.com/1200x/a4/3a/7d/a43a7dd4c38a8af76232b724def8b3f1.jpg",
-    "https://i.pinimg.com/1200x/72/a0/fc/72a0fc380325949f5c0f54e867e08fb3.jpg",
-    "https://i.pinimg.com/736x/b3/e6/ae/b3e6aeaa47709e1e4d23a7b2776b9b12.jpg",
-    "https://i.pinimg.com/736x/75/af/77/75af775c2565c429cd29cde46e253171.jpg",
-    "https://i.pinimg.com/736x/8b/c9/84/8bc9845cc800ff3bff61adf0242105b0.jpg",
-  ];
 
   useEffect(() => {
-    const regno = localStorage.getItem("Regno");
+    const regno = sessionStorage.getItem("Regno");
 
     const fetchData = async () => {
       try {
@@ -129,7 +122,7 @@ const Reward = () => {
         .reward-wrapper {
           background: #f0f2f5;
           min-height: 100vh;
-          padding: 1.5rem 1rem;
+          padding: -0.5rem 1rem;
         }
 
         .reward-container {
@@ -468,10 +461,67 @@ const Reward = () => {
             max-width: 50%;
           }
         }
-      `}</style>
 
-      <div className="reward-wrapper">
+ 
+
+
+      `}</style>
+      
+
+      <div className="reward-wrapper">  
         <div className="reward-container">
+         {/* INFO BANNER / NOTE - Fixed Design */}
+{/* INFO BANNER - Compact Inline */}
+<div
+  className="mb-3"
+  style={{
+    background: "linear-gradient(135deg, #0d6efd, #3b82f6)",
+    borderLeft: "6px solid #ffc107",
+    borderRadius: "12px",
+    padding: "10px 20px",
+    color: "#fff",
+    boxShadow: "0 6px 16px rgba(0,0,0,0.15)",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      marginBottom: "8px",
+      fontSize: "1rem",
+      fontWeight: "700",
+    }}
+  >
+    <i
+      className="bi bi-info-circle-fill me-2"
+      style={{ color: "green", fontSize: "1.3rem" }}
+    ></i>
+    <span>Important Note</span>
+  </div>
+
+  <div style={{ fontSize: "0.92rem", lineHeight: "1.3" }}>
+    <div className="mb-2">
+      <i
+        className="bi bi-trophy-fill me-2"
+        style={{ color: "#FFD700" }}
+      ></i>
+      <strong>Reward:</strong>{" "}
+      Rewards are granted <strong>only once</strong> after you successfully
+      meet all the required qualification criteria.
+    </div>
+
+    <div>
+      <i
+        className="bi bi-cash-stack me-2"
+        style={{ color: "#7CFC00" }}
+      ></i>
+      <strong>Salary:</strong>{" "}
+      Salary is paid <strong>every month</strong> as long as you continue to
+      meet all the required conditions and maintain the reward rank you have
+      achieved.
+    </div>
+  </div>
+</div>
           <div className="row g-3">
             {data.length > 0 ? (
               data.map((item, index) => {
@@ -518,7 +568,7 @@ const Reward = () => {
                   (item.secondLeg || 0) +
                   (item.thirdLeg || 0) +
                   (item.FourthLeg || 0) +
-                  (item.OthersLeg || 0);
+                  Number(item.OthersLeg) || 0
                 const targetTeam = item.leftp || 0;
 
                 // Calculate progress percentages
@@ -546,39 +596,41 @@ const Reward = () => {
                 }
 
                 return (
-                  <div className="col-lg-4 col-md-6 mb-3" key={item.rid || index}>
+                  
+                  <div className="col-lg-6 col-md-6 mb-3" key={item.rid || index}>
                     <div className={cardClass}>
                       {/* Compact Header */}
                       <div className={headerClass}>
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="flex-grow-1" style={{ minWidth: 0, paddingRight: '0.5rem' }}>
-                            <h5 className="fw-bold text-white">
+                            <h5 className="fw-bold text-white d-flex gap-2">
+                              <FaRankingStar  style={{fontSize:"20px"}}/>
                               {item.reward || "Reward"}
                             </h5>
-                            <small className="d-flex align-items-center text-white">
+                            {/* <small className="d-flex align-items-center text-white">
                               <i className="bi bi-gift-fill"></i>
                               {item.gift || "No gift"}
-                            </small>
+                            </small> */}
                           </div>
                           <div className="text-end">
-                           <div className="text-end">
-  <div style={{ fontSize: '0.7rem', opacity: 0.7, fontWeight: '500' }}>
-    Reward
-  </div>
-  <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
-    {item.SalaryAmt ? (
-      <>
-        <i className="bi bi-gift-fill me-1" style={{ fontSize: '1.4rem', color: '#ffd700' }}></i>
-        ${Number(item.SalaryAmt).toLocaleString()}
-      </>
-    ) : (
-      <>
-        <i className="bi bi-gift-fill me-1" style={{ fontSize: '1.4rem', color: '#ffd700' }}></i>
-        $0
-      </>
-    )}
-  </div>
-</div>
+                            <div className="text-end">
+                              <div style={{ fontSize: '0.7rem', opacity: 0.7, fontWeight: '500' }}>
+                                Reward
+                              </div>
+                              <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>
+                                {item.SalaryAmt ? (
+                                  <>
+                                    <i className="bi bi-gift-fill me-1" style={{ fontSize: '1.4rem', color: '#ffd700' }}></i>
+                                    ${Number(item.SalaryAmt).toLocaleString()}
+                                  </>
+                                ) : (
+                                  <>
+                                    <i className="bi bi-gift-fill me-1" style={{ fontSize: '1.4rem', color: '#ffd700' }}></i>
+                                    $0
+                                  </>
+                                )}
+                              </div>
+                            </div>
                             {/* Days remaining calculation */}
                             {item.EntryDate && item.rewardExpireDate && !isExpiredStatus && (
                               <small className="d-flex align-items-center text-white" style={{ fontSize: '0.85rem', opacity: 0.9 }}>
@@ -652,13 +704,61 @@ const Reward = () => {
                               style={{ width: `${downlineProgress}%` }}
                             ></div>
                           </div>
-                          <small style={{ fontSize: '0.55rem', color: '#6c757d', display: 'block', marginTop: '2px' }}>
-                            Required: Each leg must have ${item.rcount}+ business
+                          <small style={{ fontSize: '.8rem', color: '#6c757d', display: 'block', marginTop: '2px' }}>
+                            Required: Each leg must have   <span style={{ color: "green", fontWeight: "bold" }}>
+                              ${item.rcount}+
+                            </span>{" "} business
                           </small>
                         </div>
 
+                        {/* salary section */}
+{/* Salary Section - Redesigned with Bootstrap */}
+<div className="bg-dark bg-gradient rounded-3 p-3 mb-3 border border-warning border-opacity-25 shadow-lg" 
+     style={{ position: 'relative', overflow: 'hidden' }}>
+  
+  {/* Decorative shine effect */}
+  <div className="position-absolute top-0 end-0 w-25 h-100 opacity-10"
+       style={{
+         background: 'radial-gradient(circle, rgba(86, 94, 247, 0.2) 0%, transparent 70%)',
+         transform: 'translateX(30%)'
+       }}>
+  </div>
+  
+  <div className="d-flex justify-content-between align-items-center position-relative" style={{ zIndex: 1 }}>
+    <div>
+      <div className="d-flex align-items-center gap-2">
+        <i className="bi bi-wallet2 text-warning"></i>
+        <span className="text-white small text-uppercase fw-semibold tracking-wide" 
+              style={{ letterSpacing: '0.5px', fontSize: '0.7rem' }}>
+          Monthly Salary
+        </span>
+      </div>
+     
+    </div>
+    
+    <div className="text-end">
+      <div className="d-flex align-items-center gap-2">
+        <i className="bi bi-gift-fill text-warning" style={{ fontSize: '1.5rem' }}></i>
+        <span className="display-6 fw-bold text-warning" 
+              style={{ 
+                fontSize: '2rem', 
+                lineHeight: 1,
+                textShadow: '0 0 20px rgba(255,215,0,0.2)'
+              }}>
+          ${Number(item.SalaryAmt || 0).toLocaleString()}
+        </span>
+      </div>
+      <div className="text-white small" style={{ fontSize: '0.55rem' }}>
+        <i className="bi bi-calendar3 me-1"></i>
+      / Monthly      </div>
+    </div>
+  </div>
+</div>
+
+ 
+
                         {/* Legs Grid - Compact with Validation */}
-                        <div className="row g-2 mb-2-compact">
+                        <div className="row g-2 mb-2-compact mt-1">
                           {legs.map((leg, legIndex) => {
                             const isLegQualified = leg.value >= REQUIRED_DOWNLINE;
 
@@ -706,88 +806,88 @@ const Reward = () => {
                           </div>
                         )}
 
-                      {/* Compact Footer */}
-<div className="footer-compact">
-  <div className="d-flex flex-column gap-1" style={{ flex: 1 }}>
-    {item?.achieveDate ? (
-      <div className="date-text" style={{ fontWeight: '900' }}>
-        <i className="bi bi-calendar-event me-1"></i>
-        <strong>Achieve Date:</strong>{" "}
-        <span style={{ fontWeight: '700', color: '#0d6efd' }}>
-          {new Date(item.achieveDate).toLocaleDateString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}
-        </span>
-      </div>
-    ) : (
-      item?.rewardExpireDate && (
-        <div className="date-text" style={{ 
-          color: isExpiredStatus ? '#6c757d' : '#dc3545',
-          fontWeight: '600'
-        }}>
-          <i className="bi bi-clock me-1 fw-bold"></i>
-          <strong>Expire Date:</strong>{" "}
-          <span style={{ 
-            fontWeight: '700',
-            color: isExpiredStatus ? '#6c757d' : '#dc3545'
-          }}>
-            {new Date(item.rewardExpireDate).toLocaleString("en-IN", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit"
-            })}
-          </span>
-        </div>
-      )
-    )}
-  </div>
+                        {/* Compact Footer */}
+                        <div className="footer-compact">
+                          <div className="d-flex flex-column gap-1" style={{ flex: 1 }}>
+                            {item?.achieveDate ? (
+                              <div className="date-text" style={{ fontWeight: '900' }}>
+                                <i className="bi bi-calendar-event me-1"></i>
+                                <strong>Achieve Date:</strong>{" "}
+                                <span style={{ fontWeight: '700', color: '#0d6efd' }}>
+                                  {new Date(item.achieveDate).toLocaleDateString("en-IN", {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                  })}
+                                </span>
+                              </div>
+                            ) : (
+                              item?.rewardExpireDate && (
+                                <div className="date-text" style={{
+                                  color: isExpiredStatus ? '#6c757d' : '#dc3545',
+                                  fontWeight: '600'
+                                }}>
+                                  <i className="bi bi-clock me-1 fw-bold"></i>
+                                  <strong>Expire Date:</strong>{" "}
+                                  <span style={{
+                                    fontWeight: '700',
+                                    color: isExpiredStatus ? '#6c757d' : '#dc3545'
+                                  }}>
+                                    {new Date(item.rewardExpireDate).toLocaleString("en-IN", {
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit"
+                                    })}
+                                  </span>
+                                </div>
+                              )
+                            )}
+                          </div>
 
-  <span className={`status-text ${statusInfo.className}`}>
-    {statusInfo.icon} {statusInfo.label}
-  </span>
-</div>
+                          <span className={`status-text ${statusInfo.className}`}>
+                            {statusInfo.icon} {statusInfo.label}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 );
               })
             ) : (
-           <div className="empty-state">
-  <i className="bi bi-box-seam"></i>
-  <h5>No rewards available</h5>
-  <p>Start building your downline to unlock gifts.</p>
-  <button 
-    className="btn btn-primary mt-3 px-4 py-2 rounded-pill"
-    style={{ 
-      fontWeight: '600',
-      boxShadow: '0 4px 12px rgba(13, 110, 253, 0.3)',
-      transition: 'all 0.3s ease'
-    }}
-    onMouseEnter={(e) => {
-      e.target.style.transform = 'translateY(-2px)';
-      e.target.style.boxShadow = '0 6px 20px rgba(13, 110, 253, 0.4)';
-    }}
-    onMouseLeave={(e) => {
-      e.target.style.transform = 'translateY(0)';
-      e.target.style.boxShadow = '0 4px 12px rgba(13, 110, 253, 0.3)';
-    }}
-    onClick={() => {
-      const depositFund = userData?.Depositfund || 0;
-      if (depositFund > 0) {
-        window.location.href = '/dashboard/InvestFund';
-      } else {
-        window.location.href = '/dashboard/DepositFund';
-      }
-    }}
-  >
-    <i className="bi bi-arrow-right-circle me-2"></i>
-    {userData?.Depositfund > 0 ? 'Invest Now' : 'Deposit First'}
-  </button>
-</div>
+              <div className="empty-state">
+                <i className="bi bi-box-seam"></i>
+                <h5>No rewards available</h5>
+                <p>Start building your downline to unlock gifts.</p>
+                <button
+                  className="btn btn-primary mt-3 px-4 py-2 rounded-pill"
+                  style={{
+                    fontWeight: '600',
+                    boxShadow: '0 4px 12px rgba(13, 110, 253, 0.3)',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(13, 110, 253, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(13, 110, 253, 0.3)';
+                  }}
+                  onClick={() => {
+                    const depositFund = userData?.Depositfund || 0;
+                    if (depositFund > 0) {
+                      window.location.href = '/dashboard/InvestFund';
+                    } else {
+                      window.location.href = '/dashboard/DepositFund';
+                    }
+                  }}
+                >
+                  <i className="bi bi-arrow-right-circle me-2"></i>
+                  {userData?.Depositfund > 0 ? 'Invest Now' : 'Deposit First'}
+                </button>
+              </div>
             )}
           </div>
         </div>

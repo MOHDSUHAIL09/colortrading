@@ -5,20 +5,12 @@ import LandingLayout from './layouts/LandingLayout';
 
 const AppRoutes = () => {
   const { isAuthenticated } = useUser();
-
-  console.log("🔍 isAuthenticated:", isAuthenticated);
-
-
-
   return (
     <Routes>
-      {/* ✅ Agar authenticated hai toh dashboard, nahi toh landing */}
       <Route 
         path="/*" 
         element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingLayout />} 
       />
-      
-      {/* ✅ Dashboard routes - sirf authenticated users ke liye */}
       <Route 
         path="/dashboard/*" 
         element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/" replace />} 

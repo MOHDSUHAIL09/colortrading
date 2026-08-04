@@ -3,7 +3,7 @@ import { useState } from 'react';
 import apiClient from '../../../api/apiClient';
 
 const ChangePassword = () => {
-  const regno = localStorage.getItem('Regno');
+  const regno = sessionStorage.getItem('Regno');
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -52,8 +52,6 @@ const ChangePassword = () => {
         password: newPassword
       });
       
-      console.log("📡 Response:", response.data);
-
       const isSuccess = response.data?.result === "true" || response.data?.result === true;
       
       if (isSuccess) {

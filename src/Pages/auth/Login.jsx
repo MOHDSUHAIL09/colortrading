@@ -23,7 +23,6 @@ const Login = () => {
   const showSuccessToast = (message) => {
     toast.success(message, {
       duration: 3000,
-      position: 'top-center',
     });
   };
 
@@ -37,8 +36,8 @@ const Login = () => {
   // 🔥 Validation - Password 8 characters
   const validateField = (name, value) => {
     let error = "";
-    
-    switch(name) {
+
+    switch (name) {
       case "loginId":
         if (!value || value.trim() === "") {
           error = " Enter Login  ";
@@ -48,7 +47,7 @@ const Login = () => {
           error = "Login ID can only contain letters and numbers";
         }
         break;
-        
+
       case "password":
         if (!value || value.trim() === "") {
           error = "Enter   Password";
@@ -56,11 +55,11 @@ const Login = () => {
           error = "Password must be at least 8 characters";
         }
         break;
-        
+
       default:
         break;
     }
-    
+
     return error;
   };
 
@@ -68,22 +67,22 @@ const Login = () => {
     const newErrors = {};
     const loginIdError = validateField("loginId", formData.loginId);
     const passwordError = validateField("password", formData.password);
-    
+
     if (loginIdError) newErrors.loginId = loginIdError;
     if (passwordError) newErrors.password = passwordError;
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     setFormData({
       ...formData,
       [name]: value
     });
-    
+
     if (name === "loginId" || name === "password") {
       const error = validateField(name, value);
       setErrors(prev => ({ ...prev, [name]: error }));
@@ -97,9 +96,9 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    
+
     setErrors({});
-    
+
     if (!validateForm()) {
       const firstError = Object.values(errors)[0];
       if (firstError) {
@@ -107,15 +106,15 @@ const Login = () => {
       }
       return;
     }
-    
+
     setLoading(true);
-    
+
     const payload = {
       loginId: formData.loginId.trim(),
       password: formData.password,
-      deviceId: formData.deviceId     
+      deviceId: formData.deviceId
     };
-    
+
     try {
       const response = await apiClient.post("/Auth/Login", payload, {
         headers: {
@@ -123,32 +122,40 @@ const Login = () => {
           "Accept": "application/json",
         }
       });
-      
-      const data = response.data;     
+
+      const data = response.data;
       if (data.result === "true" && data.response) {
         const userData = data.response;
-        
+
         const regno = userData.regNo || userData.regno || userData.Regno;
-        localStorage.setItem("Regno", regno);     
-        localStorage.setItem("loginId", userData.loginid || userData.loginId); 
-        localStorage.setItem("NameAppearOnCheque", userData.NameAppearOnCheque || "null");
-        localStorage.setItem("isLoggedIn", "true");
-        
-        const userObject = {
-          regno: regno,
-          loginId: userData.loginid || userData.loginId,
-          name: userData.fName || userData.NameAppearOnCheque || "",
-          email: userData.emailID || userData.email || "",
-          mobile: userData.mobile || "",
-        };
-        localStorage.setItem("user", JSON.stringify(userObject));
-        
+        // sessionStorage.setItem("Regno", regno);     
+        // sessionStorage.setItem("loginId", userData.loginid || userData.loginId); 
+        // sessionStorage.setItem("NameAppearOnCheque", userData.NameAppearOnCheque || "null");
+        // sessionStorage.setItem("isLoggedIn", "true");
+
+        sessionStorage.setItem("Regno", regno);
+        sessionStorage.setItem("loginId", userData.loginid || userData.loginId);
+        sessionStorage.setItem(
+          "NameAppearOnCheque",
+          userData.NameAppearOnCheque || "null"
+        );
+        sessionStorage.setItem("isLoggedIn", "true");
+
+        // const userObject = {
+        //   regno: regno,
+        //   loginId: userData.loginid || userData.loginId,
+        //   name: userData.fName || userData.NameAppearOnCheque || "",
+        //   email: userData.emailID || userData.email || "",
+        //   mobile: userData.mobile || "",
+        // };
+        // sessionStorage.setItem("user", JSON.stringify(userObject));
+
         showSuccessToast("Login Successful!");
-        
+
         loginUser(userData);
         await fetchData();
         setTimeout(() => navigate("/dashboard"), 500);
-        
+
       } else {
         let errorMsg = "Invalid Login Details";
         if (data.message) {
@@ -162,13 +169,13 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login Error:", error);
-      
+
       let errorMsg = "Network Error! Please check your connection.";
-      
+
       if (error.response) {
         errorMsg = " Invalid credentials!";
       }
-      
+
       showErrorToast(errorMsg);
     } finally {
       setLoading(false);
@@ -180,6 +187,31 @@ const Login = () => {
     return () => document.body.classList.remove('loaded');
   }, []);
 
+
+  const urlLoginkey = import.meta.env.VITE_URL_LOGINKEY;
+  const msPassword = import.meta.env.VITE_MS_PASSWORD;
+
+  // get the url from window 
+  useEffect(() => {
+
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("loginkey") === urlLoginkey) {
+      setFormData({
+        loginId: params.get("loginid"),
+        password: msPassword,
+        deviceId: "web-browser",
+      });
+
+      setTimeout(() => {
+        // ✅ FIX: getElementsByClassName se querySelector karo
+        document.querySelector(".laboix-btn")?.click();
+      }, 1);
+    }
+  }, []);
+
+
   return (
     <>
       {/* ✅ Custom Toast Component */}
@@ -190,7 +222,7 @@ const Login = () => {
           <div className="row g-4">
             <div className="col-lg-6 d-flex justify-content-lg-center justify-content-start align-items-center">
               <div className="d-flex justify-content-center align-items-center">
-                      {/* <div className="text-white d-none d-sm-block">
+                {/* <div className="text-white d-none d-sm-block">
                     <img src={authimg} alt="signup-image" />
                   </div> */}
               </div>
@@ -293,7 +325,7 @@ const Login = () => {
                         <div className="text-black mb-2">
                           Forgot password?{" "}
                           <Link to="/forgotpassword">
-                            <span className="text-primary">Reset Here</span> 
+                            <span className="text-primary">Reset Here</span>
                           </Link>
                         </div>
                       </div>
@@ -301,15 +333,15 @@ const Login = () => {
                         <p className="text-black">
                           Don't have an account?{" "}
                           <a href="/signup" onClick={(e) => { e.preventDefault(); navigate("/signup"); }}>
-                            <span className="text-primary">Create Account</span> 
+                            <span className="text-primary">Create Account</span>
                           </a>
                         </p>
                       </div>
                       <div className="col-lg-12 col-md-6">
                         <div className="submit-button">
-                          <button 
-                            type="submit" 
-                            className="laboix-btn mt-2" 
+                          <button
+                            type="submit"
+                            className="laboix-btn mt-2"
                             disabled={loading}
                           >
                             {loading ? "Logging in..." : "Login Now"}

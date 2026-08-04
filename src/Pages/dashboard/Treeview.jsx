@@ -63,12 +63,10 @@ const TreeComponent = () => {
   const fetchNodeChildren = useCallback(async (regno) => {
     try {
       const response = await apiClient.post("/Dashboard/TreeView", { mregNo: regno });
-      console.log("📦 API Response for", regno, ":", response);
       const childrenData = response.data?.response || response.data?.response || response.response || [];
-      console.log(`✅ Found ${childrenData.length} children for regno ${regno}`);
       return childrenData;
     } catch (error) {
-      console.error("❌ Error fetching children for regno:", regno, error);
+      console.error("Error fetching children for regno:", regno, error);
       return [];
     }
   }, []);
@@ -78,27 +76,21 @@ const TreeComponent = () => {
   const handleNodeClick = useCallback(async (event, d3Node) => {
     event.stopPropagation();
     const clickedRegNo = d3Node.data.regno;
-    console.log("👆 User clicked node:", clickedRegNo, d3Node.data.name);
 
     setExpandedNodes(prevSet => {
       const newSet = new Set(prevSet);
       if (newSet.has(clickedRegNo)) {
-        console.log("📂 Collapsing node:", clickedRegNo);
         newSet.delete(clickedRegNo);
         d3Node.data.children = [];
       } else {
-        console.log("📂 Expanding node:", clickedRegNo);
         newSet.add(clickedRegNo);
         if (d3Node.data._children && d3Node.data._children.length > 0) {
-          console.log("✅ Using cached children for:", clickedRegNo);
           d3Node.data.children = d3Node.data._children;
         } else {
-          console.log("⏳ Fetching children for:", clickedRegNo);
           d3Node.data.loading = true;
           setTreeData({...treeData});
           fetchNodeChildren(clickedRegNo).then(apiChildren => {
             if (apiChildren.length > 0) {
-              console.log(`✅ Received ${apiChildren.length} children from API`);
               const childNodes = {};
               apiChildren.forEach(child => {
                 childNodes[child.regno] = {
@@ -128,7 +120,6 @@ const TreeComponent = () => {
               const directChildren = Object.values(childNodes).filter(
                 node => node.introRegNo === clickedRegNo
               );
-              console.log(`✅ Found ${directChildren.length} direct children for`, clickedRegNo);
               d3Node.data._children = directChildren;
               d3Node.data.children = directChildren;
               d3Node.data.childCount = directChildren.length;
@@ -158,23 +149,18 @@ const fetchTreeData = useCallback(async (regno) => {
     setLoading(true);
     setError(null);
     setCurrentRegNo(regno);
-    console.log("📡 Fetching initial tree data for regno:", regno);
     const response = await apiClient.post("/Dashboard/TreeView", { mregNo: regno });
-    console.log("API Response:", response.data);
     
     const flatData = response.data?.response || [];
     
     if (!Array.isArray(flatData) || flatData.length === 0) {
-      console.log("⚠️ No data found for regno:", regno);
       setTreeData(null);
       setError("No network members found");
       setLoading(false);
       return;
     }
-    console.log(`✅ Received ${flatData.length} records from API`);
     const tree = buildTree(flatData);
     if (tree) {
-      console.log("🌳 Tree built successfully");
       
       // 🔥 ROOT AUTO-EXPAND - root open rahega
       setExpandedNodes(new Set([regno]));
@@ -184,7 +170,7 @@ const fetchTreeData = useCallback(async (regno) => {
     }
     setTreeData(tree);
   } catch (error) {
-    console.error("❌ Tree Fetch Error:", error);
+    console.error("Tree Fetch Error:", error);
     setError(error.response?.data?.message || "Failed to load tree data");
   } finally {
     setLoading(false);
@@ -194,7 +180,7 @@ const fetchTreeData = useCallback(async (regno) => {
 useEffect(() => {
   const loadInitialData = () => {
     try {
-      const regno = localStorage.getItem("Regno");
+      const regno = sessionStorage.getItem("Regno");
       
       if (!regno) {
         setError("Registration number not found. Please login again.");
@@ -202,10 +188,9 @@ useEffect(() => {
         return;
       }
       
-      console.log("👤 Logged in user regno:", regno);
       fetchTreeData(parseInt(regno));
     } catch (error) {
-      console.error("❌ Error:", error);
+      console.error("Error:", error);
       setError("Invalid user data format");
       setLoading(false);
     }
@@ -217,7 +202,6 @@ useEffect(() => {
   useEffect(() => {
     if (!treeData || !chartRef.current || loading) return;
 
-    console.log("🎨 Rendering D3 tree");
     d3.select(chartRef.current).selectAll("*").remove();
 
     const containerWidth = chartRef.current.parentElement.clientWidth - 40;

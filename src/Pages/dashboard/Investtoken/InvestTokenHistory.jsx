@@ -16,8 +16,8 @@ const InvestTokenHistory = () => {
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Get regno from localStorage
-    const regno = localStorage.getItem('Regno') || 1;
+    // Get regno from sessionStorage
+    const regno = sessionStorage.getItem('Regno') || 1;
 
     // Format amount function
     const formatAmount = (amount) => {

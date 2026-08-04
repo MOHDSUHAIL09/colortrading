@@ -16,8 +16,8 @@ const SeftradingHistory = () => {
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Get regno from localStorage
-    const regno = localStorage.getItem('Regno');
+    // Get regno from sessionStorage
+    const regno = sessionStorage.getItem('Regno');
 
     // Format Date
     const formatDate = (dateString) => {

@@ -10,14 +10,11 @@ const apiClient = axios.create({
   },
 });
 
-// Request interceptor to add token
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+
+
+// ✅ Add env values to apiClient for use in components
+apiClient.defaults.headers.common['X-LoginKey'] = import.meta.env.VITE_URL_LOGINKEY;
+apiClient.defaults.headers.common['X-MSPassword'] = import.meta.env.VITE_MS_PASSWORD;
 
 // Response interceptor to handle 401
 apiClient.interceptors.response.use(
@@ -28,9 +25,7 @@ apiClient.interceptors.response.use(
       toast.error("Session expired !");
       
       // Clear local storage
-      // localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      localStorage.removeItem("isLoggedIn");
+      sessionStorage.removeItem("isLoggedIn");
       
       // Redirect to login page after a short delay (optional)
       setTimeout(() => {

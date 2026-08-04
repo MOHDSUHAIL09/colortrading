@@ -31,6 +31,7 @@ import SelfTradingHistory from '../Pages/dashboard/SelfTradingHistory';
 import IncomePayOutHistory from '../Pages/dashboard/IncomePayOutHistory'
 import '../assets/Main.css'
 import Reward from '../Pages/dashboard/Reward';
+import FundDepositStatus from '../Pages/dashboard/FundDepositStatus';
 
 function DashboardLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -107,6 +108,7 @@ function DashboardLayout() {
             <Route path="TokenMiningIncomeHistory" element={<TokenMiningIncomeHistory />} />
             <Route path="SelfTradingHistory" element={<SelfTradingHistory/>} />
             <Route path="Reward" element={<Reward/>} />
+            <Route path="FundDepositStatus" element={<FundDepositStatus/>} />
           </Routes>
         </div>
       </div>

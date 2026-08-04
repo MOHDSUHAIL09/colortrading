@@ -13,7 +13,7 @@ const Fundtransferhistory = () => {
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    const regno = localStorage.getItem("Regno") ;
+    const regno = sessionStorage.getItem("Regno") ;
 
     // Format amount function
     const formatAmount = (amount) => {

@@ -167,9 +167,7 @@ const Signup = () => {
     const fetchCountries = async () => {
       setCountriesLoading(true);
       try {
-        const response = await apiClient.get("/Auth/GetAllCountries");
-        console.log("Countries API Response:", response.data);
-        
+        const response = await apiClient.get("/Auth/GetAllCountries");     
         if (response.data?.result === "true" && Array.isArray(response.data.response)) {
           const activeCountries = response.data.response.filter(country => country.cActive === true);
           setCountries(activeCountries);
@@ -256,21 +254,17 @@ const Signup = () => {
   // Send OTP - API CALL
   const handleSendOTP = async () => {
     if (!formData.email || !formData.email.includes('@')) {
-      showErrorToast("⚠️ Please enter a valid email address!");
+      showErrorToast(" Please enter a valid email address!");
       return;
     }
 
     setOtpLoading(true);
     try {
       const response = await apiClient.post(`/Auth/send-otp-to-gmail?eamil=${encodeURIComponent(formData.email)}`);
-      
-      console.log("OTP Response:", response.data);
-      
       if (response.data?.data?.result === "true") {
         const receivedOtp = response.data.otp || response.data.data?.otp;
         if (receivedOtp) {
           setStoredOtp(receivedOtp);
-          console.log("OTP stored:", receivedOtp);
         }
         
         setOtpSent(true);
@@ -423,32 +417,32 @@ const Signup = () => {
     e.preventDefault();
     
     if (!otpVerified) {
-      showErrorToast("⚠️ Please verify OTP first!");
+      showErrorToast(" Please verify OTP first!");
       return;
     }
 
     if (!formData.sponsorName || formData.sponsorName === "Invalid Sponsor") {
-      showErrorToast("⚠️ Please enter a valid Sponsor ID!");
+      showErrorToast(" Please enter a valid Sponsor ID!");
       return;
     }
     
     if (!formData.mobile || formData.mobile.length !== 10) {
-      showErrorToast("⚠️ Valid 10-digit mobile number required!");
+      showErrorToast(" Valid 10-digit mobile number required!");
       return;
     }
     
     if (!formData.email || !formData.email.includes('@')) {
-      showErrorToast("⚠️ Valid email address required!");
+      showErrorToast(" Valid email address required!");
       return;
     }
     
     if (!formData.password || formData.password.length < 8) {
-      showErrorToast("⚠️ Password must be at least 8 characters!");
+      showErrorToast(" Password must be at least 8 characters!");
       return;
     }
     
     if (!formData.countryId) {
-      showErrorToast("⚠️ Please select a country!");
+      showErrorToast(" Please select a country!");
       return;
     }
     
@@ -494,7 +488,7 @@ const Signup = () => {
           countryCode: formData.countryCode,
         };
         
-        localStorage.setItem("user", JSON.stringify(userObject));
+        sessionStorage.setItem("user", JSON.stringify(userObject));
         
         setRegisteredUser({
           regno: regnoValue,
@@ -508,7 +502,7 @@ const Signup = () => {
         });
         
         setShowSuccessModal(true);
-        showSuccessToast("🎉 Registration Successful!");
+        showSuccessToast(" Registration Successful!");
         
       } else {
         let errorMsg = "Registration Failed";

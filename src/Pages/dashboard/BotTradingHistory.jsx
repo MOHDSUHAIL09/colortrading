@@ -2,18 +2,20 @@ import { useState, useEffect, useRef } from "react";
 import apiClient from "../../api/apiClient";
 import CustomTable from "../../Componenets/ui/customtable/CustomTable";
 import Pagination from "../../Componenets/ui/pagination/Pagination";
+import { useUser } from "../../context/UserContext";
 
 const BotTradingHistory = () => {
     const [records, setRecords] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     // const [totalBalance, setTotalBalance] = useState(0);
+    const { userData } = useUser();
 
     // Pagination state
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    const regno = localStorage.getItem("Regno");
+    const regno = sessionStorage.getItem("Regno");
     const intervalRef = useRef(null);
 
     // Format date function
@@ -68,7 +70,7 @@ const BotTradingHistory = () => {
         }
     };
 
-    // Fetch Deposit Wallet Data
+
     const fetchDepositHistory = async () => {
         try {
             setLoading(true);
@@ -272,6 +274,8 @@ const BotTradingHistory = () => {
                                     </td>
                                     <td>{formatDate(row.entryDate)}</td>
                                     <td>{formatDate(row.endtime)}</td>
+
+
                                     <td style={{ color: "#3b82f6", fontWeight: "600" }}>
                                         {formatAmount(betAmount)}
                                     </td>
@@ -300,12 +304,12 @@ const BotTradingHistory = () => {
                                                 color: isEarningsNegative ? "#dc3545" : "#3b82f6",
                                                 fontWeight: "600"
                                             }}>
-                                                ${(perdayroi * betAmount).toFixed(4)}
+                                                ${(perdayroi * betAmount / 100).toFixed(4)}
                                             </td>
                                         </>
                                     )}
                                     <td>{row.currency?.toUpperCase() || "-"}</td>
-                                    <td>{row.currencyRate || "-"}</td>
+                                    <td>${row.currencyRate || "-"}</td>
                                     <td>{row.slot || "-"} H</td>
                                     <td>{row.predict || "-"}</td>
                                     <td>

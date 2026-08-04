@@ -55,7 +55,7 @@ const Dashboard = () => {
     const [otpSent, setOtpSent] = useState(false);
     const [loading, setLoading] = useState(false);
     const [otpVerified, setOtpVerified] = useState(false);
-    const [apiBotStatus, setApiBotStatus] = useState(1);
+    const [apiBotStatus, setApiBotStatus] = useState();
     const [countdown, setCountdown] = useState("");
     const displayBalance = userData?.WorkingWallet || 0;
     const NameAppearOnCheque = userData?.NameAppearOncheque;
@@ -72,17 +72,19 @@ const Dashboard = () => {
     const [tokenPayoutLoading, setTokenPayoutLoading] = useState(false);
 
 
-    const loginId = localStorage.getItem("loginId");
-    const regno = localStorage.getItem('Regno');
+    const loginId = sessionStorage.getItem("loginId");
+    const regno = sessionStorage.getItem('Regno');
 
     // ============ SIRF RIGHT SIDE UPDATE - CHART STABLE ============
     const [price, setPrice] = useState(2.00);
     const [chartData, setChartData] = useState([]);
     const [labels, setLabels] = useState([]);
     const [priceChange, setPriceChange] = useState(0);
-    const [previousPrice, setPreviousPrice] = useState(2.00);
+    const [previousPrice, setPreviousPrice] = useState(0);
     const [isInitialized, setIsInitialized] = useState(false);
-    const [baseApiPrice, setBaseApiPrice] = useState(2.50); 
+    const [baseApiPrice, setBaseApiPrice] = useState(0);
+    const [isBotStarting, setIsBotStarting] = useState(false);
+
 
     //  Initialize chart with initial data
     useEffect(() => {
@@ -98,125 +100,199 @@ const Dashboard = () => {
 
 
 
-// ✅ Generate random price between min (apiPrice - 20%) and max (apiPrice)
-const generateRandomPriceFromApi = (apiPrice) => {
-    // 20% minus karo
-    const minPrice = apiPrice * 0.80; // 20% kam
-    const maxPrice = apiPrice; // API price (max)
-    
-    // Random price generate karo between min and max
-    const randomValue = (Math.random() * (maxPrice - minPrice) + minPrice);
-    return parseFloat(randomValue.toFixed(4));
-};
+    // ✅ Generate random price between min (apiPrice - 20%) and max (apiPrice)
+    const generateRandomPriceFromApi = (apiPrice) => {
+        // 20% minus karo
+        const minPrice = apiPrice - 0.5; // 20% kam
+        const maxPrice = apiPrice; // API price (max)
 
-// ✅ Generate chart data point
-const generateNewDataPoint = (currentPrice) => {
-    const min = 5;
-    const max = 40;
-    const baseValue = currentPrice * 8;
-    const variation = (Math.random() - 0.5) * 8;
-    return Math.round(Math.max(5, Math.min(45, baseValue + variation)));
-};
+        // Random price generate karo between min and max
+        const randomValue = (Math.random() * (maxPrice - minPrice) + minPrice);
+        return parseFloat(randomValue.toFixed(4));
+    };
+
+    // ✅ Generate chart data point
+    const generateNewDataPoint = (currentPrice) => {
+        const min = 5;
+        const max = 40;
+        const baseValue = currentPrice * 8;
+        const variation = (Math.random() - 0.5) * 8;
+        return Math.round(Math.max(5, Math.min(45, baseValue + variation)));
+    };
 
 
-  // ✅ Fetch real price from API
-const fetchLivePrice = async () => {
-    try {
-        const response = await apiClient.get('/Token/token-live-price');
-        console.log("📡 Live Price Response:", response.data);
-        
-        if (response.data?.result === "true" && response.data?.data?.length > 0) {
-            const livePrice = parseFloat(response.data.data[0].tokenLivePrice);
-            if (!isNaN(livePrice) && livePrice > 0) {
-                // ✅ API se real price mil gayi
-                setBaseApiPrice(livePrice);
-                
-                // ✅ API price ke 80% se 100% ke beech random price generate karo
-                const randomPrice = generateRandomPriceFromApi(livePrice);
-                console.log(`📊 API Price: ${livePrice}, Random Price: ${randomPrice} (${((randomPrice/livePrice)*100).toFixed(0)}% of API)`);
-                
-                updatePrice(randomPrice);
-                return randomPrice;
+    // ✅ Fetch real price from API
+    const fetchLivePrice = async () => {
+        try {
+            const response = await apiClient.get('/Token/token-live-price');
+
+            if (response.data?.result === "true" && response.data?.data?.length > 0) {
+                const livePrice = parseFloat(response.data.data[0].tokenLivePrice);
+                if (!isNaN(livePrice) && livePrice > 0) {
+                    // ✅ API se real price mil gayi
+                    setBaseApiPrice(livePrice);
+
+                    // ✅ API price ke 80% se 100% ke beech random price generate karo
+                    const randomPrice = generateRandomPriceFromApi(livePrice);
+                    updatePrice(randomPrice);
+                    return randomPrice;
+                }
             }
+            // ✅ Agar API fail ho toh default 2.00 - 2.50 ke beech random
+            const fallbackPrice = generateRandomPriceFallback();
+            updatePrice(fallbackPrice);
+            return fallbackPrice;
+        } catch (error) {
+            console.error('Error fetching live price:', error);
+            // ✅ Error pe fallback random
+            const fallbackPrice = generateRandomPriceFallback();
+            updatePrice(fallbackPrice);
+            return fallbackPrice;
         }
-        // ✅ Agar API fail ho toh default 2.00 - 2.50 ke beech random
-        const fallbackPrice = generateRandomPriceFallback();
-        console.log("🔄 API failed, using fallback random:", fallbackPrice);
-        updatePrice(fallbackPrice);
-        return fallbackPrice;
-    } catch (error) {
-        console.error('❌ Error fetching live price:', error);
-        // ✅ Error pe fallback random
-        const fallbackPrice = generateRandomPriceFallback();
-        console.log("🔄 Using fallback random:", fallbackPrice);
-        updatePrice(fallbackPrice);
-        return fallbackPrice;
-    }
-};
+    };
 
-// ✅ Fallback random price (2.00 - 2.50)
-const generateRandomPriceFallback = () => {
-    const min = 2.00;
-    const max = 2.50;
-    const randomValue = (Math.random() * (max - min) + min);
-    return parseFloat(randomValue.toFixed(4));
-};
+    // ✅ Fallback random price (2.00 - 2.50)
+    const generateRandomPriceFallback = () => {
+        const min = 2.00;
+        const max = 2.50;
+        const randomValue = (Math.random() * (max - min) + min);
+        return parseFloat(randomValue.toFixed(4));
+    };
 
-// ✅ Update price and chart
-const updatePrice = (newPrice) => {
-    // Price change calculate
-    const change = ((newPrice - previousPrice) / previousPrice * 100);
-    setPriceChange(change);
-    setPreviousPrice(newPrice);
-    setPrice(newPrice);
-    
-    // Chart update
-    setChartData(prevData => {
-        const newData = [...prevData];
-        newData.push(generateNewDataPoint(newPrice));
-        if (newData.length > 20) {
-            newData.shift();
-        }
-        return newData;
-    });
-    
-    setLabels(prevLabels => {
-        const newLabels = [...prevLabels];
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit'
+    // ✅ Update price and chart
+    const updatePrice = (newPrice) => {
+        // Price change calculate
+        const change = ((newPrice - previousPrice) / previousPrice * 100);
+        setPriceChange(change);
+        setPreviousPrice(newPrice);
+        setPrice(newPrice);
+
+        // Chart update
+        setChartData(prevData => {
+            const newData = [...prevData];
+            newData.push(generateNewDataPoint(newPrice));
+            if (newData.length > 20) {
+                newData.shift();
+            }
+            return newData;
         });
-        newLabels.push(timeStr);
-        if (newLabels.length > 20) {
-            newLabels.shift();
-        }
-        return newLabels;
-    });
-};
 
-// ✅ Initialize chart with initial data
-useEffect(() => {
-    const initialData = [8, 18, 12, 28, 20, 34, 26];
-    const initialLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-    setChartData(initialData);
-    setLabels(initialLabels);
-    setIsInitialized(true);
-    
-    // ✅ First call - API se fetch
-    fetchLivePrice();
-}, []);
+        setLabels(prevLabels => {
+            const newLabels = [...prevLabels];
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            newLabels.push(timeStr);
+            if (newLabels.length > 20) {
+                newLabels.shift();
+            }
+            return newLabels;
+        });
+    };
 
-// ✅ Auto update every 5 seconds
-useEffect(() => {
-    if (!isInitialized) return;
-    
-    const interval = setInterval(() => {
+    // ✅ Initialize chart with initial data
+    useEffect(() => {
+        const initialData = [8, 18, 12, 28, 20, 34, 26];
+        const initialLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+        setChartData(initialData);
+        setLabels(initialLabels);
+        setIsInitialized(true);
+
+        // ✅ First call - API se fetch
         fetchLivePrice();
-    }, 5000);
-    
-    return () => clearInterval(interval);
-}, [price, previousPrice, isInitialized]);
+    }, []);
+
+
+
+    const handleDashboardStartBot = async () => {
+        if (apiBotStatus === 0) {
+            toast.warning('⚠️ Bot is already running!');
+            return;
+        }
+
+        const investAmount = parseFloat(userData?.Invest) || 0;
+        if (investAmount <= 0) {
+            toast.error(' Please invest first to start bot!');
+            return;
+        }
+
+        // ✅ RANDOM CURRENCY
+        const currencies = ['BTC', 'ETH', 'BNB', 'SOL', 'XRP'];
+        const randomCurrency = currencies[Math.floor(Math.random() * currencies.length)];
+        const defaultSlot = 24;
+
+        // ✅ DIRECT MAPPING - Bina getCryptoConfig ke
+        const binanceSymbols = {
+            'BTC': 'BTCUSDT',
+            'ETH': 'ETHUSDT',
+            'BNB': 'BNBUSDT',
+            'SOL': 'SOLUSDT',
+            'XRP': 'XRPUSDT'
+        };
+
+        const binanceSymbol = binanceSymbols[randomCurrency];
+
+        // ✅ FETCH PRICE
+        let currencyRate = 0;
+        try {
+            const response = await fetch(
+                `https://api.binance.com/api/v3/ticker/price?symbol=${binanceSymbol}`
+            );
+            if (response.ok) {
+                const data = await response.json();
+                currencyRate = parseFloat(data.price);
+            } else {
+                currencyRate = 50000;
+            }
+        } catch (error) {
+            currencyRate = 50000;
+        }
+
+        // ✅ PAYLOAD
+        const payload = {
+            regno: parseInt(regno),
+            betAmount: investAmount,
+            currency: randomCurrency.toLowerCase(),
+            currencyRate: parseFloat(currencyRate.toFixed(4)),
+            slot: defaultSlot
+        };
+
+        setIsBotStarting(true);
+        try {
+            const response = await apiClient.post('/Trading/BotTrading', payload);
+
+            if (response.data?.result === "true") {
+                toast.success(`Bot started successfully with ${randomCurrency}!`);
+                await refreshData();
+                await fetchBotStatus();
+                setApiBotStatus(0);
+            } else {
+                toast.error(response.data?.message || ' Failed to start bot');
+            }
+        } catch (error) {
+            console.error(' Error:', error);
+            if (error.response) {
+                toast.error(error.response.data?.message || ' Failed to start bot');
+            } else {
+                toast.error(' Network error. Please try again.');
+            }
+        } finally {
+            setIsBotStarting(false);
+        }
+    };
+
+    // ✅ Auto update every 5 seconds
+    useEffect(() => {
+        if (!isInitialized) return;
+
+        const interval = setInterval(() => {
+            fetchLivePrice();
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [price, previousPrice, isInitialized]);
 
     //  Token Payout - Complete Function with API Call
     const handleTokenPayoutSubmit = async () => {
@@ -277,14 +353,8 @@ useEffect(() => {
                 amount: amountNum,
                 payMode: "usdt"
             };
-
-            console.log("📤 Sending Token Payout Request:", payload);
-
             //  API CALL - POST /Token/TokenPayoutRequest
             const response = await apiClient.post('/Token/TokenPayoutRequest', payload);
-
-            console.log("📥 Token Payout Response:", response.data);
-
             //  Check response - result can be boolean or string
             if (response.data?.result === true || response.data?.result === "true") {
                 Swal.fire({
@@ -339,7 +409,6 @@ useEffect(() => {
             setTokenPayoutLoading(false);
         }
     };
-
     //  Open Token Payout Modal (Validation Only)
     const handleTokenPayout = () => {
         const amountNum = parseFloat(tokenPayoutAmount);
@@ -382,11 +451,11 @@ useEffect(() => {
         setShowTokenPayoutModal(true);
     };
 
-
+  // BOT start in Dashboard direct
     const fetchBotStatus = async () => {
         try {
             setLoading(true);
-            const regno = localStorage.getItem('Regno');
+            const regno = sessionStorage.getItem('Regno');
 
 
             const response = await apiClient.get(`/Trading/BotStatus?regno=${regno}`);
@@ -417,19 +486,6 @@ useEffect(() => {
     //  3. COUNTDOWN TIMER - Only when status = 0 (Running)
 
     useEffect(() => {
-        if (apiBotStatus !== 0) {
-            setCountdown("Loading....");
-            return;
-        }
-
-        //  Check if userData.status exists
-        if (!userData?.status) {
-            setCountdown("No expiry date");
-            return;
-        }
-
-
-        // Convert "2026-06-19 05:00:56" -> "2026-06-19T05:00:56+04:00"
         const targetTime = new Date(
             userData.status.replace(" ", "T") + "+04:00"
         ).getTime();
@@ -459,9 +515,7 @@ useEffect(() => {
         };
     }, [userData?.status, apiBotStatus]);
 
-
-
-
+    
     // Send OTP - SIRF API KA MESSAGE
     const handleSendOTP = async () => {
         try {
@@ -470,9 +524,6 @@ useEffect(() => {
 
             const url = `/Auth/genrate-otp?loginid=${loginId}&regno=${regno}`;
             const response = await apiClient.post(url);
-
-            console.log("📡 Send OTP Response:", response.data);
-
             // SIRF API KA MESSAGE DIKHAO
             if (response.data.result === "true") {
                 toast.success(response.data.message);
@@ -481,7 +532,6 @@ useEffect(() => {
                 toast.error(response.data.message || 'Failed to send OTP');
             }
         } catch (error) {
-            console.log(" Error:", error);
             toast.error('Network error. Please try again.');
         } finally {
             setLoading(false);
@@ -584,8 +634,6 @@ useEffect(() => {
                 amount: amountNum
             });
 
-            console.log('Self Payout Response:', response.data);
-
             if (response.data?.result === 'true') {
                 Swal.fire({
                     icon: 'success',
@@ -601,7 +649,7 @@ useEffect(() => {
             } else {
                 Swal.fire({
                     icon: 'error',
-                    title: '❌ Payout Failed!',
+                    title: 'Payout Failed!',
                     text: response.data?.message || 'Payout failed. Please try again.',
                     confirmButtonColor: '#d33',
                     confirmButtonText: 'Try Again',
@@ -646,7 +694,7 @@ useEffect(() => {
 
 
 
-    // ✅ Income Payout     
+    // ✅ Income Payout
     const handleWithdraw = async () => {
         const amountNum = parseFloat(withdrawAmount);
 
@@ -688,11 +736,7 @@ useEffect(() => {
                 payMode: "usdt"
             };
 
-            console.log("📤 Sending Withdraw Request:", payload);
-
             const response = await apiClient.post('/IncomePayout/WithdrawRequest', payload);
-
-            console.log("📥 Withdraw Response:", response.data);
 
             if (response.data?.result === "true") {
                 // ✅ SUCCESS - SweetAlert
@@ -873,12 +917,11 @@ useEffect(() => {
                 </div>
 
                 {/* whatsapp contact */}
-                <div className="whatsapp-float">
-                    {/*  Bubbling Rings */}
+                {/* <div className="whatsapp-float">
+           
                     <div className="bubble-ring ring-1"></div>
                     <div className="bubble-ring ring-2"></div>
                     <div className="bubble-ring ring-3"></div>
-
                     <a
                         href="https://wa.me/447400402001"
                         target="_blank"
@@ -888,7 +931,7 @@ useEffect(() => {
                     >
                         <FaWhatsapp />
                     </a>
-                </div>
+                </div> */}
                 <div className="row">
                     {/* Welcome Card */}
                     <div className="col-12 col-lg-8 d-flex align-items-stretch">
@@ -972,39 +1015,60 @@ useEffect(() => {
                                             <div className="row g-2 mt-1">
                                                 <div className="col-6">
                                                     <div className="countdown-box text-center p-1">
-                                                        <div className="small fw-semibold ">
-                                                            BOT EXPIRE
-                                                        </div>
-                                                        <div className="left-timer">
-                                                            {/*  Status = 0 → Show Timer */}
-                                                            {apiBotStatus === 0 ? countdown : " "}
+                                                        <div className="small fw-semibold">
+                                                            {apiBotStatus === 0 && ("BOT EXPIRE")}
+                                                            {/* BOT EXPIRE */}
                                                         </div>
 
-                                                        {/*  ONLY SHOW START BUTTON WHEN STATUS = 1 (Stopped) */}
-                                                        {apiBotStatus === 1 && (
-                                                            <Link to="/dashboard/BotTreading"
+                                                        {/* ✅ Loading State - Same Size Maintain */}
+                                                        {loading ? (
+                                                            <div className="left-timer">
+                                                                <span
+                                                                    className="spinner-border"
+                                                                    role="status"
+                                                                    style={{
+                                                                        width: '38px',
+                                                                        height: '38px',
+                                                                        borderWidth: '4px'
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        ) : apiBotStatus === 0 ? (
+                                                            /* ✅ Timer */
+                                                            <div className="left-timer fw-bold">
+                                                                {countdown || "00H : 00M : 00S"}
+                                                            </div>
+                                                        ) : (
+                                                            /* ✅ Start Button */
+                                                            <button
                                                                 className="btn btn-sm btn-primary"
-                                                            // onClick={handleStartBot}
-                                                            // disabled={loading}
+                                                                onClick={handleDashboardStartBot}  // ✅ Sahi hai
+                                                                disabled={isBotStarting}
                                                             >
-                                                                Start Bot
-                                                            </Link>
+                                                                {isBotStarting ? 'Starting...' : 'Start Bot'}
+                                                            </button>
                                                         )}
-                                                        {/*  Status = 0 → No Button, Only Timer */}
-                                                        {/* {apiBotStatus === 0 && (
-                                                        <div className="text-success small mt-1">
-                                                            <span className="badge bg-success">● Running</span>
-                                                        </div>
-                                                    )} */}
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                                {/* <div className="col-6">
                                                     <div className="countdown-box text-center p-1">
                                                         <div className="small fw-semibold ">
                                                             RANK
                                                         </div>
                                                         <div className="left-timer">
                                                             {userData?.Ranks || "N/A"}
+                                                        </div>
+                                                    </div>
+                                                </div> */}
+
+
+                                                 <div className="col-6">
+                                                    <div className="countdown-box text-center p-1">
+                                                        <div className="small fw-semibold ">
+                                                            BOT-1
+                                                        </div>
+                                                        <div className="left-timer">
+                                                            {userData?.currentEarnings || "N/A"}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2076,7 +2140,7 @@ useEffect(() => {
                                                 }}
                                             />
                                             <h5 className='amount-report mb-0'>
-                                                <div className='' style={{fontWeight: "800"}} onClick={() => goToHistory("Fund Withdrawal")}>
+                                                <div className='' style={{ fontWeight: "800" }} onClick={() => goToHistory("Fund Withdrawal")}>
                                                     {userData?.TotalEarnTokenInWallet?.toLocaleString() || '0.00'}
                                                 </div>
                                             </h5>
@@ -2185,7 +2249,7 @@ useEffect(() => {
 
                                                 {!otpSent ? (
                                                     <button
-                                                        className="btn btn-primary py-2 px-4 text-nowrap"
+                                                        className="btn-primary py-2 px-4 text-nowrap"
                                                         onClick={handleSendOTP}
                                                         disabled={loading}
                                                     >
@@ -2333,7 +2397,7 @@ useEffect(() => {
 
                                             {!otpSent ? (
                                                 <button
-                                                    className="btn btn-primary py-2 px-4 text-nowrap"
+                                                    className="btn-primary py-2 px-4 text-nowrap"
                                                     onClick={handleSendOTP}
                                                     disabled={loading}
                                                 >
@@ -2555,7 +2619,7 @@ useEffect(() => {
 
                                             {!otpSent ? (
                                                 <button
-                                                    className="btn btn-primary py-2 px-4 text-nowrap"
+                                                    className=" btn-primary py-2 px-4 text-nowrap"
                                                     onClick={handleSendOTP}
                                                     disabled={loading}
                                                 >

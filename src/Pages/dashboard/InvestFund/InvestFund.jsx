@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
-import { Wallet, History, ShieldCheck, TrendingUp, ArrowRight, Zap, Headphones, BarChart3 } from 'lucide-react';
+import { Wallet, History, ShieldCheck,ArrowRight, Zap, Headphones, BarChart3 } from 'lucide-react';
 import apiClient from '../../../api/apiClient';
 import { useUser } from '../../../context/UserContext';
 import Toast from '../../../Componenets/ui/Toast';
@@ -14,7 +14,7 @@ const InvestFund = () => {
   const [loadingBot1, setLoadingBot1] = useState(false);
   const [loadingBot2, setLoadingBot2] = useState(false);
 
-  const regno = localStorage.getItem("Regno");
+  const regno = sessionStorage.getItem("Regno");
 
   const investInBot = async (botId, amount) => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -68,13 +68,14 @@ const InvestFund = () => {
           </div>
         </div>
         <div className="header-right">
-          <div className="deposit-card">
-            <Wallet size={18} className="wallet-icon" />
+          <div className="btn-primary gap-1" >
+            <Wallet size={20} className="wallet-icon me-1" style={{color: "#fff"}}/>
             <div className="deposit-info">
               <span className="value">${userData?.Depositfund?.toLocaleString() || 0}</span>
             </div>
           </div>
-          <Link to="/dashboard/InvestmentHistory" className="history-btn">
+
+          <Link to="/dashboard/InvestmentHistory" className=" btn-primary gap-1">
             <History size={18} />
             <span>History</span>
           </Link>

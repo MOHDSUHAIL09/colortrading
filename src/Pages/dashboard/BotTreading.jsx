@@ -14,7 +14,12 @@ const BotTrading = () => {
 
     // -------------------- STATE ENGINE --------------------
     const [botStatus, setBotStatus] = useState({ isRunning: false, progress: 0 });
-    const [selectedCurrency, setSelectedCurrency] = useState('BTC');
+    // 🔥 DEFAULT RANDOM CURRENCY
+    const getRandomCurrencyInit = () => {
+        const currencies = ['BTC', 'ETH', 'BNB', 'SOL', 'XRP'];
+        return currencies[Math.floor(Math.random() * currencies.length)];
+    };
+    const [selectedCurrency, setSelectedCurrency] = useState(getRandomCurrencyInit());
     const [isRoundActive, setIsRoundActive] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState(24);
     const { userData } = useUser();
@@ -23,7 +28,7 @@ const BotTrading = () => {
     const [countdown, setCountdown] = useState(" ");
     const [apiBotStatus, setApiBotStatus] = useState(null);
     const [loading, setLoading] = useState(true);
-    const regno = localStorage.getItem('Regno') || 1;
+    const regno = sessionStorage.getItem('Regno') || 1;
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null);
     const { refreshData } = useUser();
@@ -94,19 +99,6 @@ const BotTrading = () => {
                         "mainSeriesProperties.candleStyle.wickUpColor": "#26a69a",
                         "mainSeriesProperties.candleStyle.wickDownColor": "#ef5350"
                     }
-                    // "hide_legend": true,
-                    // "hide_tabs": true,
-                    // "hide_resolution": true,
-                    // "hide_fullscreen": false,
-                    // "hide_download": true,
-                    // "hide_spread": true,
-                    // "hide_share": true,
-                    // "hide_draw": true,
-                    // "hide_watchlist": true,
-                    // "hide_compare": true,
-                    // "hide_copyright": true,
-                    // "hide_analysis": true,
-                    // "hide_favorites": true
                 });
 
                 // Update last price when chart loads
@@ -123,12 +115,19 @@ const BotTrading = () => {
         };
     }, [selectedCurrency]);
 
-    // ── 🔴 FETCH LATEST PRICE (FOR BOT START) ──
+    // ── 🔴 FETCH LATEST PRICE ──
     const fetchLatestPrice = async () => {
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+
             const response = await fetch(
-                `https://api.binance.com/api/v3/ticker/price?symbol=${currentConfig.binanceSymbol}`
+                `https://api.binance.com/api/v3/ticker/price?symbol=${currentConfig.binanceSymbol}`,
+                { signal: controller.signal }
             );
+
+            clearTimeout(timeoutId);
+
             if (response.ok) {
                 const data = await response.json();
                 const price = parseFloat(data.price);
@@ -139,9 +138,15 @@ const BotTrading = () => {
                     return newData;
                 });
                 return price;
+            } else {
+                console.warn('Binance API returned:', response.status);
             }
         } catch (error) {
-            console.error('Price fetch error:', error);
+            if (error.name === 'AbortError') {
+                console.warn('⏱️ Price fetch timeout');
+            } else {
+                console.error('Price fetch error:', error);
+            }
         }
         return null;
     };
@@ -150,7 +155,7 @@ const BotTrading = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             fetchLatestPrice();
-        }, 5000); // Update every 5 seconds
+        }, 5000);
 
         return () => clearInterval(interval);
     }, [selectedCurrency]);
@@ -228,15 +233,40 @@ const BotTrading = () => {
             return;
         }
 
+        // ── 🔴 USER KI SELECTED CURRENCY USE KARENGE (jo default random hai) ──
+        const finalCurrency = selectedCurrency;
+        const config = getCryptoConfig(finalCurrency);
+        
         const betAmount = parseFloat(userData?.Invest) || 100;
-        const liveRateFromChart = chartData.length > 0 ? chartData[chartData.length - 1] : lastPrice || 0;
+        
+        // ── 🔴 FETCH PRICE FOR SELECTED CURRENCY ──
+        let dynamicCurrencyRate = 0;
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            
+            const response = await fetch(
+                `https://api.binance.com/api/v3/ticker/price?symbol=${config.binanceSymbol}`,
+                { signal: controller.signal }
+            );
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                const data = await response.json();
+                dynamicCurrencyRate = parseFloat(data.price);
+            } else {
+                dynamicCurrencyRate = lastPrice || 0;
+            }
+        } catch (error) {
+            dynamicCurrencyRate = lastPrice || 0;
+        }
 
-        const dynamicCurrencyRate = parseFloat(liveRateFromChart.toFixed(4));
         const payload = {
             regno: parseInt(regno),
             betAmount: betAmount,
-            currency: selectedCurrency.toLowerCase(),
-            currencyRate: dynamicCurrencyRate,
+            currency: finalCurrency.toLowerCase(),
+            currencyRate: parseFloat(dynamicCurrencyRate.toFixed(4)),
             slot: selectedSlot
         };
 
@@ -244,7 +274,7 @@ const BotTrading = () => {
         try {
             const response = await apiClient.post('/Trading/BotTrading', payload);
             if (response.data?.result === "true") {
-                toast.success(`✅ Bot started successfully for ${selectedSlot} hours!`);
+                toast.success(`🤖 Bot started successfully for ${selectedSlot} hours with ${finalCurrency}!`);
                 await refreshData();
                 setBotStatus({ isRunning: true, progress: 0 });
                 setApiBotStatus(0);
@@ -253,10 +283,10 @@ const BotTrading = () => {
                 setRoundStartPrice(chartData[chartData.length - 1]);
                 fetchBotStatus();
             } else {
-                toast.error(response.data?.message || '❌ Failed to start bot');
+                toast.error(response.data?.message || ' Failed to start bot');
             }
         } catch (error) {
-            toast.error('❌ Failed to start bot');
+            toast.error(' Failed to start bot');
         } finally {
             setIsSubmitting(false);
         }
@@ -264,7 +294,7 @@ const BotTrading = () => {
 
     return (
         <div className="row">
-            {/* ── 🔴 TRADINGVIEW CHART (NO API NEEDED) ── */}
+            {/* ── 🔴 TRADINGVIEW CHART ── */}
             <div className="col-12">
                 <div className="">
                     <div className="card-body p-0">
@@ -276,10 +306,8 @@ const BotTrading = () => {
                                 background: "#131722"
                             }}
                         >
-
-
                         </div>
-                        {/* ── 🔴 TOP SECTION - EK LINE MEIN ── */}
+                        {/* ── 🔴 TOP SECTION ── */}
                         <div className="col-12">
                             <div className="card shadow-sm border-0" style={{ borderRadius: '16px' }}>
                                 <div className="card-body" style={{
@@ -329,7 +357,7 @@ const BotTrading = () => {
                                                             fontWeight: '600',
                                                             cursor: isSubmitting ? 'not-allowed' : 'pointer',
                                                             minWidth: '130px',
-                                                            boxShadow: isSubmitting ? 'none' : '0 4px 15px rgba(16, 185, 129, 0.3)',
+                                                            boxShadow: isSubmitting ? 'none' : '0 4px 15px rgb(28, 48, 135)',
                                                             borderRadius: '10px'
                                                         }}
                                                         onClick={handleStartBot}
@@ -342,7 +370,7 @@ const BotTrading = () => {
                                         )}
                                         {/* Center - Crypto Selector + Slot */}
                                         <div className="d-flex align-items-center gap-2 flex-wrap">
-                                            {/* ── 🔴 CRYPTO SELECTOR ── */}
+                                            {/* ── 🔴 CRYPTO SELECTOR - NO "Select Crypto" OPTION ── */}
                                             <select
                                                 className="form-select text-uppercase fw-bold"
                                                 value={selectedCurrency}
@@ -425,8 +453,6 @@ const BotTrading = () => {
                                                 )}
                                             </div>
                                         </div>
-
-
                                     </div>
                                 </div>
                             </div>
@@ -434,8 +460,6 @@ const BotTrading = () => {
                     </div>
                 </div>
             </div>
-
-
         </div>
     );
 };

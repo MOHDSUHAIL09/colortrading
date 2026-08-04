@@ -22,7 +22,7 @@ const IncomeReport = () => {
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    const regno = localStorage.getItem('Regno');
+    const regno = sessionStorage.getItem('Regno');
 
     // Get type from URL
     useEffect(() => {

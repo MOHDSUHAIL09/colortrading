@@ -4,6 +4,7 @@ import "./InvestToken.css";
 import { Link } from "react-router-dom";
 import apiClient from "../../../api/apiClient";
 import { useUser } from "../../../context/UserContext";
+import { Wallet } from "lucide-react";
 
 const ApexMiningProgram = () => {
   const [tier1Amount, setTier1Amount] = useState("");
@@ -29,8 +30,6 @@ const ApexMiningProgram = () => {
     try {
       setLoading(true);
 
-      console.log("📤 Sending Request:", { regno, miningAmt, uregno, slotNum });
-
       // ✅ API Call - Using base URL from apiClient
       const response = await apiClient.post(`/Token/TokenMiningAsync`, null, {
         params: {
@@ -41,29 +40,27 @@ const ApexMiningProgram = () => {
         }
       });
 
-      console.log("📡 API Response:", response.data);
-
       // ✅ Check response - result can be boolean or string
       if (response.data?.result === true || response.data?.result === "true") {
         // ✅ SUCCESS - API ka exact message dikhao
         showToast(`✅ ${response.data?.message || 'Investment Successful!'}`, "success");
-        
+
         // ✅ Refresh data - balance update
         await refreshData();
-        
+
         // ✅ Amount clear karo
         return response.data;
       } else {
         // ✅ ERROR - API ka exact message dikhao
-        showToast(`❌ ${response.data?.message || 'Transaction failed'}`, "error");
+        showToast(` ${response.data?.message || 'Transaction failed'}`, "error");
         return null;
       }
     } catch (error) {
-      console.error("❌ API Error:", error);
-      
+      console.error(" API Error:", error);
+
       // ✅ ERROR - API ka exact message dikhao
       let errorMsg = error.response?.data?.message || error.message || "Something went wrong";
-      showToast(`❌ ${errorMsg}`, "error");
+      showToast(` ${errorMsg}`, "error");
       return null;
     } finally {
       setLoading(false);
@@ -72,7 +69,7 @@ const ApexMiningProgram = () => {
 
   // ✅ Get Slot Number based on Tier
   const getSlotNumber = (tier) => {
-    switch(tier) {
+    switch (tier) {
       case "Tier 1": return 10;
       case "Tier 2": return 8;
       case "Tier 3": return 6;
@@ -81,7 +78,7 @@ const ApexMiningProgram = () => {
   };
 
   const getLoadingState = (tier) => {
-    switch(tier) {
+    switch (tier) {
       case "Tier 1": return loadingTier1;
       case "Tier 2": return loadingTier2;
       case "Tier 3": return loadingTier3;
@@ -90,26 +87,26 @@ const ApexMiningProgram = () => {
   };
 
   const getSetLoading = (tier) => {
-    switch(tier) {
+    switch (tier) {
       case "Tier 1": return setLoadingTier1;
       case "Tier 2": return setLoadingTier2;
       case "Tier 3": return setLoadingTier3;
-      default: return () => {};
+      default: return () => { };
     }
   };
 
   const getAmountSetter = (tier) => {
-    switch(tier) {
+    switch (tier) {
       case "Tier 1": return setTier1Amount;
       case "Tier 2": return setTier2Amount;
       case "Tier 3": return setTier3Amount;
-      default: return () => {};
+      default: return () => { };
     }
   };
 
   const handleInvest = async (tier, amount) => {
     const loading = getLoadingState(tier);
-    
+
     if (loading) return;
 
     if (!amount || amount <= 0) {
@@ -119,41 +116,41 @@ const ApexMiningProgram = () => {
 
     const amountNum = parseFloat(amount);
     const slotNum = getSlotNumber(tier);
-    const regno = localStorage.getItem("Regno") || 1;
+    const regno = sessionStorage.getItem("Regno") || 1;
     const uregno = 0;
-    
+
     let isValid = false;
     let minAmount = 0;
     let maxAmount = 0;
-    
-    switch(tier) {
-      case "Tier 1": 
+
+    switch (tier) {
+      case "Tier 1":
         isValid = amountNum >= 100 && amountNum <= 5000;
         minAmount = 100;
         maxAmount = 5000;
         break;
-      case "Tier 2": 
+      case "Tier 2":
         isValid = amountNum >= 5001 && amountNum <= 15000;
         minAmount = 5001;
         maxAmount = 15000;
         break;
-      case "Tier 3": 
+      case "Tier 3":
         isValid = amountNum >= 15001 && amountNum <= 25000;
         minAmount = 15001;
         maxAmount = 25000;
         break;
-      default: 
+      default:
         isValid = false;
     }
 
     if (!isValid) {
-      showToast(`❌ Amount must be between $${minAmount} and $${maxAmount} for ${tier}`, "error");
+      showToast(` Amount must be between $${minAmount} and $${maxAmount} for ${tier}`, "error");
       return;
     }
 
     const setLoading = getSetLoading(tier);
     const setAmount = getAmountSetter(tier);
-    
+
     const result = await callInvestAPI(regno, amountNum, uregno, slotNum, setLoading);
 
     if (result && (result.result === true || result.result === "true")) {
@@ -162,8 +159,8 @@ const ApexMiningProgram = () => {
   };
 
   return (
-    <div className="Table-container apex-mining-app"> 
-      
+    <div className="apex-mining-app">
+
       {/* ✅ Toast Notification */}
       {toast.show && (
         <div className={`apex-toast ${toast.type}`}>
@@ -171,59 +168,72 @@ const ApexMiningProgram = () => {
         </div>
       )}
 
-      <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 apex-header">
-        <div>
-          <h1 className="apex-title mb-1">APEX MINING PROGRAM</h1> 
-        </div>
+
+    <div className=" d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 apex-header p-4 rounded-4"
+    style={{
+      background: '#ffff',
+      boxShadow: '0 2px 0px rgba(0, 0, 0, 0.1)',   
+      overflow: 'hidden',
+      zIndex: 1
+}}>
+  {/* Animated Background Glow */}
+  <div style={{
+    position: 'absolute',
+    top: '-50%',
+    right: '-20%',
+    width: '300px',
+    height: '300px',
+    background: 'radial-gradient(circle, rgba(102,126,234,0.1) 0%, transparent 70%)',
+    borderRadius: '50%',
+    animation: 'pulseGlow 4s ease-in-out infinite'
+  }}></div>
+  
+  <div style={{ position: 'relative', zIndex: 1 }}>
+    <h1 className="mb-0" style={{
+      color: '#fff',
+      fontWeight: '900',
+      fontSize: '2rem',
+      letterSpacing: '3px',
+      background: 'linear-gradient(135deg, #667eea, #764ba2, #f093fb)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      textShadow: 'none'
+    }}>
+      APEX MINING
+    </h1>
+  
+  </div>
+  
+  <div className="d-flex align-items-center gap-3 flex-wrap" style={{ position: 'relative', zIndex: 1 }}>
+    {/* Premium Wallet Card */}
+    <div className="btn-primary ">
+        <Wallet size={18} style={{ color: '#fff' }} />
+      <div>
         
-        {/* ✅ Mobile me inline, desktop me alag */}
-        <div className="d-flex align-items-center gap-2">
-          {/* Deposit Button */}
-          <div 
-            className="d-inline-flex align-items-center"
-            style={{
-              gap: '6px',
-              background: '#0d6efd',
-              color: '#fff',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '13px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <span>Deposit Fund</span>
-            <span style={{
-              background: '#fff',
-              color: "green",
-              padding: '1px 8px',
-              borderRadius: '10px',
-              fontSize: '12px',
-              fontWeight: '700',
-            }}>
-              ${userData?.Depositfund || 0}
-            </span>
-          </div>
-
-          {/* History Button */}
-          <Link to="/dashboard/InvestTokenHistory">
-            <button 
-              className="btn btn-primary"
-              style={{
-                padding: '6px 14px',
-                fontSize: '13px',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              History
-            </button>
-          </Link>
-        </div>
+        <span style={{ 
+          color: '#fff',
+          fontWeight: '600',
+          fontSize: '15px',
+          marginLeft: "5px"
+        }}>
+          ${userData?.Depositfund?.toLocaleString() || 0}
+        </span>
       </div>
+    </div>
+    
+    {/* Premium History Button */}
+    <Link to="/dashboard/InvestTokenHistory">
+      <button className="btn-primary">
+        History
+      </button>
+    </Link>
+  </div>
+</div>
 
-      <div className="apex-tiers-row">        
+
+
+
+      <div className="apex-tiers-row">
         {/* Tier 1 */}
         <div className="apex-tier-card">
           <h2>TIER 1</h2>
@@ -238,11 +248,11 @@ const ApexMiningProgram = () => {
               onChange={(e) => setTier1Amount(e.target.value)}
               disabled={loadingTier1}
             />
-            <button 
-              onClick={() => handleInvest("Tier 1", tier1Amount)} 
+            <button className="btn-primary"
+              onClick={() => handleInvest("Tier 1", tier1Amount)}
               disabled={loadingTier1}
             >
-              {loadingTier1 ? '⏳ Processing...' : 'Invest'}
+              {loadingTier1 ? 'Processing...' : 'Invest'}
             </button>
           </div>
         </div>
@@ -261,11 +271,11 @@ const ApexMiningProgram = () => {
               onChange={(e) => setTier2Amount(e.target.value)}
               disabled={loadingTier2}
             />
-            <button 
-              onClick={() => handleInvest("Tier 2", tier2Amount)} 
+            <button className="btn-primary"
+              onClick={() => handleInvest("Tier 2", tier2Amount)}
               disabled={loadingTier2}
             >
-              {loadingTier2 ? '⏳ Processing...' : 'Invest'}
+              {loadingTier2 ? ' Processing...' : 'Invest'}
             </button>
           </div>
         </div>
@@ -284,11 +294,11 @@ const ApexMiningProgram = () => {
               onChange={(e) => setTier3Amount(e.target.value)}
               disabled={loadingTier3}
             />
-            <button 
-              onClick={() => handleInvest("Tier 3", tier3Amount)} 
+            <button className="btn-primary"
+              onClick={() => handleInvest("Tier 3", tier3Amount)}
               disabled={loadingTier3}
             >
-              {loadingTier3 ? '⏳ Processing...' : 'Invest'}
+              {loadingTier3 ? ' Processing...' : 'Invest'}
             </button>
           </div>
         </div>

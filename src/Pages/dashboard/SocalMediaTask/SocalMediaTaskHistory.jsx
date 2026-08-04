@@ -16,8 +16,8 @@ const SocialTaskReport = () => {
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [transtype, setTranstype] = useState('All');
 
-    // Get regno from localStorage
-    const regno = localStorage.getItem('Regno');
+    // Get regno from sessionStorage
+    const regno = sessionStorage.getItem('Regno');
 
     // Format Date
     const formatDate = (dateString) => {

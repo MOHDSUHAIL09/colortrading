@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import CustomTable from '../../Componenets/ui/customtable/CustomTable';
 import Pagination from '../../Componenets/ui/pagination/Pagination';
 import { ToastContainer, toast } from 'react-toastify';
@@ -15,8 +15,8 @@ const DownlineTeam = () => {
   const [levelOptions] = useState([...Array(10).keys()].map(i => i + 1));
   const [pageSize] = useState(10); 
 
-  // Get regno from localStorage
-  const regno = localStorage.getItem('Regno');
+  // Get regno from sessionStorage
+  const regno = sessionStorage.getItem('Regno');
 
   // Table Columns
   const columns = [
@@ -154,7 +154,7 @@ const DownlineTeam = () => {
               {/* Summary Cards */}
               <div className="col-md-9">
                 <div className="d-flex gap-3 justify-content-end flex-wrap">
-                  <div className="bg-primary-subtle rounded-3 p-3 text-center" style={{ minWidth: "130px" }}>
+                  <div className="bg-primary-subtle rounded-3 p-3 text-center0" style={{ minWidth: "130px" }}>
                     <span className="text-muted" style={{ fontSize: "12px" }}>Total Members</span>
                     <h5 className="fw-bold mb-0 text-primary">{recordCount}</h5>
                   </div>

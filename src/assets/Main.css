@@ -225,7 +225,7 @@
   align-items: center;
   justify-content: center;
   padding: 10px 24px;
-  background: #647ceb;
+  background: #2f4ac5 !important;
   color: #fff;
   text-decoration: none;
   border: none;
@@ -237,7 +237,7 @@
 }
 
 .btn-primary:hover {
-  background: #4f68e0;
+  background: #364bb1;
   color: #fff;
   transform: translateY(-2px);
 }
@@ -10627,45 +10627,98 @@ ul {
 
 
   
-/* deposit fund */ 
+/* ============================================
+   DEPOSIT FUND - FULLY RESPONSIVE
+   ============================================ */
+
 .unique-df-main-wrapper {
-    padding: 20px;
-    background-color: #f8fafc;
+    /* padding: 10px; */
 }
 
 .unique-df-card-container {
     background: white;
-    width: 100%;
-    max-width: 850px;
+    max-width: 800px;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0,0,0,0.06);
 }
 
-/* Header */
+/* ===== HEADER ===== */
 .unique-df-top-header {
-    /* background: linear-gradient(90deg, #00572775 0%, #02b34694 100%); */
     padding: 22px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: rgb(46, 46, 46);
     box-shadow: 0 1px 5px rgba(0, 0, 0, 0.13);
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-.unique-df-header-left { display: flex; align-items: center; gap: 15px; }
-.unique-df-wallet-bg { background: #657ad8; padding: 10px; border-radius: 10px; }
-.unique-df-header-texts h2 { margin: 0; font-size: 22px; font-weight: 600; }
-.unique-df-header-texts p { margin: 4px 0 0 0; font-size: 13px; opacity: 0.9; }
+.unique-df-header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    min-width: 200px;
+}
 
+.unique-df-wallet-bg {
+    background: #657ad8;
+    padding: 10px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
 
-/* Body */
-.unique-df-content-body { padding: 40px 20px; display: flex; flex-direction: column; align-items: center;
-position: relative; }
+.unique-df-header-texts h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.unique-df-header-texts p {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.unique-df-history-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* ===== BODY ===== */
+.unique-df-content-body {
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* QR Section */
+.unique-df-qr-section {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
 
 .unique-df-qr-frame {
-    background: rgb(255, 255, 255); padding: 15px; border: 1px solid #e5e7eb;
-    border-radius: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+    background: rgb(255, 255, 255);
+    padding: 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.unique-df-qr-frame svg {
+    max-width: 100%;
+    height: auto;
 }
 
 .unique-df-scan-pay-badge {
@@ -10681,65 +10734,403 @@ position: relative; }
     padding: 8px 25px;
     border-radius: 10px;
     border: 1px solid #bfdbfe;
-    margin-top: -20px;
+    margin-top: 192px;
+    white-space: nowrap;
+    font-size: 13px;
+
 }
 
-/* Address Pill */
+/* ===== ADDRESS INFO CARD ===== */
 .unique-df-address-info-card {
-    width: 100%; max-width: 650px; background: #f0f7ff;
-    border: 1px solid #dbeafe; border-radius: 12px; padding: 20px; margin-top: 30px;
+    width: 100%;
+    max-width: 650px;
+    background: #f0f7ff;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 30px;
 }
 
-.unique-df-info-banner {
-    display: flex; align-items: center; justify-content: center;
-    gap: 10px; color: #2563eb; font-size: 14px; margin-bottom: 15px;
-}
-
+/* Address Pill - Responsive */
 .unique-df-address-input-pill {
-    background: white; border: 1px solid #e2e8f0; border-radius: 10px;
-    display: flex; align-items: center; padding: 12px 18px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
-.unique-df-label { font-weight: 700; color: #334155; font-size: 14px; white-space: nowrap; }
-.unique-df-divider { width: 1px; height: 25px; background: #e2e8f0; margin: 0 18px; }
-.unique-df-address-text { font-family: 'Courier New', monospace; font-weight: 700; color: #10b981; font-size: 15px; flex-grow: 1; }
-.unique-df-copy-icon-btn { background: #f1f5f9; border: none; padding: 8px; border-radius: 6px; cursor: pointer; }
-
-/* Action Buttons */
-.unique-df-action-row { display: flex; gap: 15px; margin: 20px 0; justify-content: center; }
-.unique-df-btn-share, .unique-df-btn-copy {
-    display: flex; align-items: center; gap: 10px; padding: 10px 30px;
-    border-radius: 8px; border: none; color: white; font-weight: 600; cursor: pointer;
+.unique-df-label {
+    font-weight: 700;
+    color: #334155;
+    font-size: 14px;
+    white-space: nowrap;
 }
-.unique-df-btn-share { background: #22c55e; }
-.unique-df-btn-copy { background: #3b82f6; }
 
-/* Confirm Deposit Button */
-.unique-df-confirm-container { width: 100%; display: flex; justify-content: center; margin-top: 10px; }
+.unique-df-address-text {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: #10b981;
+    font-size: 15px;
+    flex: 1;
+    min-width: 80px;
+    word-break: break-all;
+}
+
+.unique-df-address-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.unique-df-copy-icon-btn {
+    background: #f1f5f9;
+    border: none;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.unique-df-copy-icon-btn:hover {
+    background: #e2e8f0;
+    transform: scale(1.05);
+}
+
+.unique-df-copy-icon-btn:active {
+    transform: scale(0.95);
+}
+
+/* Full Address - Visible on Mobile */
+.unique-df-full-address {
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.unique-df-full-address-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.unique-df-full-address-text {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: #1e293b;
+    word-break: break-all;
+    line-height: 1.4;
+}
+
+/* ===== CONFIRM BUTTON ===== */
+.unique-df-confirm-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
 .unique-df-confirm-btn {
     width: 100%;
     gap: 10px;
+    padding: 12px 20px;
+    font-size: 15px;
 }
-  
-/* Bottom Note */
+
+/* ===== BOTTOM NOTE ===== */
 .unique-df-bottom-note {
-    background: #fef2f2; border: 1px solid #fee2e2; color: #ef4444;
-    padding: 14px 25px; border-radius: 10px; display: flex; align-items: center;
-    gap: 12px; width: 100%; margin-top: 25px;
+    background: #fef2f2;
+    border: 1px solid #fee2e2;
+    color: #ef4444;
+    padding: 14px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    max-width: 650px;
+    margin-top: 25px;
 }
-.unique-df-bottom-note p { margin: 0; font-size: 13.5px; font-weight: 500; }
 
-/* Spinners */
-.unique-df-spinner, .df-mini-spinner {
-    border: 3px solid rgba(0,0,0,0.1); border-top: 3px solid #3b82f6;
-    border-radius: 50%; width: 24px; height: 24px; animation: df-spin 0.8s linear infinite;
+.unique-df-bottom-note p {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 500;
+    line-height: 1.4;
 }
-.df-mini-spinner { border-top-color: white; }
-@keyframes df-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* Mobile */
-@media (max-width: 600px) {
-    .unique-df-top-header { flex-direction: column; text-align: center; gap: 20px; }
-    .unique-df-action-row { flex-direction: column; }
-    .unique-df-btn-share, .unique-df-btn-copy { width: 100%; }
+/* ===== SPINNERS ===== */
+.unique-df-spinner,
+.df-mini-spinner {
+    border: 3px solid rgba(0,0,0,0.1);
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: df-spin 0.8s linear infinite;
 }
+
+.df-mini-spinner {
+    border-top-color: white;
+    width: 20px;
+    height: 20px;
+}
+
+@keyframes df-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== ERROR ===== */
+.unique-df-error-msg {
+    padding: 20px;
+    color: #ef4444;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+
+/* ============================================
+   DEPOSIT FUND HEADER - FULL RESPONSIVE
+   ============================================ */
+
+.unique-df-top-header {
+    padding: 22px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: rgb(46, 46, 46);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.13);
+    gap: 20px;
+    flex-wrap: wrap;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Left Section */
+.unique-df-header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Wallet Icon Background */
+.unique-df-wallet-bg {
+    background: #657ad8;
+    padding: 10px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Header Text */
+.unique-df-header-texts {
+    flex: 1;
+    min-width: 0;
+}
+
+.unique-df-header-texts h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    color: #1a2332;
+    line-height: 1.2;
+}
+
+.unique-df-header-texts p {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    opacity: 0.85;
+    color: #4a5568;
+    line-height: 1.4;
+}
+
+/* History Button */
+.unique-df-history-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #657ad8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.unique-df-history-btn:hover {
+    background: #4f68e0;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(101, 122, 216, 0.3);
+}
+
+
+/* Mobile Landscape & Tablets */
+@media (max-width: 768px) {
+    .unique-df-main-wrapper {
+        padding: 10px;
+    }
+    
+    /* ✅ HEADER - ROW MEIN HI RAHEGA, COLUMN NAHI HOGA */
+    .unique-df-top-header {
+        flex-direction: row !important; /* Force row */
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        gap: 10px;
+    }
+    
+    /* ✅ LEFT SECTION - ROW MEIN HI RAHEGA */
+    .unique-df-header-left {
+        flex-direction: row !important; /* Force row */
+        align-items: center;
+        text-align: left;
+        gap: 10px;
+        flex: 1;
+        min-width: 150px;
+    }
+    
+    .unique-df-wallet-bg {
+        padding: 8px;
+        border-radius: 8px;
+    }
+    
+    .unique-df-wallet-bg svg {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .unique-df-header-texts h2 {
+        font-size: 16px;
+        margin: 0;
+    }
+    
+    .unique-df-header-texts p {
+        font-size: 11px;
+        margin: 2px 0 0 0;
+        display: none; /* Hide on mobile to save space */
+    }
+    
+    /* ✅ HISTORY BUTTON - ROW MEIN HI RAHEGA */
+    .unique-df-history-btn {
+        flex-shrink: 0;
+        width: auto !important; /* Auto width, not 100% */
+        padding: 6px 12px;
+        font-size: 12px;
+        justify-content: center;
+        gap: 4px;
+    }
+    
+    .unique-df-history-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .unique-df-history-btn span {
+        font-size: 12px;
+    }
+    
+    /* Other Styles */
+    .unique-df-content-body {
+        padding: 20px 12px;
+    }
+    
+    .unique-df-qr-frame {
+        padding: 12px;
+    }
+    
+    .unique-df-scan-pay-badge {
+        font-size: 11px;
+        padding: 6px 16px;
+        gap: 6px;
+    }
+    
+    .unique-df-address-info-card {
+        padding: 15px;
+        margin-top: 20px;
+    }
+    
+    .unique-df-address-input-pill {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 12px;
+    }
+    
+    .unique-df-label {
+        text-align: center;
+        font-size: 13px;
+    }
+    
+    .unique-df-address-text {
+        text-align: center;
+        font-size: 14px;
+        word-break: break-all;
+    }
+    
+    .unique-df-address-actions {
+        justify-content: center;
+        gap: 10px;
+    }
+    
+    .unique-df-copy-icon-btn {
+        padding: 10px 16px;
+    }
+    
+    .unique-df-full-address {
+        margin-top: 10px;
+        padding: 8px 12px;
+    }
+    
+    .unique-df-full-address-text {
+        font-size: 11px;
+    }
+    
+    .unique-df-confirm-btn {
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+    
+    .unique-df-bottom-note {
+        padding: 12px 16px;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .unique-df-bottom-note p {
+        font-size: 12px;
+    }
+}
+
+
+

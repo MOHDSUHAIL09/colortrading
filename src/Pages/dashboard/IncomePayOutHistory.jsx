@@ -14,7 +14,7 @@ const IncomePayOutHistory = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    const regno = localStorage.getItem("Regno");
+    const regno = sessionStorage.getItem("Regno");
 
     useEffect(() => {
         const fetchWithdrawReport = async () => {

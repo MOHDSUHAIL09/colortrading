@@ -23,7 +23,7 @@ const DepositHistory = () => {
 
 
 
-    const regno = localStorage.getItem("Regno") || 1;
+    const regno = sessionStorage.getItem("Regno") || 1;
 
      useEffect(() => {
         const queryParams = new URLSearchParams(location.search);

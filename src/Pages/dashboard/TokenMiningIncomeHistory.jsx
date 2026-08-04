@@ -21,24 +21,18 @@ const TokenMiningIncomeHistory = () => {
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Get regno from localStorage
-    const regno = localStorage.getItem('Regno');
+    // Get regno from sessionStorage
+    const regno = sessionStorage.getItem('Regno');
 
     // ✅ URL se type nikaalo on mount
     useEffect(() => {
-        console.log("📍 Location changed:", location.pathname, location.search);
 
         const params = new URLSearchParams(location.search);
         const typeFromUrl = params.get('type');
-
-        console.log("🔍 Raw URL Type:", typeFromUrl);
-
         if (typeFromUrl) {
             const decodedType = decodeURIComponent(typeFromUrl);
-            console.log("✅ Decoded Type:", decodedType);
             setSelectedType(decodedType);
         } else {
-            console.log("⚠️ No type in URL, using 'all'");
             setSelectedType('all');
         }
     }, [location.search]);
@@ -46,14 +40,11 @@ const TokenMiningIncomeHistory = () => {
     // ✅ Fetch Income Types from API - FIXED
     const fetchIncomeTypes = async () => {
         try {
-            console.log("📡 Fetching Income Types...");
             const response = await apiClient.get('/Token/AllMiningIncome');
-            console.log("📡 Income Types Response:", response.data);
 
             const data = response.data;
             if (data.result === "true" && data.data) {
                 setIncomeTypes(data.data);
-                console.log("✅ Income Types set:", data.data);
             } else {
                 setIncomeTypes([]);
             }
@@ -109,11 +100,9 @@ const TokenMiningIncomeHistory = () => {
                 url += `&type=${encodeURIComponent(selectedType)}`;
             }
 
-            console.log("📡 Fetching URL:", url);
 
             // ✅ USE apiClient - NOT fetch
             const response = await apiClient.get(url);
-            console.log("📡 History API Response:", response.data);
 
             const data = response.data;
 
@@ -122,8 +111,7 @@ const TokenMiningIncomeHistory = () => {
                 const historyData = data.data?.data || [];
                 const totalRecords = data.data?.totalRecords || 0;
 
-                console.log("📊 History Data:", historyData);
-                console.log("📊 Total Records:", totalRecords);
+                // console.log("📊 Total Records:", totalRecords);
 
                 setRecords(historyData);
 
@@ -234,7 +222,6 @@ const TokenMiningIncomeHistory = () => {
                             value={selectedType}
                             onChange={e => {
                                 const newType = e.target.value;
-                                console.log("🔄 Manual type change to:", newType);
                                 setSelectedType(newType);
                                 setPageIndex(1);
 

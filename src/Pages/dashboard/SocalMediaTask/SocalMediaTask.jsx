@@ -42,7 +42,7 @@ const SocalMediaTask = () => {
       return;
     }
     
-    const regno = localStorage.getItem('Regno');
+    const regno = sessionStorage.getItem('Regno');
     
     if (!regno) {
       toast.error('Registration number not found');

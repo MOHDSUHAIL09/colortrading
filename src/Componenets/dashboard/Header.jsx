@@ -28,7 +28,7 @@ const Header = ({ toggleSidebar }) => {
   const loginid = userData?.loginid || user?.loginid;
 
   // Get regno for referral link
-  const regno = userData?.regno || userData?.Regno || localStorage.getItem('regno');
+  const regno = userData?.regno || userData?.Regno || sessionStorage.getItem('regno');
 
   // Get referral link
   const getReferralLink = () => {
@@ -79,7 +79,7 @@ const Header = ({ toggleSidebar }) => {
             <ul className="navbar-nav flex-row align-items-center" style={{ flexDirection: 'row', display: 'flex' }}>
 
 
-     <a href="/App.apk" download>
+     <a href="/ApexmindAI.apk" download>
   <li className="nav-item ">
     <div
       className="btn01"

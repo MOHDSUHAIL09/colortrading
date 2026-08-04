@@ -6,7 +6,7 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
 
   const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = sessionStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
@@ -15,13 +15,12 @@ export const UserProvider = ({ children }) => {
   const [payoutData, setPayoutData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  
-  // ✅ ADD THIS - isAuthenticated state
+
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const regno = localStorage.getItem('Regno');
+    const regno = sessionStorage.getItem('Regno');
     return !!(regno);
   });
-  
+
   const isFetching = useRef(false);
   const initialLoadDone = useRef(false);
   const isMounted = useRef(true);
@@ -29,38 +28,32 @@ export const UserProvider = ({ children }) => {
   // ================= Dashboard Fetch =================
   const fetchData = useCallback(async (force = false) => {
     if (!isMounted.current) {
-      console.log("⏭️ Component unmounted, skipping API call");
       return null;
     }
-
     if (!force && isFetching.current) {
-      console.log("⏳ API call already in progress, skipping...");
       return null;
     }
 
     if (!force && userData && Object.keys(userData).length > 0) {
-      console.log("✅ Data already loaded, skipping API call");
       return userData;
     }
 
     isFetching.current = true;
-    
+
     if (force) {
       setIsRefreshing(true);
-      console.log("🔄 Refresh started...");
     } else {
       setLoading(true);
-      console.log("📥 Initial load started...");
     }
-    
+
     try {
-      let Regno = localStorage.getItem('regno');
+      let Regno = sessionStorage.getItem('regno');
       if (!Regno) {
-        Regno = localStorage.getItem('Regno');
+        Regno = sessionStorage.getItem('Regno');
       }
-      
+
       if (!Regno) {
-        console.error("❌ No regno found in localStorage");
+        console.error("❌ No regno found in sessionStorage");
         if (force) {
           setIsRefreshing(false);
         } else {
@@ -70,18 +63,15 @@ export const UserProvider = ({ children }) => {
         setIsAuthenticated(false);
         return null;
       }
-      
-      const response = await apiClient.get(`/Dashboard/Dashboard/${Regno}`);     
-      console.log("✅ Dashboard API Response received");
-      
+
+      const response = await apiClient.get(`/Dashboard/Dashboard/${Regno}`);
       if (!isMounted.current) {
-        console.log("⏭️ Component unmounted during API call, ignoring response");
         return null;
       }
-      
+
       if (response.data?.result === "true" && response.data?.response) {
         const apiData = response.data.response;
-        
+
         const newUserData = {
           fname: apiData.fname,
           loginid: apiData.loginid || user?.loginid,
@@ -95,7 +85,7 @@ export const UserProvider = ({ children }) => {
           withdrawal: apiData.withdrawal || 0,
           TeamCount: apiData.TeamCount || 0,
           ActiveTeam: apiData.ActiveTeam || 0,
-          InactiveTeam: apiData.InactiveTeam || 0,
+          InactiveTeam: apiData.InactiveTeam || 0,          
           DirectIncome: apiData.DirectIncome || 0,
           LevelIncome: apiData.LevelIncome || 0,
           miningRoi: apiData.miningRoi || 0,
@@ -151,21 +141,16 @@ export const UserProvider = ({ children }) => {
           TotalAmountBuyToken: apiData.TotalAmountBuyToken || 0,
           TotalTokenInWallet: apiData.TotalTokenInWallet || 0,
           TokenStakeBonus: apiData.TokenStakeBonus,
-          tokenBonusOnUpgrade: apiData.tokenBonusOnUpgrade,       
+          tokenBonusOnUpgrade: apiData.tokenBonusOnUpgrade,
           walletid: apiData.walletid,
           TotalEarnTokenInWallet: apiData.TotalEarnTokenInWallet || 0,
           NameAppearOncheque: apiData.NameAppearOncheque,
           TokenAddress: apiData.tokenAddress || 0,
           TradingLevelIncome: apiData.TradingLevelIncome || 0
         };
-      
+
         setUserData(newUserData);
-        localStorage.setItem("userData", JSON.stringify(newUserData));
-        console.log("✅ UserData updated - Depositfund:", newUserData.Depositfund);
-        
-        // ✅ SET isAuthenticated to TRUE
         setIsAuthenticated(true);
-        
         return newUserData;
       } else {
         console.error("❌ Dashboard API error:", response.data);
@@ -180,7 +165,6 @@ export const UserProvider = ({ children }) => {
       if (isMounted.current) {
         if (force) {
           setIsRefreshing(false);
-          console.log("🔄 Refresh complete");
         } else {
           setLoading(false);
         }
@@ -192,20 +176,20 @@ export const UserProvider = ({ children }) => {
   // ================= RESTORE SESSION ON MOUNT =================
   useEffect(() => {
     isMounted.current = true;
+
+    const regno = sessionStorage.getItem('Regno');
     
-    // ✅ Check if already authenticated
-    const regno = localStorage.getItem('Regno');
     if (regno) {
       setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
     }
-    
+
     if (initialLoadDone.current) {
-      console.log("⏭️ Initial load already done, skipping...");
       return;
     }
 
     if (userData && Object.keys(userData).length > 0) {
-      console.log("✅ UserData already exists, skipping initial load");
       initialLoadDone.current = true;
       setLoading(false);
       setIsAuthenticated(true);
@@ -214,26 +198,24 @@ export const UserProvider = ({ children }) => {
 
     const restoreSession = async () => {
       if (initialLoadDone.current) {
-        console.log("⏭️ Initial load already done (double check), skipping...");
         return;
       }
-      
-      console.log("🔄 Initial session restore started");
+
       initialLoadDone.current = true;
-      
-      const storedRegno = localStorage.getItem('Regno');
-      const storedUser = localStorage.getItem('user');
-      
+
+      const storedRegno = sessionStorage.getItem('Regno');
+      const storedUser = sessionStorage.getItem('user');
+
       if (storedRegno && storedUser) {
         await fetchData();
+        setIsAuthenticated(true);
       } else {
-        console.log("ℹ️ No user found, setting loading to false");
         if (isMounted.current) {
           setLoading(false);
           setIsAuthenticated(false);
         }
       }
-      
+
       if (storedUser && !user) {
         try {
           const parsedUser = JSON.parse(storedUser);
@@ -243,61 +225,49 @@ export const UserProvider = ({ children }) => {
         }
       }
     };
-    
+
     const timer = setTimeout(() => {
       restoreSession();
     }, 50);
-    
+
     return () => {
       clearTimeout(timer);
       isMounted.current = false;
-      console.log("🧹 Cleanup: Component unmounting");
     };
   }, []);
 
   // ================= LOGIN =================
   const loginUser = useCallback((userData) => {
-    console.log("🔐 Login called");
-    
+
     initialLoadDone.current = true;
     isFetching.current = false;
-    
+
     let regnoValue = userData.regno || userData.Regno || userData.regNo;
-    
+
     if (!regnoValue && userData.introregno) {
       regnoValue = userData.introregno;
     }
-    
+
     if (regnoValue) {
-      console.log("✅ Setting regno:", regnoValue);
-      localStorage.setItem("regno", String(regnoValue));
-      localStorage.setItem("Regno", String(regnoValue));
+      sessionStorage.setItem("Regno", String(regnoValue));
     } else {
       console.error("❌ No regno found in userData:", userData);
     }
-    
-    if (userData.token) {
-      localStorage.setItem("token", userData.token);
-    }
-    
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("loginId", userData.loginid || userData.LoginID || userData.me);
-    localStorage.setItem("isLoggedIn", "true");
-    
+
+    sessionStorage.setItem("loginId", userData.loginid || userData.LoginID || userData.me);
+    sessionStorage.setItem("isLoggedIn", "true");
+    sessionStorage.setItem("user", JSON.stringify(userData));
+
     setUser(userData);
-    
-    // ✅ SET isAuthenticated to TRUE
     setIsAuthenticated(true);
-    
+
     setTimeout(() => {
-      console.log("⏰ Fetching data after login...");
       fetchData(true);
     }, 200);
   }, [fetchData]);
 
-  // ================= LOGOUT =================
+  // ================= LOGOUT - FIXED =================
   const logoutUser = useCallback(() => {
-    console.log("🚪 Logging out user");
     setUser(null);
     setUserData(null);
     setStakeData(null);
@@ -308,24 +278,22 @@ export const UserProvider = ({ children }) => {
     isFetching.current = false;
     initialLoadDone.current = false;
     
-    localStorage.removeItem("user");
-    localStorage.removeItem("regno");
-    localStorage.removeItem("Regno");
-    localStorage.removeItem("userData");
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("loginId");
-    localStorage.removeItem("NameAppearOnCheque");
-    localStorage.removeItem("token");
+    // ✅ SIRF USER KEYS DELETE KARO
+    sessionStorage.removeItem("Regno");
+    sessionStorage.removeItem("isLoggedIn");
+    sessionStorage.removeItem("loginId");
+    sessionStorage.removeItem("NameAppearOnCheque");
+    sessionStorage.removeItem("user");
+    sessionStorage.removeItem("token");
   }, []);
 
   // ================= REFRESH =================
   const refreshData = useCallback(async () => {
-    console.log("🔄 Manual refresh triggered");
     return await fetchData(true);
   }, [fetchData]);
 
   const refreshUserData = useCallback(async () => {
-    const savedData = localStorage.getItem("userData");
+    const savedData = sessionStorage.getItem("userData");
     if (savedData) {
       const parsed = JSON.parse(savedData);
       setUserData(parsed);
@@ -345,7 +313,7 @@ export const UserProvider = ({ children }) => {
     logoutUser,
     loading,
     isRefreshing,
-    isAuthenticated, // ✅ ADD THIS
+    isAuthenticated,
     fetchData
   };
 

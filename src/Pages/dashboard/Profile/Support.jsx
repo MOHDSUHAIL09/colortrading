@@ -21,12 +21,12 @@ const Support = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const pageSize = 10;
 
-  const getRegNo = () => userData?.regno || user?.Regno || user?.regno || localStorage.getItem('regno') || '1';
+  const getRegNo = () => userData?.regno || user?.Regno || user?.regno || sessionStorage.getItem('regno') || '1';
   
   const getLoginId = () => {
     if (userData?.me) return userData.me;
     if (user?.loginid) return user.loginid;
-    const stored = localStorage.getItem('userData');
+    const stored = sessionStorage.getItem('userData');
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
@@ -62,7 +62,6 @@ const Support = () => {
         }
       });
       
-      console.log("📡 API Response:", response.data);
       
       const data = response.data;
       
@@ -71,8 +70,6 @@ const Support = () => {
         const ticketData = responseData?.data || [];
         const recordCount = responseData?.recordCount || 0;
         
-        console.log("📊 Ticket Data:", ticketData);
-        console.log("📊 Record Count:", recordCount);
         
         const formatted = ticketData.map(item => ({
           id: item.MsgId,
@@ -126,7 +123,6 @@ const Support = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      console.log("📡 Create Response:", response.data);
       
       if (response.data?.result === "true" || response.data?.result === true) {
         const responseData = response.data.response;

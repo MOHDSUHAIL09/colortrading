@@ -34,7 +34,7 @@ const UserProfile = () => {
 
     setFormData(prev => ({
       ...prev,
-      loginId: localStorage.getItem("loginId") || userData?.loginid || "",
+      loginId: sessionStorage.getItem("loginId") || userData?.loginid || "",
       address: userData?.TokenAddress || userData?.address || "",
       fullName: prev.fullName || fullName,
       firstName: prev.firstName || nameParts[0] || "",
@@ -55,8 +55,8 @@ const UserProfile = () => {
   // ✅ Send OTP Function
   const handleSendOTP = async () => {
     try {
-      const loginId = localStorage.getItem("loginId");
-      const regNo = localStorage.getItem("Regno");
+      const loginId = sessionStorage.getItem("loginId");
+      const regNo = sessionStorage.getItem("Regno");
 
       if (!loginId || !regNo) {
         toast.error("Login ID or Registration number not found");
@@ -92,8 +92,8 @@ const UserProfile = () => {
         return;
       }
 
-      const loginId = localStorage.getItem("loginId");
-      const regNo = localStorage.getItem("Regno");
+      const loginId = sessionStorage.getItem("loginId");
+      const regNo = sessionStorage.getItem("Regno");
 
       if (!loginId || !regNo) {
         toast.error("Login ID or Registration number not found");
@@ -151,7 +151,7 @@ const UserProfile = () => {
     setIsUpdating(true);
 
     try {
-      const regNo = localStorage.getItem("Regno");
+      const regNo = sessionStorage.getItem("Regno");
 
       if (!regNo) {
         toast.error("Registration number not found!");
@@ -177,24 +177,22 @@ const UserProfile = () => {
         walletAddress: formData.walletAddress || ""
       };
 
-      console.log("Sending to API:", JSON.stringify(requestData, null, 2));
 
       const response = await apiClient.put('/Auth/UpdateProfile', requestData);
 
-      console.log("API Response:", response.data);
 
       if (response.data?.result === "true" || response.data?.result === true ||
         response.data?.response === true || response.data?.response === "true") {
 
         toast.success("✅ Profile updated successfully!");
 
-        localStorage.setItem("userName", formData.fullName);
-        localStorage.setItem("userEmail", formData.emailId);
+        sessionStorage.setItem("userName", formData.fullName);
+        sessionStorage.setItem("userEmail", formData.emailId);
         if (formData.walletAddress) {
-          localStorage.setItem("walletAddress", formData.walletAddress);
+          sessionStorage.setItem("walletAddress", formData.walletAddress);
         }
         if (formData.address) {
-          localStorage.setItem("tokenAddress", formData.address);
+          sessionStorage.setItem("tokenAddress", formData.address);
         }
 
         // ✅ Reset OTP states after successful update

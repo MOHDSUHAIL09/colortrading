@@ -18,8 +18,8 @@ const SelfTradingHistory = () => {
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Get regno from localStorage
-    const regno = localStorage.getItem('Regno');
+    // Get regno from sessionStorage
+    const regno = sessionStorage.getItem('Regno');
 
     // Format Date
     const formatDate = (dateString) => {
@@ -80,8 +80,6 @@ const SelfTradingHistory = () => {
             if (data.result === "true" || data.result === true) {
                 const historyData = data.response?.data || [];
                 const totalRecords = data.response?.recordCount || 0;
-                
-                console.log("📊 History Data:", historyData);
                 
                 setRecords(historyData);
                 setRecordCount(totalRecords);
