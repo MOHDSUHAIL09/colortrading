@@ -172,13 +172,6 @@ const FundDepositStatus = () => {
                 </div>
             </div>
 
-            {/* Error Display */}
-            {error && (
-                <div className="alert alert-danger mb-3">
-                    <strong>Error:</strong> {error}
-                </div>
-            )}
-
             <div className="report-card">
                 <CustomTable columns={columns} loading={loading}>
                     {currentRecords.length > 0 ? (

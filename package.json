@@ -8,10 +8,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
-    
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "@sentinel-js/react": "^0.1.6",
     "@tabler/icons-react": "^3.44.0",
     "@tabler/icons-webfont": "^3.44.0",
     "@types/d3": "^7.4.3",
@@ -48,7 +48,7 @@
     "@eslint/js": "^10.0.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
+    "@vitejs/plugin-react": "^5.2.0",
     "autoprefixer": "^10.5.0",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -56,6 +56,6 @@
     "globals": "^17.6.0",
     "postcss": "^8.5.15",
     "postcss-flexbugs-fixes": "^5.0.2",
-    "vite": "^8.0.12"
+    "vite": "^7.3.6"
   }
 }

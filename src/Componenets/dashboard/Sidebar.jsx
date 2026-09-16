@@ -153,7 +153,7 @@ const Sidebar = ({ sidebarCollapsed, mobileSidebarOpen, closeMobileSidebar }) =>
                   <>
                     <div className="john-title">
                       <h6 className="mb-0 text-dark amount-report" style={{ fontWeight: '600' }}>
-                        {userData?.fname || 'User'}
+                        {userData?.fname}
                       </h6>
                       <span style={{ fontSize: "13px", color: '#94a3b8' }}>
                         {userData?.loginid || 'Guest'}

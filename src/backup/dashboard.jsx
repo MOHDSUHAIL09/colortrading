@@ -877,7 +877,7 @@ const Dashboard = () => {
                                                     />
                                                 </div>
                                                 <h5 className="fw-semibold mt-0 mt-md-2 fs-5 fs-sm-3">
-                                                    Welcome back <span style={{ color: "#04832f" }}>{userData?.fname}</span>
+                                                    Welcome back <span style={{ color: "#04832f" }}>{userData?.loginid}</span>
                                                 </h5>
                                             </div>
                                             <button

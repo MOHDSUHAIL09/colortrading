@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FaCreditCard, FaWhatsapp } from "react-icons/fa6";
+import { FaCreditCard } from "react-icons/fa6";
 
 import { GiProfit } from "react-icons/gi";
 import { useUser } from '../../context/UserContext';
@@ -40,7 +40,7 @@ ChartJS.register(
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const { userData, refreshData } = useUser();
+    const { userData, refreshData , currentEarnings  } = useUser();
     //  Add this state at the top with other states
     const [hoveredIncome, setHoveredIncome] = useState(null);
 
@@ -950,7 +950,7 @@ const Dashboard = () => {
                                                     />
                                                 </div>
                                                 <h5 className="fw-semibold mt-0 mt-md-2 fs-5 fs-sm-3">
-                                                    Welcome back <span style={{ color: "#04832f" }}>{userData?.fname}</span>
+                                                    Welcome back <span style={{ color: "#04832f" }}>{userData?.loginid}</span>
                                                 </h5>
                                             </div>
                                             <button
@@ -1050,7 +1050,7 @@ const Dashboard = () => {
                                                         )}
                                                     </div>
                                                 </div>
-                                                {/* <div className="col-6">
+                                                <div className="col-6">
                                                     <div className="countdown-box text-center p-1">
                                                         <div className="small fw-semibold ">
                                                             RANK
@@ -1059,19 +1059,19 @@ const Dashboard = () => {
                                                             {userData?.Ranks || "N/A"}
                                                         </div>
                                                     </div>
-                                                </div> */}
+                                                </div>
 
 
-                                                 <div className="col-6">
+                                                 {/* <div className="col-6">
                                                     <div className="countdown-box text-center p-1">
                                                         <div className="small fw-semibold ">
                                                             BOT-1
                                                         </div>
                                                         <div className="left-timer">
-                                                            {userData?.currentEarnings || "N/A"}
+                                                            {currentEarnings || "00"} / 2.5%
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </div>
                                     </div>

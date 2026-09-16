@@ -59,9 +59,9 @@ const data = response.data;
             if (data.result === "true" || data.result === true) {
                 const historyData = data.data || [];
                 setRecords(historyData);
-                if (historyData.length === 0) {
-                    toast.info(`No ${type} investments found`);
-                }
+                // if (historyData.length === 0) {
+                //     toast.info(`No ${type} investments found`);
+                // }
             } else {
                 toast.error(data.message || 'Failed to fetch history');
                 setRecords([]);

@@ -84,7 +84,7 @@ const Fundtransfer = () => {
                 setValidUser1(true);
                 setUserName1(name);
                 setReceiverLoginId1(loginid);
-                toast.success(`User found: ${name}`);
+                // toast.success(`User found: ${name}`);
             } else {
                 setValidUser1(false);
                 setUserName1("");
@@ -96,7 +96,6 @@ const Fundtransfer = () => {
             setValidUser1(false);
             setUserName1("");
             setReceiverLoginId1("");
-            toast.error("Error checking user");
         } finally {
             setCheckingUser1(false);
         }
@@ -115,7 +114,7 @@ const Fundtransfer = () => {
 
         if (debounceTimer1.current) clearTimeout(debounceTimer1.current);
 
-        if (value.trim().length >= 6) {
+        if (value.trim().length >= 8) {
             debounceTimer1.current = setTimeout(() => checkUser1(value), 500);
         }
     };
@@ -124,7 +123,7 @@ const Fundtransfer = () => {
     const handleSendOTP1 = async () => {
         try {
             if (!loginId || !regNo) {
-                toast.error("Login ID or Registration number not found");
+                toast.error("Login ID not found");
                 return;
             }
             if (!validUser1) {
@@ -420,9 +419,9 @@ const Fundtransfer = () => {
                                             <small className="status-msg info">⏳ Checking user...</small>
                                         )}
                                         {validUser1 && (
-                                            <small className="status-msg success">✅ {userName1}</small>
+                                            <small className="status-msg success">✓ {userName1}</small>
                                         )}
-                                        {investUserId1 && !validUser1 && !checkingUser1 && investUserId1.trim().length >= 6 && (
+                                        {investUserId1 && !validUser1 && !checkingUser1 && investUserId1.trim().length >= 8 && (
                                             <small className="status-msg error">❌ User ID not found</small>
                                         )}
                                     </div>
@@ -500,7 +499,7 @@ const Fundtransfer = () => {
                                             )}
                                         </div>
                                         {otpVerified1 && (
-                                            <small className="text-success">✅ OTP Verified</small>
+                                            <small className="text-success"> OTP Verified</small>
                                         )}
                                     </div>
 
@@ -552,7 +551,7 @@ const Fundtransfer = () => {
                                         <input
                                             type="text"
                                             className="form-control-field"
-                                            value={userData?.fname || userData?.Name || "Self Transfer"}
+                                            value={userData?.loginid}
                                             readOnly
                                             disabled
                                             style={{ color: '#667eea', fontWeight: '600' }}
@@ -632,7 +631,7 @@ const Fundtransfer = () => {
                                             )}
                                         </div>
                                         {otpVerified2 && (
-                                            <small className="text-success">✅ OTP Verified</small>
+                                            <small className="text-success"> OTP Verified</small>
                                         )}
                                     </div>
 

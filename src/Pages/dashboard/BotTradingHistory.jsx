@@ -1,24 +1,103 @@
+// File: src/components/BotTradingHistory.jsx
+
 import { useState, useEffect, useRef } from "react";
-import apiClient from "../../api/apiClient";
 import CustomTable from "../../Componenets/ui/customtable/CustomTable";
 import Pagination from "../../Componenets/ui/pagination/Pagination";
 import { useUser } from "../../context/UserContext";
 
 const BotTradingHistory = () => {
-    const [records, setRecords] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
-    // const [totalBalance, setTotalBalance] = useState(0);
-    const { userData } = useUser();
+    // ✅ Context se data lo
+    const { 
+        botRecords: contextBotRecords,
+        currentEarnings: contextCurrentEarnings,
+        totalEarnings: contextTotalEarnings,
+        fetchBotEarnings,
+        botEarningsLoading 
+    } = useUser();
 
-    // Pagination state
+    // ✅ Local state - Interval update ke liye
+    const [records, setRecords] = useState([]);
+    const [currentEarnings, setCurrentEarnings] = useState(0);
+    const [totalEarnings, setTotalEarnings] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const regno = sessionStorage.getItem("Regno");
     const intervalRef = useRef(null);
 
-    // Format date function
+    // ✅ Initial fetch - Context se data lo
+    useEffect(() => {
+        if (regno) {
+            fetchBotEarnings(regno);
+        }
+    }, [regno]);
+
+    // ✅ Context se data aane par local state set karo
+    useEffect(() => {
+        if (contextBotRecords.length > 0) {
+            setRecords(contextBotRecords);
+            setCurrentEarnings(contextCurrentEarnings);
+            setTotalEarnings(contextTotalEarnings);
+        }
+    }, [contextBotRecords, contextCurrentEarnings, contextTotalEarnings]);
+
+    // ✅ START INTERVAL - Sirf BotTradingHistory mein
+    const startInterval = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
+
+        intervalRef.current = setInterval(() => {
+            setRecords(prevRecords => {
+                const updatedRecords = prevRecords.map(record => {
+                    if (record.status === 1) {
+                        const currentEarn = parseFloat(record.TotalEarnings) || 0;
+                        const increment = 0.000008;
+                        const shouldIncrease = Math.random() < 0.5;
+                        const newEarnings = shouldIncrease ? currentEarn + increment : currentEarn - increment;
+                        return { ...record, TotalEarnings: newEarnings };
+                    }
+                    return record;
+                });
+
+                // ✅ Update local currentEarnings
+                const openRecord = updatedRecords.find(item => item.status === 1);
+                if (openRecord) {
+                    setCurrentEarnings(parseFloat(openRecord.TotalEarnings) || 0);
+                }
+
+                // ✅ Update total earnings
+                const total = updatedRecords.reduce((sum, item) => {
+                    return sum + (parseFloat(item.TotalEarnings) || 0);
+                }, 0);
+                setTotalEarnings(total);
+
+                return updatedRecords;
+            });
+        }, 1000);
+    };
+
+    // ✅ Stop interval
+    const stopInterval = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+    };
+
+    // ✅ Start interval when records loaded
+    useEffect(() => {
+        if (records.length > 0) {
+            startInterval();
+        }
+        return () => stopInterval();
+    }, [records.length]);
+
+    // ===================== ✅ FORMAT FUNCTIONS - YAHAN ADD KARO =====================
+    
+    // ✅ Format date function
     const formatDate = (dateString) => {
         if (!dateString) return "-";
         try {
@@ -36,7 +115,7 @@ const BotTradingHistory = () => {
         }
     };
 
-    // Format amount function
+    // ✅ Format amount function
     const formatAmount = (amount) => {
         return `$${parseFloat(amount || 0).toLocaleString(undefined, {
             minimumFractionDigits: 2,
@@ -44,150 +123,26 @@ const BotTradingHistory = () => {
         })}`;
     };
 
-    // Get status badge class
+    // ✅ Get status badge class
     const getStatusBadge = (status) => {
         switch (status) {
-            case 1:
-                return "bg-success"; // Active/Running
-            case 0:
-                return "bg-danger"; // Inactive
-            default:
-                return "bg-secondary";
+            case 1: return "bg-success";
+            case 0: return "bg-danger";
+            default: return "bg-secondary";
         }
     };
 
-    // Get status text
+    // ✅ Get status text
     const getStatusText = (status) => {
         switch (status) {
-            case 1:
-                return "Open";
-            case 0:
-                return "Closed";
-            case 2:
-                return "Closed";
-            default:
-                return "Closed";
+            case 1: return "Open";
+            case 0: return "Closed";
+            case 2: return "Closed";
+            default: return "Closed";
         }
     };
 
-
-    const fetchDepositHistory = async () => {
-        try {
-            setLoading(true);
-            const res = await apiClient.get(
-                `/Trading/BotReport`,
-                {
-                    params: {
-                        regno: regno,
-                        PageIndex: 1,
-                        PageSize: 10000
-                    },
-                }
-            );
-
-            if (res.data?.result === "true") {
-                const data = res.data.response?.data || [];
-                setRecords(data);
-
-                // Calculate total balance (betAmount + earnings)
-                // const balance = data.reduce((sum, item) => {
-                //     const betAmount = parseFloat(item.betAmount) || 0;
-                //     const earnings = parseFloat(item.TotalEarnings) || 0;
-                //     return sum + betAmount + earnings;
-                // }, 0);
-                // setTotalBalance(balance);
-            } else {
-                console.warn(" API result is not true");
-                setRecords([]);
-            }
-        } catch (error) {
-            console.error(" API Error:", error.response || error);
-            setRecords([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // 🔄 Interval function to update values (only for Open status)
-    const startInterval = () => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-        }
-
-        intervalRef.current = setInterval(() => {
-            setRecords(prevRecords => {
-                return prevRecords.map(record => {
-                    // Only update if status is Open (1)
-                    if (record.status === 1) {
-                        const currentEarnings = parseFloat(record.TotalEarnings) || 0;
-                        // const perdayroi = parseFloat(record.perdayroi) || 0;
-                        // const betAmount = parseFloat(record.betAmount) || 0;
-
-                        // 🔥 0.000008 increment/decrement per second
-                        const increment = 0.000008;
-
-                        // Randomly decide to increase or decrease (50% chance)
-                        const shouldIncrease = Math.random() < 0.5;
-
-                        let newEarnings;
-                        if (shouldIncrease) {
-                            newEarnings = currentEarnings + increment;
-                        } else {
-                            newEarnings = currentEarnings - increment;
-                        }
-
-                        // Also update perdayroi slightly
-                        let newPerdayRoi = parseFloat(record.perdayroi) || 0;
-                        const roiChange = (Math.random() < 0.5 ? 1 : -1) * 0.0001;
-                        newPerdayRoi = newPerdayRoi + roiChange;
-
-                        return {
-                            ...record,
-                            TotalEarnings: newEarnings,
-                            perdayroi: newPerdayRoi
-                        };
-                    }
-                    return record;
-                });
-            });
-        }, 1000); // Every 1 second
-    };
-
-    // Stop interval
-    const stopInterval = () => {
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-    };
-
-    // Initial fetch and interval setup
-    useEffect(() => {
-        if (regno) {
-            fetchDepositHistory();
-        } else {
-            console.warn(" No Regno found");
-            setLoading(false);
-        }
-
-        // Cleanup interval on unmount
-        return () => {
-            stopInterval();
-        };
-    }, [regno]);
-
-    // Start interval automatically when records are loaded
-    useEffect(() => {
-        if (records.length > 0) {
-            startInterval();
-        }
-
-        return () => {
-            stopInterval();
-        };
-    }, [records.length]);
-
-    // Filter records
+    // ===================== FILTER & PAGINATION =====================
     const filteredRecords = records.filter((row) => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -201,16 +156,10 @@ const BotTradingHistory = () => {
         );
     });
 
-    // Pagination logic
     const totalItems = filteredRecords.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (pageIndex - 1) * itemsPerPage;
     const currentRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
-
-    // Reset to first page when search term or items per page changes
-    // useEffect(() => {
-    //     setPageIndex(1);
-    // }, [searchTerm, itemsPerPage]);
 
     const columns = [
         "Sl.No.",
@@ -226,11 +175,12 @@ const BotTradingHistory = () => {
         "Status",
     ];
 
+    // ===================== RENDER =====================
     return (
         <div className="Table-container royalty-main-wrapper mb-5 p-4">
             <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
                 <h3 className="mb-0">Bot Trading History</h3>
-            </div>
+</div>
 
             <div className="d-flex justify-content-between entries-search-bar entries-control mb-3">
                 <div className="entries-control">
@@ -254,15 +204,14 @@ const BotTradingHistory = () => {
             </div>
 
             <div className="report-card">
-                <CustomTable columns={columns} loading={loading}>
+                <CustomTable columns={columns} loading={botEarningsLoading || loading}>
                     {currentRecords.length > 0 ? (
                         currentRecords.map((row, index) => {
-                            const currentEarnings = parseFloat(row.TotalEarnings) || 0;
+                            const currentEarn = parseFloat(row.TotalEarnings) || 0;
                             const perdayroi = parseFloat(row.perdayroi) || 0;
                             const betAmount = parseFloat(row.betAmount) || 0;
 
-                            // 🔥 Check if earnings is negative
-                            const isEarningsNegative = currentEarnings < 0;
+                            const isEarningsNegative = currentEarn < 0;
                             const isRoiNegative = perdayroi < 0;
 
                             return (
@@ -274,22 +223,18 @@ const BotTradingHistory = () => {
                                     </td>
                                     <td>{formatDate(row.entryDate)}</td>
                                     <td>{formatDate(row.endtime)}</td>
-
-
                                     <td style={{ color: "#3b82f6", fontWeight: "600" }}>
                                         {formatAmount(betAmount)}
                                     </td>
 
                                     {getStatusText(row.status) === "Open" ? (
                                         <>
-                                            <td style={{ color: "#3b82f6", fontWeight: "600" }}>
-                                                -
-                                            </td>
+                                            <td style={{ color: "#3b82f6", fontWeight: "600" }}>-</td>
                                             <td style={{
                                                 color: isEarningsNegative ? "#dc3545" : "#3b82f6",
                                                 fontWeight: "600"
                                             }}>
-                                                ${currentEarnings.toFixed(8)}
+                                                ${currentEarn.toFixed(8)}
                                             </td>
                                         </>
                                     ) : (
@@ -323,13 +268,12 @@ const BotTradingHistory = () => {
                     ) : (
                         <tr>
                             <td colSpan={columns.length} className="text-center py-4">
-                                {loading ? "Loading..." : "No records found"}
+                                {botEarningsLoading ? "Loading..." : "No records found"}
                             </td>
                         </tr>
                     )}
                 </CustomTable>
 
-                {/* Pagination Component */}
                 {totalPages > 1 && (
                     <Pagination
                         currentPage={pageIndex}

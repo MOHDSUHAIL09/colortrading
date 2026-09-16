@@ -18,7 +18,7 @@ const UserProfile = () => {
   const [formData, setFormData] = useState({
     loginId: "",
     address: "",
-    fullName: "",
+    fullName: "apexmindai",
     emailId: "",
     mobileNumber: "",
     firstName: "",
@@ -135,10 +135,10 @@ const UserProfile = () => {
       return;
     }
 
-    if (!formData.fullName) {
-      toast.error("Full name is required");
-      return;
-    }
+    // if (!formData.fullName) {
+    //   toast.error("Full name is required");
+    //   return;
+    // }
     if (!formData.emailId) {
       toast.error("Email ID is required");
       return;
@@ -186,7 +186,7 @@ const UserProfile = () => {
 
         toast.success("✅ Profile updated successfully!");
 
-        sessionStorage.setItem("userName", formData.fullName);
+        // sessionStorage.setItem("userName", formData.fullName);
         sessionStorage.setItem("userEmail", formData.emailId);
         if (formData.walletAddress) {
           sessionStorage.setItem("walletAddress", formData.walletAddress);
@@ -194,7 +194,7 @@ const UserProfile = () => {
         if (formData.address) {
           sessionStorage.setItem("tokenAddress", formData.address);
         }
-
+        
         // ✅ Reset OTP states after successful update
         setOtp("");
         setOtpSent(false);
@@ -256,7 +256,7 @@ const UserProfile = () => {
                     />
                   </div>
 
-                  <div className="mb-3">
+                  {/* <div className="mb-3 ">
                     <label>Full Name *</label>
                     <input
                       type="text"
@@ -267,7 +267,7 @@ const UserProfile = () => {
                       required
                       placeholder="Enter your full name"
                     />
-                  </div>
+                  </div> */}
 
                   <div className="mb-3">
                     <label>Email ID *</label>

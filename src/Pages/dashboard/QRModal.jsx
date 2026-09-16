@@ -29,12 +29,12 @@ const QRModal = ({ isOpen, onClose }) => {
     const generateReferralLink = () => {
         try {
             const loginid = userData?.loginid;
-            const baseUrl = 'http://apexmindai.in';
+            const baseUrl = 'https://apxmindai.com';
             const link = `${baseUrl}/signup?ref=${loginid}`;
             setReferralLink(link);
         } catch (error) {
             console.error("Error generating referral link:", error);
-            setReferralLink('http://apexmindai.in/signup');
+            setReferralLink('https://apxmindai.com/signup');
         }
     };
 
@@ -93,8 +93,8 @@ const QRModal = ({ isOpen, onClose }) => {
         }
 
         const shareData = {
-            title: 'Join ApexMind AI',
-            text: `Join ApexMind AI using my referral link and start earning! 🚀`,
+            title: 'Join Apxmind AI',
+            text: `Join Apxmind AI using my referral link and start earning! `,
             url: referralLink,
         };
 

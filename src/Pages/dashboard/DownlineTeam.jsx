@@ -184,20 +184,20 @@ const DownlineTeam = () => {
               <td className="py-3 px-3">
                 <div className="d-flex flex-column">
                   <div>
-                    <span className="fw-semibold d-block">{item.Name || item.introName || '-'}</span>
-                    <span className="text-muted small">{item.loginid || '-'}</span>
+                    <span className="fw-semibold d-block">{item.Name || '-'}</span>
+                    <span className="small" style={{fontSize: "15px"}}>{item.loginid || '-'}</span>
                   </div>
                 </div>
               </td>
               <td className="py-3 px-3">
                 <div className="d-flex flex-column">
                   <span className="fw-semibold">{item.Sponsor || '-'}</span>
-                  <span className="text-muted small">{item.introName || '-'}</span>
+                  {/* <span className="text-muted small">{item.introName || '-'}</span> */}
                 </div>
               </td>
               <td className="py-3 px-3">
                 <div className="d-flex flex-column">
-                  <span className="fw-bold text-success">{formatAmount(item.kitPrice || item.Stake)}</span>             
+                  <span className="fw-bold " style={{color: "green"}}>{formatAmount(item.kitPrice || item.Stake)}</span>             
                 </div>
               </td>
               <td className="py-3 px-3">
