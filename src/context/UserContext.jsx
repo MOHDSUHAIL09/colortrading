@@ -22,51 +22,9 @@ export const UserProvider = ({ children }) => {
     return !!(regno);
   });
 
-  // ✅ Sirf Data Store - Koi Interval Nahi
-  const [botRecords, setBotRecords] = useState([]);
-  const [currentEarnings, setCurrentEarnings] = useState(0);
-  const [totalEarnings, setTotalEarnings] = useState(0);
-  const [botEarningsLoading, setBotEarningsLoading] = useState(false);
-
   const isFetching = useRef(false);
   const initialLoadDone = useRef(false);
   const isMounted = useRef(true);
-
-  // ===================== FETCH BOT EARNINGS - Sirf API Call =====================
-  // ✅ PEHLE fetchBotEarnings DEFINE KARO (kyunki fetchData mein use ho raha hai)
-  const fetchBotEarnings = useCallback(async (regnoParam = null) => {
-    const regno = regnoParam || sessionStorage.getItem('Regno');
-    if (!regno) return;
-
-    try {
-      setBotEarningsLoading(true);
-      const res = await apiClient.get(`/Trading/BotReport`, {
-        params: { regno: regno, PageIndex: 1, PageSize: 10000 }
-      });
-
-      if (res.data?.result === "true") {
-        const data = res.data.response?.data || [];
-        setBotRecords(data);
-
-        const total = data.reduce((sum, item) => {
-          return sum + (parseFloat(item.TotalEarnings) || 0);
-        }, 0);
-        
-        setTotalEarnings(total);
-
-        const openRecord = data.find(item => item.status === 1);
-        if (openRecord) {
-          setCurrentEarnings(parseFloat(openRecord.TotalEarnings) || 0);
-        } else {
-          setCurrentEarnings(total);
-        }
-      }
-    } catch (error) {
-      console.error('❌ Bot earnings fetch error:', error);
-    } finally {
-      setBotEarningsLoading(false);
-    }
-  }, []); // ✅ Empty array - kyunki kisi external dependency par nahi hai
 
   // ===================== DASHBOARD FETCH =====================
   const fetchData = useCallback(async (force = false) => {
@@ -83,21 +41,14 @@ export const UserProvider = ({ children }) => {
 
     try {
       let Regno = sessionStorage.getItem('regno') || sessionStorage.getItem('Regno');
-
-      if (!Regno) {
-        console.error("❌ No regno found in sessionStorage");
-        setIsAuthenticated(false);
-        return null;
-      }
-
       const response = await apiClient.get(`/Dashboard/Dashboard/${Regno}`);
       if (!isMounted.current) return null;
-
       if (response.data?.result === "true" && response.data?.response) {
         const apiData = response.data.response;
 
         const newUserData = {
           fname: apiData.fname,
+          me: apiData.loginid,
           loginid: apiData.loginid || user?.loginid,
           MobileNo: apiData.mobile || user?.MobileNo,
           email: apiData.emailID || user?.email,
@@ -109,7 +60,7 @@ export const UserProvider = ({ children }) => {
           withdrawal: apiData.withdrawal || 0,
           TeamCount: apiData.TeamCount || 0,
           ActiveTeam: apiData.ActiveTeam || 0,
-          InactiveTeam: apiData.InactiveTeam || 0,          
+          InactiveTeam: apiData.InactiveTeam || 0,
           DirectIncome: apiData.DirectIncome || 0,
           LevelIncome: apiData.LevelIncome || 0,
           miningRoi: apiData.miningRoi || 0,
@@ -175,10 +126,7 @@ export const UserProvider = ({ children }) => {
 
         setUserData(newUserData);
         setIsAuthenticated(true);
-        
-        // ✅ After dashboard fetch, fetch bot earnings
-        await fetchBotEarnings(Regno);
-        
+
         return newUserData;
       } else {
         console.error("❌ Dashboard API error:", response.data);
@@ -199,7 +147,7 @@ export const UserProvider = ({ children }) => {
         isFetching.current = false;
       }
     }
-  }, [user?.loginid, userData, fetchBotEarnings]); // ✅ fetchBotEarnings dependency add karo
+  }, [user?.loginid, userData]);
 
   // ===================== RESTORE SESSION =====================
   useEffect(() => {
@@ -256,7 +204,7 @@ export const UserProvider = ({ children }) => {
       clearTimeout(timer);
       isMounted.current = false;
     };
-  }, []); // ✅ Empty array - sirf mount pe run ho
+  }, []);
 
   // ===================== LOGIN =====================
   const loginUser = useCallback((userData) => {
@@ -298,11 +246,7 @@ export const UserProvider = ({ children }) => {
     setIsAuthenticated(false);
     isFetching.current = false;
     initialLoadDone.current = false;
-    
-    setCurrentEarnings(0);
-    setTotalEarnings(0);
-    setBotRecords([]);
-    
+
     sessionStorage.removeItem("Regno");
     sessionStorage.removeItem("isLoggedIn");
     sessionStorage.removeItem("loginId");
@@ -314,11 +258,7 @@ export const UserProvider = ({ children }) => {
   // ===================== REFRESH =====================
   const refreshData = useCallback(async () => {
     await fetchData(true);
-    const regno = sessionStorage.getItem('Regno');
-    if (regno) {
-      await fetchBotEarnings(regno);
-    }
-  }, [fetchData, fetchBotEarnings]);
+  }, [fetchData]);
 
   const refreshUserData = useCallback(async () => {
     const savedData = sessionStorage.getItem("userData");
@@ -344,11 +284,6 @@ export const UserProvider = ({ children }) => {
     loginUser,
     logoutUser,
     fetchData,
-    botRecords,
-    currentEarnings,
-    totalEarnings,
-    botEarningsLoading,
-    fetchBotEarnings,
   };
 
   return (
@@ -361,7 +296,7 @@ export const UserProvider = ({ children }) => {
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error('❌ useUser must be used within a UserProvider');
+    throw new Error(' useUser must be used within a UserProvider');
   }
   return context;
 };

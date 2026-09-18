@@ -1,7 +1,6 @@
 import  { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BsTwitterX } from "react-icons/bs";
-import { CiYoutube } from "react-icons/ci";
 import { GrNotes } from "react-icons/gr";
 import '../../assets/index.css';
 

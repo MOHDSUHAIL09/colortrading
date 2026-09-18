@@ -39,7 +39,7 @@ const Signup = () => {
 
   const [formData, setFormData] = useState({
     introRegNo: "",
-    fName: "apexmindai",
+    fName: "",
     lName: "",
     mobile: "",
     email: "",
@@ -322,7 +322,7 @@ const Signup = () => {
       const response = await apiClient.get(`/Auth/UserDetailsById?loingId=${sponsorId}`);
       if (response.data?.result === "true" && response.data.user) {
         // const sponsorName = response.data.user.fName || response.data.user.LoginID;
-                const sponsorName = "✓ Verified ";
+            const sponsorName = "✓ Verified ";
 
         setFormData(prev => ({
           ...prev,
@@ -627,7 +627,7 @@ const Signup = () => {
                         </div>
                       </div>
 
-                      <div className="col-lg-12 d-none">
+                      <div className="col-lg-12 ">
                         <div className="form-box">
                           <input
                             type="text"
