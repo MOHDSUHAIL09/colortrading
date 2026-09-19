@@ -9,9 +9,6 @@ import {
   IconUsersGroup,
   IconBinaryTree2,
   IconPower,
-  IconUserCircle,
-  IconLock,
-  IconHelpCircle,
   IconAward
 } from '@tabler/icons-react';
 import { RiRobot2Line } from "react-icons/ri";

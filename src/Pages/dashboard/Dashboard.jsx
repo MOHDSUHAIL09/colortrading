@@ -208,7 +208,7 @@ const Dashboard = () => {
 
     const handleDashboardStartBot = async () => {
         if (apiBotStatus === 0) {
-            toast.warning('⚠️ Bot is already running!');
+            toast.warning('Bot is already running!');
             return;
         }
 
@@ -302,7 +302,7 @@ const Dashboard = () => {
         if (!tokenPayoutAmount || isNaN(amountNum) || amountNum <= 0) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Invalid Amount!',
+                title: 'Invalid Amount!',
                 text: 'Please enter a valid token amount.',
                 confirmButtonColor: '#667eea',
                 confirmButtonText: 'OK',
@@ -313,7 +313,7 @@ const Dashboard = () => {
         if (amountNum < 10) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Minimum Withdrawal 10 Tokens!',
+                title: 'Minimum Withdrawal 10 Tokens!',
                 text: `You entered ${tokenPayoutAmount} tokens. Minimum withdrawal is 10 tokens.`,
                 confirmButtonColor: '#667eea',
                 confirmButtonText: 'OK, Got it!',
@@ -400,7 +400,7 @@ const Dashboard = () => {
 
             Swal.fire({
                 icon: 'error',
-                title: '⚠️ Server Error!',
+                title: 'Server Error!',
                 text: errorMsg,
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Try Again',
@@ -416,7 +416,7 @@ const Dashboard = () => {
         if (!tokenPayoutAmount || isNaN(amountNum) || amountNum <= 0) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Invalid Amount!',
+                title: 'Invalid Amount!',
                 text: 'Please enter a valid token amount.',
                 confirmButtonColor: '#667eea',
                 confirmButtonText: 'OK',
@@ -427,7 +427,7 @@ const Dashboard = () => {
         if (amountNum < 10) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Minimum Withdrawal 10 Tokens!',
+                title: 'Minimum Withdrawal 10 Tokens!',
                 text: `You entered ${tokenPayoutAmount} tokens. Minimum withdrawal is 10 tokens.`,
                 confirmButtonColor: '#667eea',
                 confirmButtonText: 'OK, Got it!',
@@ -593,7 +593,7 @@ const Dashboard = () => {
         if (amountNum < 10) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Minimum Withdrawal $10!',
+                title: 'Minimum Withdrawal $10!',
                 text: `You entered $${selfPayoutAmount || 0}. Minimum withdrawal amount is $10.`,
                 confirmButtonColor: '#667eea',
                 confirmButtonText: 'OK, Got it!',
@@ -660,7 +660,7 @@ const Dashboard = () => {
             console.error('Payout error:', error);
             Swal.fire({
                 icon: 'error',
-                title: '⚠️ Error!',
+                title: 'Error!',
                 text: error.response?.data?.message || 'Server error. Please try again.',
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'OK',
@@ -706,7 +706,7 @@ const Dashboard = () => {
         if (amountNum < minimumWithdraw) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Minimum Withdrawal $10!',
+                title: 'Minimum Withdrawal $10!',
                 text: `You entered $${withdrawAmount}. Minimum withdrawal amount is $10.`,
                 confirmButtonColor: '#667eea',
                 confirmButtonText: 'OK, Got it!',
@@ -787,7 +787,7 @@ const Dashboard = () => {
 
             Swal.fire({
                 icon: 'error',
-                title: '⚠️ Server Error!',
+                title: 'Server Error!',
                 text: errorMsg,
                 confirmButtonColor: '#d33',
                 confirmButtonText: 'Try Again',
@@ -808,7 +808,7 @@ const Dashboard = () => {
         if (!selfPayoutAmount || isNaN(amountNum) || amountNum <= 0) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Invalid Amount!',
+                title: 'Invalid Amount!',
                 text: 'Please enter a valid amount.',
                 confirmButtonColor: '#667eea',
                 confirmButtonText: 'OK',
@@ -820,7 +820,7 @@ const Dashboard = () => {
         if (amountNum < 10) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Minimum Withdrawal $10!',
+                title: 'Minimum Withdrawal $10!',
                 text: `You entered $${selfPayoutAmount}. Minimum withdrawal amount is $10.`,
                 confirmButtonColor: '#667eea',
                 confirmButtonText: 'OK, Got it!',
@@ -853,7 +853,7 @@ const Dashboard = () => {
         if (!payoutAmount || isNaN(amountNum) || amountNum <= 0) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Invalid Amount!',
+                title: 'Invalid Amount!',
                 text: 'Please enter a valid amount.',
                 confirmButtonColor: '#667eea',
                 confirmButtonText: 'OK',
@@ -865,7 +865,7 @@ const Dashboard = () => {
         if (amountNum < 10) {
             Swal.fire({
                 icon: 'warning',
-                title: '⚠️ Minimum Withdrawal $10!',
+                title: 'Minimum Withdrawal $10!',
                 text: `You entered $${payoutAmount}. Minimum withdrawal amount is $10.`,
                 confirmButtonColor: '#667eea',
                 confirmButtonText: 'OK, Got it!',
@@ -2447,7 +2447,7 @@ const Dashboard = () => {
 
                                     <div className='mt-3 ms-1'>
                                         <span style={{ fontSize: '12px', color: 'red' }}>
-                                            ⚠️ Note: Minimum Withdraw Limit $10
+                                            Note: Minimum Withdraw Limit $10
                                         </span>
                                     </div>
                                 </div>
@@ -2683,7 +2683,7 @@ const Dashboard = () => {
                                             fontSize: '12px',
                                             color: 'red',
                                         }}>
-                                            ⚠️ Note: Minimum Withdraw Limit 10 Tokens
+                                            Note: Minimum Withdraw Limit 10 Tokens
                                         </span>
                                     </div>
                                 </div>

@@ -3,6 +3,7 @@ import { FaArrowDown, FaRobot, FaShareNodes } from "react-icons/fa6";
 import { Link, useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import QRModal from '../../Pages/dashboard/QRModal';
+import smalldashboardlogo from '../../assets/images/logo/favicon-01.png'
 
 const userProfileImage = "https://bootstrapdemos.adminmart.com/modernize/dist/assets/images/profile/user-1.jpg";
 
@@ -55,9 +56,22 @@ const Header = ({ toggleSidebar }) => {
       />
 
       <div className="topbar px-4">
-        <nav className="navbar navbar-expand p-0"> {/* Changed from navbar-expand-lg to navbar-expand */}
+        <nav className="navbar navbar-expand p-0">
+          <ul className="navbar-nav d-block d-sm-none">
+            <li className="nav-item nav-icon-hover-bg rounded-circle ms-n2">
+              <Link to="/dashboard">
+                <button
+                  className="nav-link sidebartoggler"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                  <img src={smalldashboardlogo} />
+                </button>
+              </Link>
+            </li>
+          </ul>
+
           {/* Left side - Menu Icon for Sidebar Toggle */}
-          <ul className="navbar-nav">
+          <ul className="navbar-nav ms-3 ms-ms-0">
             <li className="nav-item nav-icon-hover-bg rounded-circle ms-n2">
               <button
                 className="nav-link sidebartoggler"
@@ -71,6 +85,9 @@ const Header = ({ toggleSidebar }) => {
 
 
 
+
+
+
           {/* Right Side Dropdowns - Always visible */}
           <div className="d-flex align-items-center ms-auto">
 
@@ -79,28 +96,28 @@ const Header = ({ toggleSidebar }) => {
             <ul className="navbar-nav flex-row align-items-center" style={{ flexDirection: 'row', display: 'flex' }}>
 
 
-     <a href="/ApexmindAI.apk" download>
-  <li className="nav-item ">
-    <div
-      className="btn01"
-      style={{
-        width: "45px",
-        height: "45px",
-        borderRadius: "50%",
-        border: "none",
-        background: 'var(--bs-primary-bg-subtle)',
-        color: "#3e51a5",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: "20px",
-        cursor: "pointer",
-      }}
-    >
-      <FaArrowDown />
-    </div>
-  </li>
-</a>
+              <a href="/ApexmindAI.apk" download>
+                <li className="nav-item ">
+                  <div
+                    className="btn01"
+                    style={{
+                      width: "45px",
+                      height: "45px",
+                      borderRadius: "50%",
+                      border: "none",
+                      background: 'var(--bs-primary-bg-subtle)',
+                      color: "#3e51a5",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "20px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <FaArrowDown />
+                  </div>
+                </li>
+              </a>
 
 
 

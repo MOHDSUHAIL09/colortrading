@@ -28,7 +28,7 @@ const BotTrading = () => {
     const [countdown, setCountdown] = useState(" ");
     const [apiBotStatus, setApiBotStatus] = useState(null);
     const [loading, setLoading] = useState(true);
-    const regno = sessionStorage.getItem('Regno') || 1;
+    const regno = sessionStorage.getItem('Regno') ;
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null);
     const { refreshData } = useUser();
@@ -204,7 +204,7 @@ const BotTrading = () => {
             if (response.data?.result === "true") {
                 const status = response.data?.response?.status;
                 setApiBotStatus(status);
-                setBotStatus(prev => ({ ...prev, isRunning: status === 0 }));
+                setBotStatus(prev => ({ ...prev, isRunning: status === 2 }));
             } else {
                 setApiBotStatus(1);
             }
@@ -220,16 +220,16 @@ const BotTrading = () => {
     const handleSlotSelect = (slot) => {
         setSelectedSlot(slot);
         setShowDropdown(false);
-        toast.info(`⏱️ ${slot} Hours selected!`);
+        toast.info(` ${slot} Hours selected!`);
     };
 
     const handleStartBot = async () => {
         if (apiBotStatus === 0 || botStatus.isRunning) {
-            toast.warning('⚠️ Bot is already running!');
+            toast.warning(' Bot is already running!');
             return;
         }
         if (!selectedSlot) {
-            toast.warning('⚠️ Please select a slot first!');
+            toast.warning(' Please select a slot first!');
             return;
         }
 
@@ -269,27 +269,36 @@ const BotTrading = () => {
             currencyRate: parseFloat(dynamicCurrencyRate.toFixed(4)),
             slot: selectedSlot
         };
-
         setIsSubmitting(true);
-        try {
-            const response = await apiClient.post('/Trading/BotTrading', payload);
-            if (response.data?.result === "true") {
-                toast.success(`🤖 Bot started successfully for ${selectedSlot} hours with ${finalCurrency}!`);
-                await refreshData();
-                setBotStatus({ isRunning: true, progress: 0 });
-                setApiBotStatus(0);
-                setIsRoundActive(true);
-                setRoundStartIndex(chartData.length - 1);
-                setRoundStartPrice(chartData[chartData.length - 1]);
-                fetchBotStatus();
-            } else {
-                toast.error(response.data?.message || ' Failed to start bot');
-            }
-        } catch (error) {
-            toast.error(' Failed to start bot');
-        } finally {
-            setIsSubmitting(false);
+       try {
+    const response = await apiClient.post('/Trading/BotTrading', payload);
+
+    if (response.data?.result === "true") {
+        toast.success(`Bot started successfully for ${selectedSlot} hours with ${finalCurrency}!`);
+        await refreshData();
+        setBotStatus({ isRunning: true, progress: 0 });
+        setApiBotStatus(0);
+        setIsRoundActive(true);
+
+        if (chartData.length > 0) {
+            const lastIndex = chartData.length - 1;
+            setRoundStartIndex(lastIndex);
+            setRoundStartPrice(chartData[lastIndex]);
         }
+
+        fetchBotStatus();
+    } else {
+        toast.error(response.data?.message);
+    }
+} catch (error) {
+    toast.error(
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong"
+    );
+} finally {
+    setIsSubmitting(false);
+}
     };
 
     return (
