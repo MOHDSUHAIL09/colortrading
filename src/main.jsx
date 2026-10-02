@@ -5,7 +5,7 @@ import App from './App.jsx'
 
 import './App.css'
 import './assets/Main.css'
-import './index.css'
+import './assets/Index.css'
 
 import '@rainbow-me/rainbowkit/styles.css'
 import { RainbowKitProvider, getDefaultConfig, darkTheme } from '@rainbow-me/rainbowkit'
