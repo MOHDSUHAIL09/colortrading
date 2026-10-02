@@ -4,8 +4,8 @@ import { UserProvider } from './context/UserContext'
 import App from './App.jsx'
 
 import './App.css'
-import './assets/Main.css'
-import './assets/Index.css'
+import './assets/css/Main.css'
+import './assets/css/Index.css' 
 
 import '@rainbow-me/rainbowkit/styles.css'
 import { RainbowKitProvider, getDefaultConfig, darkTheme } from '@rainbow-me/rainbowkit'

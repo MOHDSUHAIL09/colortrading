@@ -27,7 +27,6 @@ import DashboardSkeleton from '../Componenets/SkeletonLoader/DashboardSkeleton';
 import { useUser } from '../context/UserContext';
 import SelfTradingHistory from '../Pages/dashboard/SelfTradingHistory';
 import IncomePayOutHistory from '../Pages/dashboard/IncomePayOutHistory'
-import '../assets/Main.css'
 import Reward from '../Pages/dashboard/Reward';
 import FundDepositStatus from '../Pages/dashboard/FundDepositStatus';
 import Game from '../Componenets/game/Game';

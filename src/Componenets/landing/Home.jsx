@@ -76,7 +76,7 @@ import task2 from '../../assets/img/task/tast2.jpg';
 import robotVideo from '../../assets/video/robort.mp4';
 
 
-import '../../assets/landingcss.css'
+import '../../assets/css/landingcss.css'
 const LandingPage = () => {
   return (
     <>
