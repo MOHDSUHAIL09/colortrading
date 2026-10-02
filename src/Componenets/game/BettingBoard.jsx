@@ -91,7 +91,7 @@ export const BettingBoard = ({
         </div>
 
         {/* Number Balls Grid (0 to 9) */}
-        <div className="bg-[#f6f7f9] p-3 rounded-2xl grid grid-cols-5 gap-y-3 gap-x-1.5 border border-gray-100/70">
+        <div className="bg-[#f6f7f9] p-0 rounded-2xl grid grid-cols-5 gap-y-3 gap-x-1.5 border border-gray-100/70">
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
             return (
               <div key={num} className="flex flex-col items-center">
