@@ -11,15 +11,12 @@ const SocialTaskReport = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [totalRecords, setTotalRecords] = useState(0);
 
-    // Pagination state
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [transtype, setTranstype] = useState('All');
 
-    // Get regno from sessionStorage
     const regno = sessionStorage.getItem('Regno');
 
-    // Format Date
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         const date = new Date(dateString);
@@ -32,7 +29,6 @@ const SocialTaskReport = () => {
         });
     };
 
-    // Fetch Social Task Report Data
     const fetchSocialTaskReport = async () => {
         if (!regno) {
             toast.error('Registration number not found');
@@ -46,7 +42,6 @@ const SocialTaskReport = () => {
                 `/Dashboard/SocialTaskReport?regno=${regno}&transtype=${transtype}&pageIndex=${pageIndex}&pageSize=${itemsPerPage}`);
 
             const data = response.data;
-            console.log("API Response:", data);
 
             if (data.result === "true") {
                 const historyData = data.response?.data || [];
@@ -71,7 +66,6 @@ const SocialTaskReport = () => {
         fetchSocialTaskReport();
     }, [pageIndex, itemsPerPage, transtype]);
 
-    // Filter records based on search term (local search)
     const filteredRecords = records.filter((row) => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -83,13 +77,11 @@ const SocialTaskReport = () => {
         );
     });
 
-    // Pagination logic
     const totalItems = filteredRecords.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (pageIndex - 1) * itemsPerPage;
     const currentRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
 
-    // Reset to first page when search term or items per page changes
     useEffect(() => {
         setPageIndex(1);
     }, [searchTerm, itemsPerPage, transtype]);
@@ -103,17 +95,17 @@ const SocialTaskReport = () => {
         "Status",
     ];
 
-    // Get Status Badge
+    // ===== Status Badge (navy theme) =====
     const getStatusBadge = (status) => {
         switch (status?.toLowerCase()) {
             case 'completed':
-                return <span className="badge bg-success">✅ Completed</span>;
+                return <span className="stb-badge stb-badge-success">✓ Completed</span>;
             case 'pending':
-                return <span className="badge bg-warning text-dark"> Pending</span>;
+                return <span className="stb-badge stb-badge-warning">Pending</span>;
             case 'failed':
-                return <span className="badge bg-danger"> Failed</span>;
+                return <span className="stb-badge stb-badge-danger">✕ Failed</span>;
             default:
-                return <span className="badge bg-secondary">{status || 'Pending'}</span>;
+                return <span className="stb-badge stb-badge-neutral">{status || 'Pending'}</span>;
         }
     };
 
@@ -121,42 +113,47 @@ const SocialTaskReport = () => {
         <>
             <ToastContainer position="top-right" />
             <div className="Table-container royalty-main-wrapper mb-5 p-4">
-                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-                    <h3 className="mb-0 text-dark">Social Task Report</h3>
+
+                {/* ===== HEADER CARD ===== */}
+                <div className="dh-header-card">
+                    <div className="dh-header-icon">
+                        <i className="ti ti-brand-instagram"></i>
+                    </div>
+                    <div className="dh-header-texts">
+                        <h2>Social Task Report</h2>
+                        <p>View your social media task history</p>
+                    </div>
                 </div>
 
-                {/* Filters Row - Show entries and Search */}
-                <div className="d-flex justify-content-between align-items-center mb-3 gap-3 entries-search-bar">
-                    {/* Show Entries */}
-                    <div className="entries-control d-flex align-items-center gap-2">
-                        <label className="text-dark mb-0">Show entries:</label>
-                        <select 
-                            className="form-select" 
-                            value={itemsPerPage} 
+                {/* ===== FILTERS BAR ===== */}
+                <div className="dh-filters-bar">
+                    <div className="dh-filter-item">
+                        <label className="dh-filter-label">Show entries:</label>
+                        <select
+                            className="dh-select"
+                            value={itemsPerPage}
                             onChange={e => {
                                 setItemsPerPage(Number(e.target.value));
                                 setPageIndex(1);
                             }}
-                            style={{ width: '80px' }}
                         >
                             {[10, 25, 50, 75, 100].map(n => <option key={n} value={n}>{n}</option>)}
                         </select>
                     </div>
 
-
-                    {/* Search Records */}
-                    <div className="search-wrapper">
+                    <div className="dh-search-wrap">
+                        <i className="ti ti-search dh-search-icon"></i>
                         <input
-                            className="form-control search-input"
-                            placeholder="🔍 Search records..."
+                            className="dh-search-input"
+                            placeholder="Search records..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            style={{ width: '250px' }}
                         />
                     </div>
                 </div>
 
-                <div className="report-card">
+                {/* ===== TABLE CARD ===== */}
+                <div className="dh-table-card">
                     <CustomTable columns={columns} loading={loading}>
                         {currentRecords.length > 0 ? (
                             currentRecords.map((row, index) => (
@@ -167,28 +164,23 @@ const SocialTaskReport = () => {
                                         </div>
                                     </td>
                                     <td>
-                                        <strong className="text-primary">{row.AppName || '-'}</strong>
+                                        <strong className="stb-app-name">{row.AppName || '-'}</strong>
                                     </td>
                                     <td>
-                                        <a 
-                                            href={row.Url} 
-                                            target="_blank" 
+                                        <a
+                                            href={row.Url}
+                                            target="_blank"
                                             rel="noopener noreferrer"
-                                            style={{ 
-                                                color: "#3b82f6", 
-                                                textDecoration: "none",
-                                                wordBreak: "break-all"
-                                            }}
-                                            onMouseEnter={(e) => e.target.style.textDecoration = "underline"}
-                                            onMouseLeave={(e) => e.target.style.textDecoration = "none"}
+                                            className="stb-url-link"
+                                            title={row.Url || "-"}
                                         >
                                             {row.Url?.length > 50 ? row.Url.substring(0, 50) + '...' : row.Url || '-'}
                                         </a>
                                     </td>
-                                    <td style={{ color: "#10b981", fontWeight: "600" }}>
+                                    <td className="stb-percentage">
                                         {row.Percentage || 0}%
                                     </td>
-                                    <td style={{ color: "#6b7280", fontSize: "13px" }}>
+                                    <td className="stb-date">
                                         {formatDate(row.EntryDate)}
                                     </td>
                                     <td>
@@ -205,7 +197,6 @@ const SocialTaskReport = () => {
                         )}
                     </CustomTable>
 
-                    {/* Pagination Component */}
                     {totalPages > 1 && (
                         <Pagination
                             currentPage={pageIndex}

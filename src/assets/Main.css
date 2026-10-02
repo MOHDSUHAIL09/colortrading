@@ -10,6 +10,43 @@
 
 :root,
 [data-bs-theme=light] {
+
+  --apex-gradient: linear-gradient(90deg,
+      #0878ff 0%, #204af3db 35%, #5422e8ec 70%, #e91bea 100%);
+      --tcolor: rgba(255, 255, 255, 1);
+  --backtop: linear-gradient(90deg,
+      #0b101f 0%, #0e1d4f 50%, #091848 100%);
+  --cardcolor: linear-gradient(90deg,
+      #0d2672 0%, #092da2 100%);
+  --dash-welcome-bg: linear-gradient(135deg,
+      #293e89 0%, #060d86 50%, #2303b0 100%);
+  --dash-inner-bg: linear-gradient(135deg,
+      rgba(13, 31, 92, 0.85), rgba(8, 21, 66, 0.9));
+--dash-border: linear-gradient(
+  135deg,
+  #00d9ff 0%,
+  #0878ff 35%,
+  #5422e8 70%,
+  #e91bea 100%
+);
+  --dash-text-primary: #ffffff;
+  --dash-text-secondary: #a9b7d6;
+  --dash-accent: #00e5a0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   --table-header: rgb(229, 235, 245);
   --bs-blue: #5D87FF;
   --bs-indigo: #6610f2;
@@ -208,17 +245,15 @@
   --bs-form-invalid-border-color: rgb(252, 184.2, 166.2);
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+
 
 @media (prefers-reduced-motion: no-preference) {
   :root {
     scroll-behavior: smooth;
   }
 }
+
+
 
 .btn-primary {
   display: inline-flex;
@@ -585,7 +620,6 @@
 .top-100 {
   top: 100% !important;
 }
-
 .bottom-0 {
   bottom: 0 !important;
 }
@@ -8428,16 +8462,6 @@ ul {
 
 
 
-
-
-
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 /* Main Wrapper */
 .app-wrapper {
   display: flex;
@@ -8505,10 +8529,6 @@ ul {
   padding: 15px 0;
 }
 
-.app-wrapper.sidebar-collapsed .fixed-profile .john-title,
-.app-wrapper.sidebar-collapsed .fixed-profile button {
-  display: none;
-}
 
 .app-wrapper.sidebar-collapsed .fixed-profile .hstack {
   justify-content: center;
@@ -8523,6 +8543,7 @@ ul {
   display: flex;
   flex-direction: column;
   width: calc(100% - 260px);
+ 
 }
 
 .app-wrapper.sidebar-collapsed .main-wrapper {
@@ -8572,8 +8593,7 @@ ul {
   transition: background 0.2s;
   background: none;
   border: none;
-  background: var(--bs-primary-bg-subtle) !important;
-  color: #001138;
+  /* background: var(--bs-primary-bg-subtle) !important; */
 }
 
 /* .nav-link:hover {
@@ -8589,7 +8609,7 @@ ul {
 /* ========== MAIN CONTENT ========== */
 .main-content {
   padding: 12px;
-  background: #f5f5f5;
+  background: #0a032a;
   flex: 1;
   transition: all 0.3s ease;
 }
@@ -8791,7 +8811,7 @@ ul {
   }
   
   .left-sidebar.mobile-open .fixed-profile .john-title,
-  .left-sidebar.mobile-open .fixed-profile button {
+  .left-sidebar.mobile-open .fixed-profile  {
     display: block !important;
   }
   
@@ -8800,6 +8820,7 @@ ul {
   .app-wrapper.sidebar-collapsed .main-wrapper {
     margin-left: 0 !important;
     width: 100% !important;
+      background-color: #000C29 !important;
   }
   
   /* Mobile close button */
@@ -9571,405 +9592,425 @@ ul {
 }
 
 
+/* ============================================
+   FUND TRANSFER — Navy Theme
+   ============================================ */
 
-/* DepositToDeposit.css */
-.deposit-to-deposit-container {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-    min-height: 100vh;
-}
-/* Transfer Card */
-.transfer-card {
-    background: #ffffff;
-    border-radius: 24px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    height: 100%;
+.fundtransfer-page {
+  padding: 20px 24px 40px;
+  background: transparent;
 }
 
-.transfer-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+/* ===== CARD ===== */
+.ft-card {
+  background: linear-gradient(135deg, #0d1f5c 0%, #081542 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(120, 90, 255, 0.35);
+  box-shadow: 0 4px 20px rgba(84, 32, 245, 0.2);
+  overflow: hidden;
+  position: relative;
+  height: 100%;
 }
 
-/* Card Header */
-.transfer-card-header {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    padding: 1.25rem 1.5rem;
-    border-bottom: 2px solid #e9ecef;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.ft-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(160, 120, 255, 0.7), transparent);
 }
 
-.transfer-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+/* ===== CARD HEADER ===== */
+.ft-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(120, 160, 255, 0.15);
+  flex-wrap: wrap;
 }
 
-.transfer-title h5 {
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 0;
+.ft-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.transfer-icon {
-    color: #007bff;
+.ft-title h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
 }
 
-.history-icon {
-    cursor: pointer;
-    color: #6c757d;
-    transition: all 0.2s ease;
+.ft-icon {
+  color: #b794ff;
 }
 
-.history-icon:hover {
-    color: #f909f9 !important;
-    transform: scale(1.1);
+.ft-icon-blue {
+  color: #4dabff;
 }
 
-/* Card Body */
-.transfer-card-body {
-    padding: 1.5rem;
-}
-
-.income-wallet {
-    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-}
-
-.deposit-wallet {
-    background: linear-gradient(135deg, #e3f2fd, #bbdef5);
-}
-
-.wallet-label {
-    font-weight: 600;
-    color: #495057;
-    font-size: 0.9rem;
-}
-
-.wallet-amount {
-    font-size: 1.5rem;
-    font-weight: 800;
-}
-
-/* Form Styles */
-.transfer-form {
-    display: flex;
-    flex-direction: column;
-    /* gap: 1.25rem; */
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.form-label {
-    font-weight: 700;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #6c757d;
-    margin: 0;
-}
-
-/* Amount Input Wrapper */
-.amount-input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.currency-sign {
-    position: absolute;
-    left: 1rem;
-    color: #6c757d;
-    font-weight: 600;
-    z-index: 1;
-}
-
-.amount-input-field {
-    width: 100%;
-    padding: 0.575rem 1rem 0.575rem 2rem;
-    border-radius: 14px;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    background: #ffffff;
-}
-
-.amount-input-field:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-}
-
-.clear-input-btn {
-    position: absolute;
-    right: 0.75rem;
-    background: #f8f9fa;
-    border: none;
-    border-radius: 10px;
-    padding: 0.25rem 0.5rem;
-    cursor: pointer;
-    color: #dc3545;
-    transition: all 0.2s ease;
-}
-
-.clear-input-btn:hover {
-    background: #dc3545;
-    color: white;
-}
-
-/* Form Control */
-.form-control-field,
-.form-control-readonly {
-    width: 100%;
-    padding: 0.575rem 1rem;
-    border: 2px solid #e9ecef;
-    border-radius: 14px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-
-.form-control-field:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-}
-
-.form-control-readonly {
-    background: #f8f9fa;
-    color: #495057;
-    font-weight: 500;
-    cursor: not-allowed;
-}
-
-/* Quick Amount Grid - 2 on mobile, 3 on desktop */
-.quick-amount-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-}
-
-@media (min-width: 992px) {
-    .quick-amount-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-.quick-amount-btn {
-    padding: 0.625rem 0.5rem;
-    border: 2px solid #e9ecef;
-    background: white;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 0.9rem;
-    color: #495057;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.quick-amount-btn:hover {
-    background: #f8f9fa;
-    border-color: #007bff;
-    transform: translateY(-2px);
-}
-
-.quick-amount-btn.active {
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    color: white;
-    border-color: #007bff;
-}
-
-/* Range Slider */
-.range-slider-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.range-slider {
-    flex: 1;
-    height: 6px;
-    -webkit-appearance: none;
-    background: #e9ecef;
-    border-radius: 10px;
-    outline: none;
-}
-
-.range-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 20px;
-    height: 20px;
-    background: #007bff;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
-}
-
-.range-value {
-    font-weight: 800;
-    font-size: 1.1rem;
-    color: #007bff;
-    min-width: 80px;
-    text-align: right;
-}
-
-/* OTP Input */
-.otp-input-wrapper {
-    display: flex;
-    gap: 0.75rem;
-}
-
-.otp-input-field {
-    flex: 1;
-    padding: 0.875rem 1rem;
-    border: 2px solid #e9ecef;
-    border-radius: 14px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.otp-input-field:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
-}
-.send-otp-btn {
-    padding: 0.875rem 1.5rem;
-    background: linear-gradient(135deg, #28a745, #1e7e34);
-    color: white;
-    border: none;
-    border-radius: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.send-otp-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
-}
-
-.send-otp-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* Submit Button */
-.submit-transfer-btn {
-    width: 100%;
-    padding: 1rem;
-    background: linear-gradient(135deg, #007bff, #0056b3);
-    color: white;
-    border: none;
-    border-radius: 16px;
-    font-weight: 800;
-    font-size: 1rem;
-    margin-top: 0.5rem;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.submit-transfer-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
-}
-
-.submit-transfer-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-/* Status Messages */
-.status-msg {
-    display: block;
-    font-size: 0.80rem;
-    margin-left: 2px;
-}
-
-.status-msg.success {
-    color: #28a745;
-    font-weight: 600;
-}
-
-.status-msg.error {
-    color: #dc3545;
-    font-weight: 600;
-}
-
-.status-msg.info {
-    color: #17a2b8;
-    font-weight: 600;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .transfer-card-header {
-        padding: 1rem;
-    }
-    
-    .transfer-title h5 {
-        font-size: 0.9rem;
-    }
-    
-    .transfer-card-body {
-        padding: 1rem;
-    }
-    
-    .wallet-amount {
-        font-size: 1.2rem;
-    }
-    
-    .quick-amount-btn {
-        font-size: 0.8rem;
-        padding: 0.5rem 0.25rem;
-    }
-    
-    .otp-input-wrapper {
-        flex-direction: column;
-    }
-    
-    .send-otp-btn {
-        justify-content: center;
-    }
-    
-    .range-slider-wrapper {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .range-value {
-        text-align: left;
-    }
-}
-
-/* Animation */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.transfer-card {
-    animation: fadeInUp 0.4s ease;
-}
-
-.hover:hover{
-  color: #1e7e34;
+.ft-history-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #0878ff 0%, #5420f5 70%, #e91bea 100%);
+  color: #ffffff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(84, 32, 245, 0.4);
+}
+
+.ft-history-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(84, 32, 245, 0.6);
+}
+
+/* ===== CARD BODY ===== */
+.ft-card-body {
+  padding: 20px 22px 24px;
+}
+
+/* ===== WALLET INFO ===== */
+.ft-wallet-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(120, 160, 255, 0.2);
+  border-radius: 10px;
+  margin-bottom: 18px;
+}
+
+.ft-wallet-label {
+  font-size: 13px;
+  color: #a9b7d6;
+  font-weight: 600;
+}
+
+.ft-wallet-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #00e5a0;
+}
+
+.ft-wallet-amount-blue {
+  color: #4dabff;
+}
+
+/* ===== FORM ===== */
+.ft-form-group {
+  margin-bottom: 16px;
+}
+
+.ft-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #a9b7d6;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.ft-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(120, 160, 255, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.ft-input::placeholder {
+  color: #7b8ba8;
+}
+
+.ft-input:focus {
+  border-color: rgba(123, 95, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(123, 95, 255, 0.15);
+}
+
+.ft-input-readonly {
+  color: #b794ff !important;
+  font-weight: 600;
+  cursor: not-allowed;
+  background: rgba(123, 95, 255, 0.08);
+}
+
+/* Status messages */
+.ft-status {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ft-status.info {
+  color: #4dabff;
+}
+
+.ft-status.success {
+  color: #00e5a0;
+}
+
+.ft-status.error {
+  color: #ff6b6b;
+}
+
+/* ===== QUICK AMOUNT ===== */
+.ft-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.ft-quick-btn {
+  padding: 10px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(120, 160, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  color: #a9b7d6;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  outline: none;
+}
+
+.ft-quick-btn:hover {
+  background: rgba(120, 90, 255, 0.15);
+  border-color: rgba(123, 95, 255, 0.5);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.ft-quick-btn.active {
+  background: linear-gradient(135deg, #5467c5, #a855f7);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(123, 95, 255, 0.4);
+}
+
+/* ===== AMOUNT INPUT ===== */
+.ft-amount-wrapper {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(120, 160, 255, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.ft-amount-wrapper:focus-within {
+  border-color: rgba(123, 95, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(123, 95, 255, 0.15);
+}
+
+.ft-currency {
+  padding: 12px 16px;
+  background: rgba(120, 90, 255, 0.15);
+  color: #b794ff;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.ft-amount-field {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.ft-amount-field::placeholder {
+  color: #7b8ba8;
+  font-weight: 500;
+}
+
+.ft-clear-btn {
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  color: #7b8ba8;
+  cursor: pointer;
+  font-size: 20px;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.ft-clear-btn:hover {
+  color: #ff6b6b;
+}
+
+/* ===== OTP ===== */
+.ft-otp-wrap {
+  margin-top: 16px;
+}
+
+.ft-otp-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ft-otp-input {
+  flex: 1;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(120, 160, 255, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.ft-otp-input::placeholder {
+  color: #7b8ba8;
+  font-weight: 500;
+}
+
+.ft-otp-input:focus {
+  border-color: rgba(123, 95, 255, 0.7);
+  box-shadow: 0 0 0 3px rgba(123, 95, 255, 0.15);
+}
+
+.ft-otp-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ft-otp-btn {
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(90deg, #0878ff 0%, #5420f5 70%, #e91bea 100%);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(84, 32, 245, 0.4);
+}
+
+.ft-otp-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(84, 32, 245, 0.6);
+}
+
+.ft-otp-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ft-otp-verify {
+  background: linear-gradient(90deg, #00b873 0%, #00e5a0 100%);
+  box-shadow: 0 4px 14px rgba(0, 229, 160, 0.4);
+}
+
+.ft-otp-verify:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(0, 229, 160, 0.6);
+}
+
+/* ===== SUBMIT BUTTON ===== */
+.ft-submit-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, #0878ff 0%, #5420f5 70%, #e91bea 100%);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 18px rgba(84, 32, 245, 0.45);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.ft-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(84, 32, 245, 0.65);
+}
+
+.ft-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Spinner */
+.ft-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: ft-spin 0.8s linear infinite;
+}
+
+@keyframes ft-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .fundtransfer-page {
+    padding: 14px 12px 30px;
+  }
+
+  .ft-card-header {
+    padding: 14px 16px;
+  }
+
+  .ft-title h5 {
+    font-size: 16px;
+  }
+
+  .ft-card-body {
+    padding: 16px 16px 20px;
+  }
+
+  .ft-quick-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .ft-quick-btn {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+
+  .ft-history-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
 }
 
 
@@ -10628,303 +10669,40 @@ ul {
 
   
 /* ============================================
-   DEPOSIT FUND - FULLY RESPONSIVE
+   DEPOSIT FUND — Navy Theme (Left Aligned, Plain Border)
    ============================================ */
 
+/* ===== MAIN WRAPPER - no center, left align ===== */
 .unique-df-main-wrapper {
-    /* padding: 10px; */
+    padding: 24px;
+    display: block;
+    min-height: 100vh;
+    background: transparent;
 }
 
-.unique-df-card-container {
-    background: white;
-    max-width: 800px;
-    border-radius: 12px;
+/* ===== MAIN CARD - plain border, no gradient ===== */
+.unique-df-card {
+    width: 100%;
+    max-width: 900px;
+    border-radius: 20px;
+    background: #0a1a55;
+    border: 1px solid rgba(120, 160, 255, 0.25);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
 }
 
 /* ===== HEADER ===== */
 .unique-df-top-header {
-    padding: 22px 30px;
+    padding: 22px 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: rgb(46, 46, 46);
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.13);
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.unique-df-header-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex: 1;
-    min-width: 200px;
-}
-
-.unique-df-wallet-bg {
-    background: #657ad8;
-    padding: 10px;
-    border-radius: 10px;
-    flex-shrink: 0;
-}
-
-.unique-df-header-texts h2 {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 600;
-}
-
-.unique-df-header-texts p {
-    margin: 4px 0 0 0;
-    font-size: 13px;
-    opacity: 0.9;
-}
-
-.unique-df-history-btn {
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-
-/* ===== BODY ===== */
-.unique-df-content-body {
-    padding: 40px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-}
-
-/* QR Section */
-.unique-df-qr-section {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
-
-.unique-df-qr-frame {
-    background: rgb(255, 255, 255);
-    padding: 15px;
-    border: 1px solid #e5e7eb;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.unique-df-qr-frame svg {
-    max-width: 100%;
-    height: auto;
-}
-
-.unique-df-scan-pay-badge {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #eff6ff;
-    color: #3b82f6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 8px 25px;
-    border-radius: 10px;
-    border: 1px solid #bfdbfe;
-    margin-top: 192px;
-    white-space: nowrap;
-    font-size: 13px;
-
-}
-
-/* ===== ADDRESS INFO CARD ===== */
-.unique-df-address-info-card {
-    width: 100%;
-    max-width: 650px;
-    background: #f0f7ff;
-    border: 1px solid #dbeafe;
-    border-radius: 12px;
-    padding: 20px;
-    margin-top: 30px;
-}
-
-/* Address Pill - Responsive */
-.unique-df-address-input-pill {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.unique-df-label {
-    font-weight: 700;
-    color: #334155;
-    font-size: 14px;
-    white-space: nowrap;
-}
-
-.unique-df-address-text {
-    font-family: 'Courier New', monospace;
-    font-weight: 700;
-    color: #10b981;
-    font-size: 15px;
-    flex: 1;
-    min-width: 80px;
-    word-break: break-all;
-}
-
-.unique-df-address-actions {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.unique-df-copy-icon-btn {
-    background: #f1f5f9;
-    border: none;
-    padding: 8px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.unique-df-copy-icon-btn:hover {
-    background: #e2e8f0;
-    transform: scale(1.05);
-}
-
-.unique-df-copy-icon-btn:active {
-    transform: scale(0.95);
-}
-
-/* Full Address - Visible on Mobile */
-.unique-df-full-address {
-    margin-top: 12px;
-    padding: 10px 14px;
-    background: white;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.unique-df-full-address-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.unique-df-full-address-text {
-    font-family: 'Courier New', monospace;
-    font-size: 13px;
-    color: #1e293b;
-    word-break: break-all;
-    line-height: 1.4;
-}
-
-/* ===== CONFIRM BUTTON ===== */
-.unique-df-confirm-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-top: 16px;
-}
-
-.unique-df-confirm-btn {
-    width: 100%;
-    gap: 10px;
-    padding: 12px 20px;
-    font-size: 15px;
-}
-
-/* ===== BOTTOM NOTE ===== */
-.unique-df-bottom-note {
-    background: #fef2f2;
-    border: 1px solid #fee2e2;
-    color: #ef4444;
-    padding: 14px 20px;
-    border-radius: 10px;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    width: 100%;
-    max-width: 650px;
-    margin-top: 25px;
-}
-
-.unique-df-bottom-note p {
-    margin: 0;
-    font-size: 13.5px;
-    font-weight: 500;
-    line-height: 1.4;
-}
-
-/* ===== SPINNERS ===== */
-.unique-df-spinner,
-.df-mini-spinner {
-    border: 3px solid rgba(0,0,0,0.1);
-    border-top: 3px solid #3b82f6;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    animation: df-spin 0.8s linear infinite;
-}
-
-.df-mini-spinner {
-    border-top-color: white;
-    width: 20px;
-    height: 20px;
-}
-
-@keyframes df-spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-/* ===== ERROR ===== */
-.unique-df-error-msg {
-    padding: 20px;
-    color: #ef4444;
-    font-weight: 600;
-    text-align: center;
-}
-
-/* ============================================
-   RESPONSIVE BREAKPOINTS
-   ============================================ */
-
-
-/* ============================================
-   DEPOSIT FUND HEADER - FULL RESPONSIVE
-   ============================================ */
-
-.unique-df-top-header {
-    padding: 22px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: rgb(46, 46, 46);
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.13);
     gap: 20px;
     flex-wrap: wrap;
-    background: white;
-    border-bottom: 1px solid #e5e7eb;
+    background: transparent;
+    border-bottom: 1px solid rgba(120, 160, 255, 0.15);
 }
 
-/* Left Section */
 .unique-df-header-left {
     display: flex;
     align-items: center;
@@ -10933,18 +10711,18 @@ ul {
     min-width: 200px;
 }
 
-/* Wallet Icon Background */
 .unique-df-wallet-bg {
-    background: #657ad8;
-    padding: 10px;
-    border-radius: 10px;
+    background: linear-gradient(135deg, #5467c5, #9e64d4) !important;
+    padding: 12px;
+    border-radius: 12px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 15px rgba(110, 84, 218, 0.4);
+    border: none !important;
 }
 
-/* Header Text */
 .unique-df-header-texts {
     flex: 1;
     min-width: 0;
@@ -10953,20 +10731,19 @@ ul {
 .unique-df-header-texts h2 {
     margin: 0;
     font-size: 22px;
-    font-weight: 600;
-    color: #1a2332;
+    font-weight: 700;
+    color: #ffffff !important;
     line-height: 1.2;
 }
 
 .unique-df-header-texts p {
     margin: 4px 0 0 0;
     font-size: 13px;
-    opacity: 0.85;
-    color: #4a5568;
+    color: #a9b7d6 !important;
     line-height: 1.4;
 }
 
-/* History Button */
+/* ===== HISTORY BUTTON ===== */
 .unique-df-history-btn {
     flex-shrink: 0;
     white-space: nowrap;
@@ -10974,163 +10751,357 @@ ul {
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: #657ad8;
-    color: white;
-    border: none;
-    border-radius: 8px;
+    background: linear-gradient(90deg, #0878ff 0%, #5420f5 70%, #e91bea 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 10px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
+    box-shadow: 0 4px 16px rgba(84, 32, 245, 0.4);
 }
 
 .unique-df-history-btn:hover {
-    background: #4f68e0;
-    color: white;
+    color: #ffffff !important;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(101, 122, 216, 0.3);
+    box-shadow: 0 6px 22px rgba(84, 32, 245, 0.6);
 }
 
+/* ===== CONTENT BODY ===== */
+.unique-df-content-body {
+    padding: 30px 24px 34px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+}
 
-/* Mobile Landscape & Tablets */
+/* ===== QR SECTION ===== */
+.unique-df-qr-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.unique-df-qr-frame {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(84, 32, 245, 0.3);
+    border: 2px solid rgba(120, 160, 255, 0.5);
+}
+
+.unique-df-scan-pay-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #0d1f5c, #1e145a);
+    color: #ffffff !important;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid rgba(120, 160, 255, 0.4);
+    box-shadow: 0 0 20px rgba(90, 130, 255, 0.25);
+}
+
+.unique-df-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(120, 160, 255, 0.2);
+    border-top-color: #7b5fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.unique-df-error-msg {
+    color: #ff6b6b !important;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ===== ADDRESS INFO CARD - plain border ===== */
+.unique-df-address-info-card {
+    width: 100%;
+    max-width: 620px;
+    margin-top: 28px;
+    padding: 20px;
+    border-radius: 16px;
+    background: #0d1f5c;
+    border: 1px solid rgba(120, 160, 255, 0.25);
+}
+
+.unique-df-address-input-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(120, 160, 255, 0.25);
+    border-radius: 12px;
+    flex-wrap: wrap;
+}
+
+.unique-df-label {
+    color: #a9b7d6 !important;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.unique-df-address-text {
+    color: #ffffff !important;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.5px;
+    word-break: break-all;
+    flex: 1;
+    text-align: center;
+}
+
+.unique-df-address-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.unique-df-copy-icon-btn {
+    background: rgba(120, 90, 255, 0.15);
+    border: 1px solid rgba(120, 90, 255, 0.4);
+    color: #b794ff;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.unique-df-copy-icon-btn:hover {
+    background: linear-gradient(135deg, #7b5fff, #a855f7);
+    color: #ffffff;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(123, 95, 255, 0.5);
+}
+
+/* ===== CONFIRM SECTION ===== */
+.unique-df-confirm-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.unique-df-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.unique-df-progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s linear;
+}
+
+.unique-df-confirm-btn {
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(90deg, #0878ff 0%, #5420f5 70%, #e91bea 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 18px rgba(84, 32, 245, 0.45);
+}
+
+.unique-df-confirm-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(84, 32, 245, 0.65);
+}
+
+.unique-df-confirm-btn:disabled {
+    opacity: 0.85;
+    cursor: default;
+}
+
+.df-mini-spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* ===== BOTTOM NOTE ===== */
+.unique-df-bottom-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 14px 18px;
+    background: rgba(255, 193, 7, 0.08);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 12px;
+    max-width: 620px;
+    width: 100%;
+}
+
+.unique-df-bottom-note svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: #ffd166 !important;
+}
+
+.unique-df-bottom-note p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #ffd166 !important;
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-    .unique-df-main-wrapper {
-        padding: 10px;
-    }
-    
-    /* ✅ HEADER - ROW MEIN HI RAHEGA, COLUMN NAHI HOGA */
+    .unique-df-main-wrapper { padding: 12px; }
+
+    .unique-df-card { border-radius: 16px; }
+
     .unique-df-top-header {
-        flex-direction: row !important; /* Force row */
+        flex-direction: row !important;
         flex-wrap: wrap;
         align-items: center;
         justify-content: space-between;
-        padding: 12px 16px;
+        padding: 14px 16px;
         gap: 10px;
     }
-    
-    /* ✅ LEFT SECTION - ROW MEIN HI RAHEGA */
+
     .unique-df-header-left {
-        flex-direction: row !important; /* Force row */
+        flex-direction: row !important;
         align-items: center;
-        text-align: left;
         gap: 10px;
         flex: 1;
         min-width: 150px;
     }
-    
+
     .unique-df-wallet-bg {
-        padding: 8px;
-        border-radius: 8px;
+        padding: 9px;
+        border-radius: 10px;
     }
-    
+
     .unique-df-wallet-bg svg {
         width: 20px;
         height: 20px;
     }
-    
-    .unique-df-header-texts h2 {
-        font-size: 16px;
-        margin: 0;
-    }
-    
-    .unique-df-header-texts p {
-        font-size: 11px;
-        margin: 2px 0 0 0;
-        display: none; /* Hide on mobile to save space */
-    }
-    
-    /* ✅ HISTORY BUTTON - ROW MEIN HI RAHEGA */
+
+    .unique-df-header-texts h2 { font-size: 16px; }
+    .unique-df-header-texts p { font-size: 11px; display: none; }
+
     .unique-df-history-btn {
-        flex-shrink: 0;
-        width: auto !important; /* Auto width, not 100% */
-        padding: 6px 12px;
+        padding: 8px 14px;
         font-size: 12px;
-        justify-content: center;
-        gap: 4px;
+        gap: 6px;
     }
-    
+
     .unique-df-history-btn svg {
         width: 14px;
         height: 14px;
     }
-    
-    .unique-df-history-btn span {
-        font-size: 12px;
-    }
-    
-    /* Other Styles */
-    .unique-df-content-body {
-        padding: 20px 12px;
-    }
-    
-    .unique-df-qr-frame {
-        padding: 12px;
-    }
-    
-    .unique-df-scan-pay-badge {
-        font-size: 11px;
-        padding: 6px 16px;
-        gap: 6px;
-    }
-    
-    .unique-df-address-info-card {
-        padding: 15px;
-        margin-top: 20px;
-    }
-    
+
+    .unique-df-content-body { padding: 20px 14px 24px; }
+    .unique-df-qr-frame { padding: 12px; }
+    .unique-df-qr-frame svg { width: 150px !important; height: 150px !important; }
+
+    .unique-df-address-info-card { padding: 16px; }
+
     .unique-df-address-input-pill {
         flex-direction: column;
         align-items: stretch;
-        gap: 8px;
-        padding: 12px;
-    }
-    
-    .unique-df-label {
-        text-align: center;
-        font-size: 13px;
-    }
-    
-    .unique-df-address-text {
-        text-align: center;
-        font-size: 14px;
-        word-break: break-all;
-    }
-    
-    .unique-df-address-actions {
-        justify-content: center;
         gap: 10px;
     }
-    
-    .unique-df-copy-icon-btn {
-        padding: 10px 16px;
-    }
-    
-    .unique-df-full-address {
-        margin-top: 10px;
-        padding: 8px 12px;
-    }
-    
-    .unique-df-full-address-text {
-        font-size: 11px;
-    }
-    
+
+    .unique-df-label,
+    .unique-df-address-text { text-align: center; }
+
+    .unique-df-address-actions { justify-content: center; }
+
     .unique-df-confirm-btn {
         font-size: 14px;
-        padding: 10px 16px;
-    }
-    
-    .unique-df-bottom-note {
         padding: 12px 16px;
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 10px;
     }
-    
-    .unique-df-bottom-note p {
-        font-size: 12px;
-    }
+
+    .unique-df-bottom-note { padding: 12px 14px; }
+    .unique-df-bottom-note p { font-size: 12px; }
 }
 
 
+/* ✅ Override Bootstrap Reboot for Tailwind rounded buttons */
+button.rounded-full,
+button[class*="rounded-full"] {
+  border-radius: 9999px !important;
+}
+
+/* Ya sab buttons ke liye default */
+button {
+  border-radius: inherit;
+}
+
+
+
+.swiper,
+.swiper-wrapper,
+.swiper-slide {
+  /* height: 295px !important; */
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  filter: none !important;
+}
+
+.swiper-slide img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  box-shadow: none !important;
+}
+
+.swiper-slide {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 👇 Swiper cube effect ke internal shadows band */
+.swiper-cube-shadow,
+.swiper-cube .swiper-cube-shadow {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+.swiper-cube .swiper-slide::before,
+.swiper-cube .swiper-slide::after {
+  display: none !important;
+  opacity: 0 !important;
+}
 

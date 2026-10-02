@@ -1,9 +1,10 @@
-// WithdrawReport.jsx - Exact copy of InvestmentHistory style
+// IncomePayOutHistory.jsx
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../api/apiClient";
 import CustomTable from "../../Componenets/ui/customtable/CustomTable";
 import Pagination from "../../Componenets/ui/pagination/Pagination";
+
 
 const IncomePayOutHistory = () => {
     const [records, setRecords] = useState([]);
@@ -51,7 +52,6 @@ const IncomePayOutHistory = () => {
         fetchWithdrawReport();
     }, [regno]);
 
-    // Filter records
     const filteredRecords = records.filter((row) => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -77,23 +77,19 @@ const IncomePayOutHistory = () => {
         setCurrentPage(1);
     };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return "-";
-        return dateString;
-    };
-
     const formatAmount = (amount) => {
         if (!amount && amount !== 0) return "-";
         return `$${Number(amount).toFixed(2)}`;
     };
 
-    const getStatusBadge = (status) => {
-        if (!status) return "secondary";
+    // ✅ Status badge class - navy theme
+    const getStatusBadgeClass = (status) => {
+        if (!status) return "ip-badge-neutral";
         const type = status.toLowerCase();
-        if (type.includes('success') || type.includes('approved') || type.includes('completed')) return "success";
-        if (type.includes('pending')) return "warning";
-        if (type.includes('rejected') || type.includes('failed') || type.includes('cancel')) return "danger";
-        return "secondary";
+        if (type.includes('success') || type.includes('approved') || type.includes('completed')) return "ip-badge-success";
+        if (type.includes('pending')) return "ip-badge-warning";
+        if (type.includes('rejected') || type.includes('failed') || type.includes('cancel')) return "ip-badge-danger";
+        return "ip-badge-neutral";
     };
 
     const columns = [
@@ -106,16 +102,22 @@ const IncomePayOutHistory = () => {
         "Status"
     ];
 
-    // Login required error
+    // ===== Login required error =====
     if (error === "Please login to view your withdrawal history") {
         return (
             <div className="Table-container downline-main-wrapper report-container p-2 p-md-4 mb-5">
-                <div className="mb-3">
-                    <h2>Withdrawal Report</h2>
+                <div className="dh-header-card">
+                    <div className="dh-header-icon">
+                        <i className="ti ti-cash-banknote"></i>
+                    </div>
+                    <div className="dh-header-texts">
+                        <h2>Withdrawal Report</h2>
+                        <p>View your withdrawal transaction records</p>
+                    </div>
                 </div>
-                <div className="alert alert-warning shadow-sm rounded-3" role="alert">
-                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                    {error}
+                <div className="ip-error-alert ip-error-warning">
+                    <i className="ti ti-alert-triangle"></i>
+                    <span>{error}</span>
                 </div>
             </div>
         );
@@ -124,12 +126,18 @@ const IncomePayOutHistory = () => {
     if (error) {
         return (
             <div className="Table-container downline-main-wrapper report-container p-2 p-md-4 mb-5">
-                <div className="mb-3">
-                    <h2>PayOut Report</h2>
+                <div className="dh-header-card">
+                    <div className="dh-header-icon">
+                        <i className="ti ti-cash-banknote"></i>
+                    </div>
+                    <div className="dh-header-texts">
+                        <h2>PayOut Report</h2>
+                        <p>View your payout transaction records</p>
+                    </div>
                 </div>
-                <div className="alert alert-danger shadow-sm rounded-3" role="alert">
-                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                    {error}
+                <div className="ip-error-alert ip-error-danger">
+                    <i className="ti ti-alert-circle"></i>
+                    <span>{error}</span>
                 </div>
             </div>
         );
@@ -137,118 +145,115 @@ const IncomePayOutHistory = () => {
 
     return (
         <div className="Table-container downline-main-wrapper report-container p-2 p-md-4 mb-5">
-            {/* Heading */}
-            <div className="mb-3">
-                <h2>Income Payout History</h2>
-            </div>
 
-            {/* Search and Items per page */}
-            <div className="entries-search-bar entries-control mb-3">
-                <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <div className="d-flex align-items-center gap-2">
-                        <label className="fw-semibold">Show entries:</label>
-                        <select
-                            className="form-select w-auto"
-                            value={itemsPerPage}
-                            onChange={handleItemsPerPageChange}
-                            style={{
-                                borderRadius: "8px",
-                                border: "1px solid rgba(102, 126, 234, 0.2)",
-                            }}
-                        >
-                            <option value={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                            <option value={75}>75</option>
-                            <option value={100}>100</option>
-                        </select>
-                    </div>
-
-                    <div className="d-flex align-items-center gap-2">
-                        <input
-                            className="form-control"
-                            placeholder="Search records..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{
-                                minWidth: "250px",
-                                borderRadius: "8px",
-                                border: "1px solid rgba(102, 126, 234, 0.2)",
-                                padding: "8px 12px",
-                            }}
-                        />
-                    </div>
+            {/* ===== HEADER CARD ===== */}
+            <div className="dh-header-card">
+                <div className="dh-header-icon">
+                    <i className="ti ti-cash-banknote"></i>
+                </div>
+                <div className="dh-header-texts">
+                    <h2>Income Payout History</h2>
+                    <p>View your payout transaction records</p>
                 </div>
             </div>
 
-            {/* Table */}
-            <CustomTable columns={columns} loading={loading}>
-                {currentRecords.length > 0 ? (
-                    currentRecords.map((row, index) => (
-                        <tr key={index}>
-                            <td className="text-center">
-                                <div className="sr-no-circle">
-                                    {startIndex + index + 1}
-                                </div>
-                            </td>
-                            <td>{row.TransDate ? new Date(row.TransDate).toLocaleString("en-GB") : "-"}</td>
-                            <td>
-                                {row.debit > 0 ? (
-                                    <span className="badge bg-success px-3 py-2 rounded-pill">
-                                        {formatAmount(row.debit)}
-                                    </span>
-                                ) : (
-                                    <span className="text-muted">-</span>
-                                )}
-                            </td>
-                            <td>
-                                {row.handlingcharge > 0 ? (
-                                    <span className="badge bg-danger px-3 py-2 rounded-pill">
-                                        {formatAmount(row.handlingcharge)}
-                                    </span>
-                                ) : (
-                                    <span className="text-muted">-</span>
-                                )}
-                            </td>
-                            <td>
-                                {row.netPayable > 0 ? (
-                                    <span className="badge bg-primary px-3 py-2 rounded-pill">
-                                        {formatAmount(row.netPayable)}
-                                    </span>
-                                ) : (
-                                    <span className="text-muted">-</span>
-                                )}
-                            </td>
-                            <td>
-                                <span style={{ fontSize: '0.9rem' }}>
+            {/* ===== FILTERS BAR ===== */}
+            <div className="dh-filters-bar">
+                <div className="dh-filter-item">
+                    <label className="dh-filter-label">Show entries:</label>
+                    <select
+                        className="dh-select"
+                        value={itemsPerPage}
+                        onChange={handleItemsPerPageChange}
+                    >
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                        <option value={75}>75</option>
+                        <option value={100}>100</option>
+                    </select>
+                </div>
+
+                <div className="dh-search-wrap">
+                    <i className="ti ti-search dh-search-icon"></i>
+                    <input
+                        className="dh-search-input"
+                        placeholder="Search records..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            {/* ===== TABLE CARD ===== */}
+            <div className="dh-table-card">
+                <CustomTable columns={columns} loading={loading}>
+                    {currentRecords.length > 0 ? (
+                        currentRecords.map((row, index) => (
+                            <tr key={index}>
+                                <td className="text-center">
+                                    <div className="sr-no-circle">
+                                        {startIndex + index + 1}
+                                    </div>
+                                </td>
+                                <td className="ip-date">
+                                    {row.TransDate ? new Date(row.TransDate).toLocaleString("en-GB") : "-"}
+                                </td>
+                                <td>
+                                    {row.debit > 0 ? (
+                                        <span className="ip-amount-badge ip-amount-green">
+                                            {formatAmount(row.debit)}
+                                        </span>
+                                    ) : (
+                                        <span className="ip-na">-</span>
+                                    )}
+                                </td>
+                                <td>
+                                    {row.handlingcharge > 0 ? (
+                                        <span className="ip-amount-badge ip-amount-red">
+                                            {formatAmount(row.handlingcharge)}
+                                        </span>
+                                    ) : (
+                                        <span className="ip-na">-</span>
+                                    )}
+                                </td>
+                                <td>
+                                    {row.netPayable > 0 ? (
+                                        <span className="ip-amount-badge ip-amount-blue">
+                                            {formatAmount(row.netPayable)}
+                                        </span>
+                                    ) : (
+                                        <span className="ip-na">-</span>
+                                    )}
+                                </td>
+                                <td className="ip-remark" title={row.Remark || "-"}>
                                     {row.Remark || "-"}
-                                </span>
-                            </td>
-                            <td>
-                                <span className={`badge bg-${getStatusBadge(row.status)} px-3 py-2 rounded-pill`}>
-                                    {row.status || "N/A"}
-                                </span>
+                                </td>
+                                <td>
+                                    <span className={`ip-badge ${getStatusBadgeClass(row.status)}`}>
+                                        {row.status || "N/A"}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan={columns.length} className="text-center py-4">
+                                {loading ? "Loading..." : "No records found"}
                             </td>
                         </tr>
-                    ))
-                ) : (
-                    <tr>
-                        <td colSpan={columns.length} className="text-center py-4">
-                            {loading ? "Loading..." : "No records found"}
-                        </td>
-                    </tr>
-                )}
-            </CustomTable>
+                    )}
+                </CustomTable>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalRecords={totalItems}
-                    onPageChange={handlePageChange}
-                />
-            )}
+                {totalPages > 1 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalRecords={totalItems}
+                        onPageChange={handlePageChange}
+                    />
+                )}
+            </div>
         </div>
     );
 };

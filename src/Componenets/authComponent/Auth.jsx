@@ -7,6 +7,7 @@ import BotPanel from './BotPanel';
 import Card3D from './Card3D';
 import { THEME_CONFIGS } from './themes';
 import { playCardFlip } from './sound';
+import { useUser } from '../../context/UserContext'; // ✅ import
 
 export default function Auth() {
   const [theme] = useState('cyber');
@@ -16,21 +17,20 @@ export default function Auth() {
 
   const themeConfig = THEME_CONFIGS[theme];
   const navigate = useNavigate();
+  const { loginUser } = useUser(); // ✅ context se loginUser lo
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (userFromApi) => {
     setBotMood('celebrating');
 
-    // ✅ Pehla attempt: navigate
-    setTimeout(() => {
-      navigate('/dashboard', { replace: true });
+    // ✅ STEP 1: Context update — sessionStorage set + isAuthenticated = true
+    if (userFromApi) {
+      loginUser(userFromApi);
+    } else {
+      console.warn('⚠️ onLoginSuccess called without user data');
+    }
 
-      setTimeout(() => {
-        if (window.location.pathname !== '/dashboard') {
-          console.warn('⚠️ Navigate failed, hard redirecting...');
-          window.location.href = '/dashboard';
-        }
-      }, 100);
-    }, 100);
+    // ✅ STEP 2: DIRECT dashboard — no setTimeout, no waiting
+    navigate('/dashboard', { replace: true });
   };
 
   const handleMascotClick = () => {

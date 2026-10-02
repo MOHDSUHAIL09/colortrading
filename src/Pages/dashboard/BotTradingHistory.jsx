@@ -3,10 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import CustomTable from "../../Componenets/ui/customtable/CustomTable";
 import Pagination from "../../Componenets/ui/pagination/Pagination";
-import apiClient from "../../api/apiClient";   // 👈 path apne project ke hisaab se
+import apiClient from "../../api/apiClient";
 
 const BotTradingHistory = () => {
-  // ✅ Local state
   const [records, setRecords] = useState([]);
   const [currentEarnings, setCurrentEarnings] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
@@ -18,7 +17,7 @@ const BotTradingHistory = () => {
   const regno = sessionStorage.getItem("Regno");
   const intervalRef = useRef(null);
 
-  // ===================== ✅ FETCH BOT EARNINGS (API) =====================
+  // ===================== FETCH BOT EARNINGS =====================
   const fetchBotEarnings = async () => {
     if (!regno) return;
 
@@ -33,21 +32,15 @@ const BotTradingHistory = () => {
         },
       });
 
-      console.log("tradingbot", response);
-
-      // ✅ Same pattern as Signup.jsx
       if (response.data?.result === "true") {
         const data = response.data.response?.data || [];
-
         setRecords(data);
 
-        // ✅ Total earnings
         const total = data.reduce((sum, item) => {
           return sum + (parseFloat(item.TotalEarnings) || 0);
         }, 0);
         setTotalEarnings(total);
 
-        // ✅ Current earnings (open record)
         const openRecord = data.find((item) => item.status === 1);
         if (openRecord) {
           setCurrentEarnings(parseFloat(openRecord.TotalEarnings) || 0);
@@ -55,32 +48,12 @@ const BotTradingHistory = () => {
           setCurrentEarnings(total);
         }
       } else {
-        const errorMsg = response.data?.message || "Failed to fetch bot earnings";
-        console.error(
-          "Bot Report API error:",
-          Array.isArray(errorMsg) ? errorMsg.join(", ") : errorMsg
-        );
         setRecords([]);
         setCurrentEarnings(0);
         setTotalEarnings(0);
       }
     } catch (error) {
       console.error("Bot earnings fetch error:", error);
-
-      if (error.response?.data?.message) {
-        const msg = error.response.data.message;
-        console.error("API Message:", Array.isArray(msg) ? msg.join(", ") : msg);
-      } else if (error.response?.data?.title) {
-        console.error("API Title:", error.response.data.title);
-      } else if (error.response?.data?.errors) {
-        const errorsList = Object.values(error.response.data.errors).flat();
-        console.error("Validation Errors:", errorsList.join(", "));
-      } else if (error.code === "ECONNABORTED") {
-        console.error("Request timed out");
-      } else if (!error.response) {
-        console.error("Network error");
-      }
-
       setRecords([]);
       setCurrentEarnings(0);
       setTotalEarnings(0);
@@ -89,14 +62,13 @@ const BotTradingHistory = () => {
     }
   };
 
-  // ✅ Initial fetch — API se data
   useEffect(() => {
     if (regno) {
       fetchBotEarnings();
     }
   }, [regno]);
 
-  // ===================== ✅ START INTERVAL  =====================
+  // ===================== LIVE EARNINGS INTERVAL =====================
   const startInterval = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -117,13 +89,11 @@ const BotTradingHistory = () => {
           return record;
         });
 
-        // ✅ Update currentEarnings
         const openRecord = updatedRecords.find((item) => item.status === 1);
         if (openRecord) {
           setCurrentEarnings(parseFloat(openRecord.TotalEarnings) || 0);
         }
 
-        // ✅ Update totalEarnings
         const total = updatedRecords.reduce((sum, item) => {
           return sum + (parseFloat(item.TotalEarnings) || 0);
         }, 0);
@@ -141,7 +111,6 @@ const BotTradingHistory = () => {
     }
   };
 
-  // ✅ Start interval when records loaded (API data aane ke baad)
   useEffect(() => {
     if (records.length > 0) {
       startInterval();
@@ -149,7 +118,7 @@ const BotTradingHistory = () => {
     return () => stopInterval();
   }, [records.length]);
 
-  // ===================== FORMAT FUNCTIONS =====================
+  // ===================== FORMAT =====================
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     try {
@@ -174,11 +143,12 @@ const BotTradingHistory = () => {
     })}`;
   };
 
-  const getStatusBadge = (status) => {
+  // ✅ Status badge - navy theme
+  const getStatusBadgeClass = (status) => {
     switch (status) {
-      case 1: return "bg-success";
-      case 0: return "bg-danger";
-      default: return "bg-secondary";
+      case 1: return "bt-badge bt-badge-success";
+      case 0: return "bt-badge bt-badge-danger";
+      default: return "bt-badge bt-badge-neutral";
     }
   };
 
@@ -227,15 +197,24 @@ const BotTradingHistory = () => {
   // ===================== RENDER =====================
   return (
     <div className="Table-container royalty-main-wrapper mb-5 p-4">
-      <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-        <h3 className="mb-0">Bot Trading History</h3>
+
+      {/* ===== HEADER CARD ===== */}
+      <div className="dh-header-card">
+        <div className="dh-header-icon">
+          <i className="ti ti-robot"></i>
+        </div>
+        <div className="dh-header-texts">
+          <h2>Bot Trading History</h2>
+          <p>View your bot trading transaction records</p>
+        </div>
       </div>
 
-      <div className="d-flex justify-content-between entries-search-bar entries-control mb-3">
-        <div className="entries-control">
-          <label>Show entries:</label>
+      {/* ===== FILTERS BAR ===== */}
+      <div className="dh-filters-bar">
+        <div className="dh-filter-item">
+          <label className="dh-filter-label">Show entries:</label>
           <select
-            className="form-select"
+            className="dh-select"
             value={itemsPerPage}
             onChange={(e) => setItemsPerPage(Number(e.target.value))}
           >
@@ -244,9 +223,11 @@ const BotTradingHistory = () => {
             ))}
           </select>
         </div>
-        <div className="search-wrapper mt-3">
+
+        <div className="dh-search-wrap">
+          <i className="ti ti-search dh-search-icon"></i>
           <input
-            className="form-control search-input"
+            className="dh-search-input"
             placeholder="Search records..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -254,7 +235,8 @@ const BotTradingHistory = () => {
         </div>
       </div>
 
-      <div className="report-card">
+      {/* ===== TABLE CARD ===== */}
+      <div className="dh-table-card">
         <CustomTable columns={columns} loading={loading}>
           {currentRecords.length > 0 ? (
             currentRecords.map((row, index) => {
@@ -270,50 +252,35 @@ const BotTradingHistory = () => {
                   <td className="text-center">
                     <div className="sr-no-circle">{startIndex + index + 1}</div>
                   </td>
-                  <td>{formatDate(row.entryDate)}</td>
-                  <td>{formatDate(row.endtime)}</td>
-                  <td style={{ color: "#3b82f6", fontWeight: "600" }}>
+                  <td className="bt-date">{formatDate(row.entryDate)}</td>
+                  <td className="bt-date">{formatDate(row.endtime)}</td>
+                  <td className="bt-amount">
                     {formatAmount(betAmount)}
                   </td>
 
                   {getStatusText(row.status) === "Open" ? (
                     <>
-                      <td style={{ color: "#3b82f6", fontWeight: "600" }}>-</td>
-                      <td
-                        style={{
-                          color: isEarningsNegative ? "#dc3545" : "#3b82f6",
-                          fontWeight: "600",
-                        }}
-                      >
+                      <td className="bt-amount">-</td>
+                      <td className={isEarningsNegative ? "bt-earn-negative" : "bt-earn-positive"}>
                         ${currentEarn.toFixed(8)}
                       </td>
                     </>
                   ) : (
                     <>
-                      <td
-                        style={{
-                          color: isRoiNegative ? "#dc3545" : "#3b82f6",
-                          fontWeight: "600",
-                        }}
-                      >
+                      <td className={isRoiNegative ? "bt-earn-negative" : "bt-earn-positive"}>
                         {perdayroi.toFixed(4)}%
                       </td>
-                      <td
-                        style={{
-                          color: isEarningsNegative ? "#dc3545" : "#3b82f6",
-                          fontWeight: "600",
-                        }}
-                      >
+                      <td className={isEarningsNegative ? "bt-earn-negative" : "bt-earn-positive"}>
                         ${((perdayroi * betAmount) / 100).toFixed(4)}
                       </td>
                     </>
                   )}
-                  <td>{row.currency?.toUpperCase() || "-"}</td>
-                  <td>${row.currencyRate || "-"}</td>
-                  <td>{row.slot || "-"} H</td>
-                  <td>{row.predict || "-"}</td>
+                  <td className="bt-currency">{row.currency?.toUpperCase() || "-"}</td>
+                  <td className="bt-rate">${row.currencyRate || "-"}</td>
+                  <td className="bt-slot">{row.slot || "-"} H</td>
+                  <td className="bt-type">{row.predict || "-"}</td>
                   <td>
-                    <span className={`badge ${getStatusBadge(row.status)}`}>
+                    <span className={getStatusBadgeClass(row.status)}>
                       {getStatusText(row.status)}
                     </span>
                   </td>
@@ -342,4 +309,4 @@ const BotTradingHistory = () => {
   );
 };
 
-export default BotTradingHistory;
+export default BotTradingHistory; 

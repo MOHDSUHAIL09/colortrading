@@ -14,9 +14,9 @@ const FundDepositStatus = () => {
 
     // Get user data from sessionStorage
     const userData = JSON.parse(sessionStorage.getItem("userData") || "{}");
-    const walletId = userData?.NameAppearOncheque || ""; // Wallet ID from user data
+    const walletId = userData?.NameAppearOncheque || "";
 
-    // Format amount function (for token amount)
+    // Format amount
     const formatAmount = (amount) => {
         return `${parseFloat(amount || 0).toLocaleString(undefined, {
             minimumFractionDigits: 2,
@@ -24,7 +24,7 @@ const FundDepositStatus = () => {
         })}`;
     };
 
-    // Format date function
+    // Format date
     const formatDate = (dateString) => {
         if (!dateString) return "-";
         try {
@@ -41,20 +41,19 @@ const FundDepositStatus = () => {
         }
     };
 
-    // Truncate hash for display
+    // Truncate hash
     const truncateHash = (hash) => {
         if (!hash) return "-";
         return hash.length > 20 ? `${hash.substring(0, 10)}...${hash.substring(hash.length - 8)}` : hash;
     };
 
-    // ✅ Fetch Wallet History
+    // Fetch Wallet History
     useEffect(() => {
         const fetchWalletHistory = async () => {
             try {
                 setLoading(true);
                 setError(null);
 
-                // ✅ Using fetch with the API endpoint
                 const response = await fetch(
                     `http://gateway.maxedlogic.com/api/v1/WalletHistory?ClientId=40c629c6780143feb3d7&WalletAddress=${walletId}`
                 );
@@ -62,18 +61,13 @@ const FundDepositStatus = () => {
                 const res = await response.json();
 
                 if (res?.status === true) {
-                    // Get data from response - using the exact structure from your API
                     const data = res?.data || [];
-
-                    // All transactions are deposit transactions (based on your API response)
                     setRecords(data);
                 } else {
-                    console.warn("⚠️ API response error:", res);
                     setRecords([]);
                     setError(res?.message || "No data found");
                 }
             } catch (error) {
-                console.error("❌ API Error:", error);
                 setError(error?.message || "Failed to fetch data");
                 setRecords([]);
             } finally {
@@ -84,13 +78,11 @@ const FundDepositStatus = () => {
         if (walletId) {
             fetchWalletHistory();
         } else {
-            console.warn("⚠️ No Wallet ID found in user data");
             setLoading(false);
-            setError("Wallet ID not found. Please check user data.");
         }
     }, [walletId]);
 
-    // Filter records based on search term
+    // Filter records
     const filteredRecords = records.filter((row) => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -111,7 +103,6 @@ const FundDepositStatus = () => {
     const startIndex = (pageIndex - 1) * itemsPerPage;
     const currentRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
 
-    // Reset to first page when search term or items per page changes
     useEffect(() => {
         setPageIndex(1);
     }, [searchTerm, itemsPerPage]);
@@ -126,45 +117,46 @@ const FundDepositStatus = () => {
         "Status"
     ];
 
-    // Get status badge color
+    // Status badge class
     const getStatusBadge = (status) => {
-        const statusLower = (status || "").toLowerCase();
-        if (statusLower.includes("success")) {
-            return "badge bg-success";
-        } else if (statusLower.includes("pending") || statusLower.includes("waiting")) {
-            return "badge bg-warning";
-        } else if (statusLower.includes("failed") || statusLower.includes("rejected") || statusLower.includes("declined")) {
-            return "badge bg-danger";
-        } else {
-            return "badge bg-secondary";
-        }
+        const s = (status || "").toLowerCase();
+        if (s.includes("success")) return "fs-badge fs-badge-success";
+        if (s.includes("pending") || s.includes("waiting")) return "fs-badge fs-badge-warning";
+        if (s.includes("failed") || s.includes("rejected") || s.includes("declined")) return "fs-badge fs-badge-danger";
+        return "fs-badge fs-badge-neutral";
     };
 
     return (
         <div className="Table-container royalty-main-wrapper mb-5 p-4">
-            {/* <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-                <h3 className="mb-0">Fund Deposit Status</h3>
-                {walletId && (
-                    <span className="badge bg-primary">
-                        Wallet ID: {walletId}
-                    </span>
-                )}
-            </div> */}
 
-            <div className="d-flex justify-content-between entries-search-bar entries-control mb-3">
-                <div className="entries-control">
-                    <label>Show entries:</label>
+            {/* ===== HEADER CARD ===== */}
+            <div className="dh-header-card">
+                <div className="dh-header-icon">
+                    <i className="ti ti-wallet"></i>
+                </div>
+                <div className="dh-header-texts">
+                    <h2>Fund Deposit Status</h2>
+                    <p>View your deposit transaction records</p>
+                </div>
+            </div>
+
+            {/* ===== FILTERS BAR ===== */}
+            <div className="dh-filters-bar">
+                <div className="dh-filter-item">
+                    <label className="dh-filter-label">Show entries:</label>
                     <select
-                        className="form-select"
+                        className="dh-select"
                         value={itemsPerPage}
                         onChange={e => setItemsPerPage(Number(e.target.value))}
                     >
                         {[10, 25, 50, 75, 100].map(n => <option key={n} value={n}>{n}</option>)}
                     </select>
                 </div>
-                <div className="search-wrapper mt-3">
+
+                <div className="dh-search-wrap">
+                    <i className="ti ti-search dh-search-icon"></i>
                     <input
-                        className="form-control search-input"
+                        className="dh-search-input"
                         placeholder="Search records..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
@@ -172,7 +164,8 @@ const FundDepositStatus = () => {
                 </div>
             </div>
 
-            <div className="report-card">
+            {/* ===== TABLE CARD ===== */}
+            <div className="dh-table-card">
                 <CustomTable columns={columns} loading={loading}>
                     {currentRecords.length > 0 ? (
                         currentRecords.map((row, index) => (
@@ -184,34 +177,27 @@ const FundDepositStatus = () => {
                                 </td>
                                 <td>{formatDate(row.entry_date)}</td>
                                 <td>
-                                    {/* ✅ Hash with BSCScan Link */}
                                     {row.hash_key || row.Transfer_hashKey ? (
                                         <a
                                             href={`https://bscscan.com/tx/${row.hash_key || row.Transfer_hashKey}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            style={{
-                                                color: '#0d6efd',
-                                                textDecoration: 'none',
-                                                fontWeight: '500',
-                                                fontSize: '14px'
-                                            }}
                                             className="hash-link"
                                         >
                                             {truncateHash(row.hash_key || row.Transfer_hashKey)}
                                             <i className="ti ti-external-link ms-1" style={{ fontSize: '12px' }}></i>
                                         </a>
                                     ) : (
-                                        <span style={{ color: '#6c757d', fontSize: '14px' }}>N/A</span>
+                                        <span>N/A</span>
                                     )}
                                 </td>
-                                <td style={{ fontSize: '13px' }}>
+                                <td className="fs-address">
                                     {row.From_address ? truncateHash(row.From_address) : "-"}
                                 </td>
-                                <td style={{ fontSize: '13px' }}>
+                                <td className="fs-address">
                                     {row.to_address ? truncateHash(row.to_address) : "-"}
                                 </td>
-                                <td style={{ color: "#10b981", fontWeight: "600" }}>
+                                <td className="fs-amount">
                                     ${formatAmount(row.amount)}
                                 </td>
                                 <td>
@@ -224,19 +210,12 @@ const FundDepositStatus = () => {
                     ) : (
                         <tr>
                             <td colSpan={columns.length} className="text-center py-4">
-                                {loading ? (
-                                    <div className="spinner-border text-primary" role="status">
-                                        <span className="visually-hidden">Loading...</span>
-                                    </div>
-                                ) : (
-                                    "No deposit records found"
-                                )}
+                                {loading ? "Loading..." : "No deposit records found"}
                             </td>
                         </tr>
                     )}
                 </CustomTable>
 
-                {/* Pagination Component */}
                 {totalPages > 1 && (
                     <Pagination
                         currentPage={pageIndex}

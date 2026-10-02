@@ -217,6 +217,7 @@ const BotTrading = () => {
 
     useEffect(() => { fetchBotStatus(); }, []);
 
+    
     const handleSlotSelect = (slot) => {
         setSelectedSlot(slot);
         setShowDropdown(false);

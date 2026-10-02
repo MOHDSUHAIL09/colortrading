@@ -4,7 +4,6 @@ import Header from '../Componenets/dashboard/Header';
 import Dashboard from '../Pages/dashboard/Dashboard';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import UserProfile from '../Pages/dashboard/Profile/UserProfile';
-import Console from '../Pages/dashboard/Consolepage/Console';
 import Changepassword from '../Pages/dashboard/Profile/Changepassword';
 import Support from '../Pages/dashboard/Profile/Support';
 import Treeview from '../Pages/dashboard/Treeview';
@@ -15,7 +14,6 @@ import Fundtransfer from '../Pages/dashboard/Fundtransfer';
 import InvestFund from '../Pages/dashboard/InvestFund/InvestFund';
 import SocalMediaTask from '../Pages/dashboard/SocalMediaTask/SocalMediaTask';
 import SocalMediaTaskHistory from '../Pages/dashboard/SocalMediaTask/SocalMediaTaskHistory';
-// import IncomePayOutHistory from '../Pages/dashboard/IncomePayOutHistory';
 import FundtransferHistory from '../Pages/dashboard/FundtransferHistory';
 import IncomeReport from '../Pages/dashboard/IncomeReport';
 import BotTreading from '../Pages/dashboard/BotTreading';
@@ -32,6 +30,10 @@ import IncomePayOutHistory from '../Pages/dashboard/IncomePayOutHistory'
 import '../assets/Main.css'
 import Reward from '../Pages/dashboard/Reward';
 import FundDepositStatus from '../Pages/dashboard/FundDepositStatus';
+import Game from '../Componenets/game/Game';
+import BottomNavigation from '../Componenets/BottomNavigation';
+import { Bot } from 'lucide-react';
+import Devdeposit from '../Pages/dashboard/Devdeposit';
 
 function DashboardLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -48,25 +50,26 @@ function DashboardLayout() {
 
   const closeMobileSidebar = useCallback(() => {
     setMobileSidebarOpen(false);
-  }, []); 
+  }, []);
 
   const location = useLocation();
 
-  const noSidebarPages = ['/dashboard/console', '/dashboard/tree-view'];
-  const hideSidebarAndHeader = noSidebarPages.includes(location.pathname);
+  const noSidebarPages = [
+    '/dashboard/console',
+    '/dashboard/tree-view',
 
-  // ✅ Dashboard page check
-  const isDashboardPage = location.pathname === '/dashboard' || location.pathname === '/dashboard/';
+  ];
 
-  // ✅ SIRF DASHBOARD PAGE PE SKELETON DIKHEGA
+  const hideSidebarAndHeader = noSidebarPages.some(page =>
+    location.pathname.startsWith(page)
+  );
+
+  const isDashboardPage =
+    location.pathname === '/dashboard' || location.pathname === '/dashboard/';
+
   if (isDashboardPage && (loading || !userData)) {
     return <DashboardSkeleton />;
   }
-
-  // ✅ Agar dashboard page nahi hai aur userData nahi hai toh loading show karo
-    // if (!userData && !isDashboardPage) {
-    //   return <div className="loading-screen">Loading...</div>;
-    // }
 
   return (
     <div className={`app-wrapper ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
@@ -77,12 +80,12 @@ function DashboardLayout() {
           closeMobileSidebar={closeMobileSidebar}
         />
       )}
+
       <div className={`main-wrapper ${hideSidebarAndHeader ? 'full-screen-mode' : ''}`}>
         {!hideSidebarAndHeader && <Header toggleSidebar={toggleSidebar} />}
         <div className={`main-content ${hideSidebarAndHeader ? 'full-screen-content' : ''}`}>
           <Routes>
             <Route index element={<Dashboard />} />
-            <Route path="console" element={<Console />} />
             <Route path="profile" element={<UserProfile />} />
             <Route path="changepassword" element={<Changepassword />} />
             <Route path="support" element={<Support />} />
@@ -90,8 +93,9 @@ function DashboardLayout() {
             <Route path="SocalMediaTask" element={<SocalMediaTask />} />
             <Route path="SocalMediaTaskHistory" element={<SocalMediaTaskHistory />} />
             <Route path="InvestFund" element={<InvestFund />} />
+            <Route path="Devdeposit" element={<Devdeposit />} />
             <Route path="DepositFund" element={<DepositFund />} />
-            <Route path="IncomePayOutHistory" element={<IncomePayOutHistory/>} />
+            <Route path="IncomePayOutHistory" element={<IncomePayOutHistory />} />
             <Route path="Fundtransfer" element={<Fundtransfer />} />
             <Route path="FundtransferHistory" element={<FundtransferHistory />} />
             <Route path="DashboardLayout" element={<DashboardLayout />} />
@@ -104,15 +108,26 @@ function DashboardLayout() {
             <Route path="InvestToken" element={<InvestToken />} />
             <Route path="InvestTokenHistory" element={<InvestTokenHistory />} />
             <Route path="BotTradingHistory" element={<BotTradingHistory />} />
-            {/* <Route path="TokenMiningHistory" element={<TokenMiningHistory />} /> */}
             <Route path="TokenMiningIncomeHistory" element={<TokenMiningIncomeHistory />} />
-            <Route path="SelfTradingHistory" element={<SelfTradingHistory/>} />
-            <Route path="Reward" element={<Reward/>} />
-            <Route path="FundDepositStatus" element={<FundDepositStatus/>} />
+            <Route path="SelfTradingHistory" element={<SelfTradingHistory />} />
+            <Route path="Reward" element={<Reward />} />
+            <Route path="FundDepositStatus" element={<FundDepositStatus />} />
+            <Route path="game" element={<Game/>} />
+            <Route path="bot" element={<Bot/>} />
           </Routes>
         </div>
       </div>
-      {mobileSidebarOpen && <div className="sidebar-overlay" onClick={closeMobileSidebar}></div>}
+
+      {/* ✅ Bottom Navbar — sirf dashboard ke pages pe, game/console/tree-view pe nahi */}
+{(!hideSidebarAndHeader || location.pathname === '/dashboard/game') && (
+  <div className="bottom-nav-fixed-wrapper mb-2">
+    <BottomNavigation />
+  </div>
+)}
+
+      {mobileSidebarOpen && (
+        <div className="sidebar-overlay" onClick={closeMobileSidebar}></div>
+      )}
     </div>
   );
 }

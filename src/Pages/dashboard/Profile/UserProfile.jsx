@@ -4,12 +4,12 @@ import apiClient from '../../../api/apiClient';
 import toast from 'react-hot-toast';
 import Toast from '../../../Componenets/ui/Toast';
 
+
 const UserProfile = () => {
   const { userData } = useUser();
   const [loading, setLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // ✅ OTP States
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
@@ -52,7 +52,6 @@ const UserProfile = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Send OTP Function
   const handleSendOTP = async () => {
     try {
       const loginId = sessionStorage.getItem("loginId");
@@ -65,8 +64,8 @@ const UserProfile = () => {
 
       setOtpLoading(true);
       setOtpVerified(false);
-      setOtp(""); // Clear previous OTP
-      
+      setOtp("");
+
       const response = await apiClient.post('/Auth/genrate-otp', null, {
         params: { loginid: loginId, regno: regNo }
       });
@@ -84,7 +83,6 @@ const UserProfile = () => {
     }
   };
 
-  // ✅ Verify OTP Function
   const handleVerifyOTP = async () => {
     try {
       if (!otp || otp.length < 6) {
@@ -108,7 +106,7 @@ const UserProfile = () => {
       if (response.data.result === "true") {
         toast.success("OTP Verified Successfully");
         setOtpVerified(true);
-        setOtpSent(false); // Hide OTP input after verification
+        setOtpSent(false);
       } else {
         setOtpVerified(false);
         toast.error(response.data.message || "Invalid OTP");
@@ -129,16 +127,11 @@ const UserProfile = () => {
       return;
     }
 
-    // ✅ Check if OTP is verified
     if (!otpVerified) {
       toast.error("Please verify OTP first before updating profile");
       return;
     }
 
-    // if (!formData.fullName) {
-    //   toast.error("Full name is required");
-    //   return;
-    // }
     if (!formData.emailId) {
       toast.error("Email ID is required");
       return;
@@ -177,16 +170,13 @@ const UserProfile = () => {
         walletAddress: formData.walletAddress || ""
       };
 
-
       const response = await apiClient.put('/Auth/UpdateProfile', requestData);
-
 
       if (response.data?.result === "true" || response.data?.result === true ||
         response.data?.response === true || response.data?.response === "true") {
 
-        toast.success("✅ Profile updated successfully!");
+        toast.success("Profile updated successfully!");
 
-        // sessionStorage.setItem("userName", formData.fullName);
         sessionStorage.setItem("userEmail", formData.emailId);
         if (formData.walletAddress) {
           sessionStorage.setItem("walletAddress", formData.walletAddress);
@@ -194,8 +184,7 @@ const UserProfile = () => {
         if (formData.address) {
           sessionStorage.setItem("tokenAddress", formData.address);
         }
-        
-        // ✅ Reset OTP states after successful update
+
         setOtp("");
         setOtpSent(false);
         setOtpVerified(false);
@@ -204,7 +193,7 @@ const UserProfile = () => {
           window.location.reload();
         }, 1500);
       } else {
-        toast.error("❌ Update failed: " + (response.data?.message || "Unknown error"));
+        toast.error("Update failed: " + (response.data?.message || "Unknown error"));
       }
     } catch (error) {
       console.error("Full error:", error);
@@ -227,199 +216,195 @@ const UserProfile = () => {
 
   if (loading) {
     return (
-      <div className="text-center p-5">
-        <div className="spinner-border text-primary"></div>
+      <div className="up-loading">
+        <div className="up-spinner"></div>
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="body-wrapper">
+    <div className="up-page">
       <Toast />
-      <div className="container">
-        <div className="row mt-4">
-          <div className="col-lg-8">
-            <form onSubmit={handleSubmit}>
-              <div className="card">
-                <div className="card-body">
-                  <h4 className="mb-4">Profile Information</h4>
 
-                  <div className="mb-3">
-                    <label>Login ID</label>
-                    <input 
-                      style={{ color: "green" }}
+      {/* ===== HEADER CARD ===== */}
+      <div className="dh-header-card">
+        <div className="dh-header-icon">
+          <i className="ti ti-user-circle"></i>
+        </div>
+        <div className="dh-header-texts">
+          <h2>Profile Information</h2>
+          <p>Update your profile details and wallet addresses</p>
+        </div>
+      </div>
+
+      <div className="row">
+        <div className="col-12 col-lg-8">
+          <form onSubmit={handleSubmit}>
+            <div className="up-card">
+              <div className="up-card-body">
+
+                {/* Login ID */}
+                <div className="up-form-group">
+                  <label className="up-label">Login ID</label>
+                  <div className="up-input-wrap">
+                    <i className="ti ti-user up-input-icon"></i>
+                    <input
                       type="text"
                       value={formData.loginId}
-                      className="form-control bg-light"
+                      className="up-input up-input-readonly"
                       disabled
                     />
                   </div>
+                </div>
 
-                  {/* <div className="mb-3 ">
-                    <label>Full Name *</label>
+                {/* Email */}
+                <div className="up-form-group">
+                  <label className="up-label">Email ID *</label>
+                  <div className="up-input-wrap">
+                    <i className="ti ti-mail up-input-icon"></i>
                     <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className="form-control"
-                      required
-                      placeholder="Enter your full name"
-                    />
-                  </div> */}
-
-                  <div className="mb-3">
-                    <label>Email ID *</label>
-                    <input
-                      type="email"  
+                      type="email"
                       name="emailId"
                       value={formData.emailId}
                       onChange={handleChange}
-                      className="form-control"
+                      className="up-input up-input-readonly"
                       required
                       placeholder="Enter your email"
                       disabled
                     />
                   </div>
+                </div>
 
-                  <div className="mb-3">
-                    <label>Mobile Number *</label>
+                {/* Mobile */}
+                <div className="up-form-group">
+                  <label className="up-label">Mobile Number *</label>
+                  <div className="up-input-wrap">
+                    <i className="ti ti-phone up-input-icon"></i>
                     <input
                       type="tel"
                       name="mobileNumber"
                       value={formData.mobileNumber}
                       onChange={handleChange}
-                      className="form-control"
+                      className="up-input"
                       required
                       placeholder="Enter your mobile number"
                       pattern="[0-9]{10}"
                       title="Please enter a valid 10-digit mobile number"
                     />
                   </div>
+                </div>
 
-                  <div className="mb-3">
-                    <label>Income Payout Wallet Address</label>
+                {/* Wallet Address */}
+                <div className="up-form-group">
+                  <label className="up-label">Income Payout Wallet Address</label>
+                  <div className="up-input-wrap">
+                    <i className="ti ti-wallet up-input-icon"></i>
                     <input
                       type="text"
                       name="walletAddress"
                       value={formData.walletAddress || ""}
                       onChange={handleChange}
-                      className="form-control"
-                      style={{ color: formData.walletAddress ? "green" : "#999" }}
+                      className="up-input"
                       placeholder="Enter your wallet address"
                     />
                   </div>
+                </div>
 
-                  <div className="mb-3">
-                    <label>Token Payout Address</label>
+                {/* Token Address */}
+                <div className="up-form-group">
+                  <label className="up-label">Token Payout Address</label>
+                  <div className="up-input-wrap">
+                    <i className="ti ti-coin up-input-icon"></i>
                     <input
                       type="text"
-                      placeholder='Enter Token Address'
                       name="address"
                       value={formData.address || ""}
                       onChange={handleChange}
-                      className="form-control"
-                      style={{ color: formData.address ? "green" : "#999" }}
+                      className="up-input"
+                      placeholder="Enter Token Address"
                     />
                   </div>
-
-                  {/* ✅ OTP SECTION - IMPROVED */}
-                  <div className="mb-3 p-3" style={{ 
-                    backgroundColor: otpVerified ? '#d4edda' : '#f8f9fa',
-                    borderRadius: '8px',
-                  }}>
-                    <label className="fw-bold mb-2">
-                      OTP Verification 
-                    </label>
-                    
-                    <div className="d-flex gap-2">
-                      <div className="flex-grow-1">
-                        <input
-                          type="number"
-                          className="form-control"
-                          placeholder="Enter 6-digit OTP"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                          disabled={!otpSent || otpVerified}
-                          maxLength="6"                      
-                        />
-                      </div>
-                      
-                      {!otpVerified && (
-                        !otpSent ? (
-                          <button
-                            type="button"
-                            className="btn btn-primary text-nowrap"
-                            onClick={handleSendOTP}
-                            disabled={otpLoading}
-                          >
-                            {otpLoading ? (
-                              <>
-                                <span className="spinner-border spinner-border-sm me-1"></span>
-                                Sending...
-                              </>
-                            ) : (
-                              "Send OTP"
-                            )}
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className="btn btn-success text-nowrap"
-                            onClick={handleVerifyOTP}
-                            disabled={otpLoading || otp.length < 6}
-                          >
-                            {otpLoading ? (
-                              <>
-                                <span className="spinner-border spinner-border-sm me-1"></span>
-                                Verifying...
-                              </>
-                            ) : (
-                              "Verify OTP"
-                            )}
-                          </button>
-                        )
-                      )}
-                    </div>
-
-                  </div>
-
-                  {/* ✅ UPDATE BUTTON - COMPLETELY DISABLED UNTIL OTP VERIFIED */}
-                  <button
-                    type="submit"
-                    className="btn btn-primary w-100"
-                    style={{
-                      backgroundColor: otpVerified ? '#007bff' : '#6c757d',
-                      color: 'white',
-                      cursor: otpVerified ? 'pointer' : 'not-allowed',
-                      opacity: otpVerified ? 1 : 0.7,
-                      transition: 'all 0.3s ease'
-                    }}
-                    disabled={isUpdating || !otpVerified}
-                    onMouseEnter={(e) => {
-                      if (!otpVerified) {
-                        e.target.title = "Please verify OTP first";
-                      }
-                    }}
-                  >
-                    {isUpdating ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                        UPDATING...
-                      </>
-                    ) : (
-                      <>
-                        {otpVerified ? ' UPDATE PROFILE' : 'UPDATE PROFILE'}
-                      </>
-                    )}
-                  </button>
-
-  
                 </div>
+
+                {/* OTP Section */}
+                <div className={`up-otp-box ${otpVerified ? 'up-otp-verified' : ''}`}>
+                  <label className="up-otp-label">
+                    <i className="ti ti-shield-check"></i>
+                    OTP Verification
+                    {otpVerified && <span className="up-otp-status">✓ Verified</span>}
+                  </label>
+
+                  <div className="up-otp-row">
+                    <input
+                      type="number"
+                      className="up-otp-input"
+                      placeholder="Enter 6-digit OTP"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      disabled={!otpSent || otpVerified}
+                      maxLength="6"
+                    />
+
+                    {!otpVerified && (
+                      !otpSent ? (
+                        <button
+                          type="button"
+                          className="up-otp-btn"
+                          onClick={handleSendOTP}
+                          disabled={otpLoading}
+                        >
+                          {otpLoading ? (
+                            <>
+                              <span className="up-spinner-sm"></span>
+                              Sending...
+                            </>
+                          ) : (
+                            "Send OTP"
+                          )}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className="up-otp-btn up-otp-btn-verify"
+                          onClick={handleVerifyOTP}
+                          disabled={otpLoading || otp.length < 6}
+                        >
+                          {otpLoading ? (
+                            <>
+                              <span className="up-spinner-sm"></span>
+                              Verifying...
+                            </>
+                          ) : (
+                            "Verify OTP"
+                          )}
+                        </button>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className="up-submit-btn"
+                  disabled={isUpdating || !otpVerified}
+                >
+                  {isUpdating ? (
+                    <>
+                      <span className="up-spinner-sm"></span>
+                      UPDATING...
+                    </>
+                  ) : (
+                    <>
+                      <i className="ti ti-device-floppy"></i>
+                      UPDATE PROFILE
+                    </>
+                  )}
+                </button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

@@ -25,6 +25,15 @@ import apiClient from '../../api/apiClient';
 import Marquee from './Marquee';
 import Toast from '../../Componenets/ui/Toast';
 
+// Swiper imports — ye add karo
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/css';
+import 'swiper/css/effect-cube';
+import { EffectCube, Pagination, Autoplay } from 'swiper/modules';
+
+import wingoimg from '../../assets/images/logo/wingogame.png'
+import botimg from '../../assets/images/logo/botimg.png'
+
 
 ChartJS.register(
     CategoryScale,
@@ -38,11 +47,63 @@ ChartJS.register(
     Filler
 );
 
+
+
+const GameSlider = () => {
+    const images = [wingoimg, wingoimg, wingoimg, wingoimg, wingoimg];
+
+    return (
+        <Swiper
+            effect={'cube'}
+            grabCursor={true}
+            loop={true}
+            loopedSlides={5}
+            loopAdditionalSlides={2}
+            speed={2000}
+            cubeEffect={{
+                shadow: false,
+                slideShadows: false,
+            }}
+            autoplay={{
+                delay: 4000,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: false,
+            }}
+            modules={[EffectCube, Autoplay]}
+            style={{
+                width: '100%',
+                borderRadius: '0.5rem',
+            }}
+        >
+{images.map((img, index) => (
+  <SwiperSlide
+    key={index}
+    style={{ height: '100%', overflow: 'hidden' }}
+  >
+    <Link to="/dashboard/game" className="game-banner-link">
+      <img
+        src={img}
+        alt={`game-${index + 1}`}
+        className="game-banner-img"
+      />
+    </Link>
+  </SwiperSlide>
+))}
+        </Swiper>
+    );
+};
+
+
 const Dashboard = () => {
     const navigate = useNavigate();
-    const { userData, refreshData , currentEarnings  } = useUser();
+
+
+    const { userData, refreshData } = useUser();
     //  Add this state at the top with other states
     const [hoveredIncome, setHoveredIncome] = useState(null);
+
+
+
 
 
     // Withdraw Modal States -  FIXED
@@ -451,7 +512,7 @@ const Dashboard = () => {
         setShowTokenPayoutModal(true);
     };
 
-  // BOT start in Dashboard direct
+    // BOT start in Dashboard direct
     const fetchBotStatus = async () => {
         try {
             setLoading(true);
@@ -515,7 +576,7 @@ const Dashboard = () => {
         };
     }, [userData?.status, apiBotStatus]);
 
-    
+
     // Send OTP - SIRF API KA MESSAGE
     const handleSendOTP = async () => {
         try {
@@ -909,7 +970,6 @@ const Dashboard = () => {
                     className="card01 mb-2"
                     style={{
                         borderRadius: "8px",
-                        border: "1px solid #f1f1f1",
                         overflow: "hidden",
                     }}
                 >
@@ -932,16 +992,18 @@ const Dashboard = () => {
                         <FaWhatsapp />
                     </a>
                 </div> */}
-                <div className="row">
-                    {/* Welcome Card */}
-                    <div className="col-12 col-lg-8 d-flex align-items-stretch">
-                        <div className="card w-100 bg-primary-subtle overflow-hidden shadow-none">
+                {/* top section */}
+                <div className="row mt-4 ">
+                    {/* ===== WELCOME CARD ===== */}
+
+                    <div className="col-12 col-lg-8 d-flex align-items-stretch ">
+                        <div className=" w-100 welcome-card overflow-hidden glow-card aa ">
                             <div className="card-body02 position-relative">
                                 <div className="row">
                                     <div className="col-12 col-sm-7">
                                         <div className="d-flex align-items-center justify-content-between mb-3">
-                                            <div className="d-flex">
-                                                <div className="rounded-circle overflow-hidden me-6 flex-shrink-0">
+                                            <div className="d-flex align-items-center">
+                                                <div className="rounded-circle overflow-hidden me-6 flex-shrink-0 profile-img-circle">
                                                     <img
                                                         src="https://bootstrapdemos.adminmart.com/modernize/dist/assets/images/profile/user-1.jpg"
                                                         alt="profile"
@@ -949,9 +1011,12 @@ const Dashboard = () => {
                                                         height="40"
                                                     />
                                                 </div>
-                                                <h5 className="fw-semibold mt-0 mt-md-2 fs-5 fs-sm-3">
-                                                    Welcome back <span style={{ color: "#04832f" }}>{userData?.loginid}</span>
-                                                </h5>
+                                                <div className="welcome-text-wrap">
+                                                    <div className="welcome-sub text-white">Welcome back</div>
+                                                    <h5 className="welcome-title m-0">
+                                                        <span className="login-id">{userData?.loginid || 'ApexMindAi'}</span>
+                                                    </h5>
+                                                </div>
                                             </div>
                                             <button
                                                 className="invite-btn btn d-block d-sm-none"
@@ -972,11 +1037,11 @@ const Dashboard = () => {
                                         <div className='mt-4'>
                                             <div className="row g-2">
                                                 <div className="col-4">
-                                                    <div className="card01 border-0 shadow-sm">
+                                                    <div className="card01 border-0 shadow-sm welcome-inner-card">
                                                         <Link to='/dashboard/DepositHistory' className="text-decoration-none">
                                                             <div className="card-body01 p-2 text-center">
-                                                                <p className="income-text  mb-1 small">Deposit Fund</p>
-                                                                <h6 className="income-balance mb-0 fw-bold text-dark">
+                                                                <p className="income-text mb-1 small">Deposit Fund</p>
+                                                                <h6 className="income-balance mb-0 fw-bold">
                                                                     ${userData?.Depositfund || "0.00"}
                                                                 </h6>
                                                             </div>
@@ -985,11 +1050,11 @@ const Dashboard = () => {
                                                 </div>
 
                                                 <div className="col-4">
-                                                    <div className="card01 border-0 shadow-sm">
+                                                    <div className="card01 border-0 shadow-sm welcome-inner-card">
                                                         <Link to='/dashboard/InvestmentHistory' className="text-decoration-none">
                                                             <div className="card-body01 p-2 text-center">
-                                                                <p className="income-text  mb-1 small">Investment</p>
-                                                                <h6 className="income-balance mb-0 fw-bold text-dark">
+                                                                <p className="income-text mb-1 small">Investment</p>
+                                                                <h6 className="income-balance mb-0 fw-bold">
                                                                     ${userData?.Invest?.toFixed(2) || '0.00'}
                                                                 </h6>
                                                             </div>
@@ -998,10 +1063,10 @@ const Dashboard = () => {
                                                 </div>
 
                                                 <div className="col-4">
-                                                    <div className="card01 border-0 shadow-sm">
+                                                    <div className="card01 border-0 shadow-sm welcome-inner-card">
                                                         <Link to='/dashboard/IncomeReport' className="text-decoration-none">
                                                             <div className="card-body01 p-2 text-center">
-                                                                <p className="income-text  mb-1 small">Total Income</p>
+                                                                <p className="income-text mb-1 small">Total Income</p>
                                                                 <h6 className="income-balance mb-0 fw-bold">
                                                                     ${userData?.TotalIncome?.toFixed(2) || '0.00'}
                                                                 </h6>
@@ -1011,16 +1076,14 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Remaining Days Countdown Timer */}
+                                            {/* Countdown Timer */}
                                             <div className="row g-2 mt-1">
                                                 <div className="col-6">
                                                     <div className="countdown-box text-center p-1">
                                                         <div className="small fw-semibold">
                                                             {apiBotStatus === 0 && ("BOT EXPIRE")}
-                                                            {/* BOT EXPIRE */}
                                                         </div>
 
-                                                        {/* ✅ Loading State - Same Size Maintain */}
                                                         {loading ? (
                                                             <div className="left-timer">
                                                                 <span
@@ -1034,15 +1097,13 @@ const Dashboard = () => {
                                                                 />
                                                             </div>
                                                         ) : apiBotStatus === 0 ? (
-                                                            /* ✅ Timer */
                                                             <div className="left-timer fw-bold">
                                                                 {countdown || "00H : 00M : 00S"}
                                                             </div>
                                                         ) : (
-                                                            /* ✅ Start Button */
                                                             <button
                                                                 className="btn btn-sm btn-primary"
-                                                                onClick={handleDashboardStartBot}  // ✅ Sahi hai
+                                                                onClick={handleDashboardStartBot}
                                                                 disabled={isBotStarting}
                                                             >
                                                                 {isBotStarting ? 'Starting...' : 'Start Bot'}
@@ -1052,7 +1113,7 @@ const Dashboard = () => {
                                                 </div>
                                                 <div className="col-6">
                                                     <div className="countdown-box text-center p-1">
-                                                        <div className="small fw-semibold ">
+                                                        <div className="small fw-semibold">
                                                             RANK
                                                         </div>
                                                         <div className="left-timer">
@@ -1060,18 +1121,6 @@ const Dashboard = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-
-
-                                                 {/* <div className="col-6">
-                                                    <div className="countdown-box text-center p-1">
-                                                        <div className="small fw-semibold ">
-                                                            BOT-1
-                                                        </div>
-                                                        <div className="left-timer">
-                                                            {currentEarnings || "00"} / 2.5%
-                                                        </div>
-                                                    </div>
-                                                </div> */}
                                             </div>
                                         </div>
                                     </div>
@@ -1116,13 +1165,12 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-
-                    {/* Income Wallet - Fully Responsive */}
+                    {/* ===== INCOME WALLET ===== */}
                     <div className="col-md-6 col-lg-4 d-flex align-items-stretch">
-                        <div className="card w-100">
+                        <div className="card w-100 income-wallet-card glow-card">
                             <div className="card-body p-3">
                                 <div className="d-flex align-items-center justify-content-between mb-3">
-                                    <h5 className="fw-bold mb-0" style={{ fontSize: "clamp(16px, 2vw, 20px)" }}>
+                                    <h5 className="income-wallet-title mb-0" style={{ fontSize: "clamp(16px, 2vw, 20px)" }}>
                                         Income Wallet
                                     </h5>
                                 </div>
@@ -1137,16 +1185,15 @@ const Dashboard = () => {
                                         }}>
                                             {(() => {
                                                 const categories = [
-                                                    { label: "Bot Income", value: Number(userData?.AIBOTIncome) || 0, color: "#5D87FF", hoverColor: "#2B5BD9" },
-                                                    { label: "Trading Level Bonus", value: Number(userData?.TradingLevelIncome) || 0, color: "#28a745", hoverColor: "#1A7A32" },
-                                                    { label: "Sponsor Bonus", value: Number(userData?.SponsorIncome) || 0, color: "#FFB74D", hoverColor: "#E67E22" },
-                                                    { label: "Salary", value: Number(userData?.Salary) || 0, color: "#FF6B6B", hoverColor: "#C0392B" },
-                                                    { label: "Reward", value: Number(userData?.Reward) || 0, color: "#9C27B0", hoverColor: "#6A1B9A" }
+                                                    { label: "Bot Income", value: Number(userData?.AIBOTIncome) || 0, color: "#22C55E", hoverColor: "#16A34A" },
+                                                    { label: "Trading Level Bonus", value: Number(userData?.TradingLevelIncome) || 0, color: "#14B8A6", hoverColor: "#0D9488" },
+                                                    { label: "Sponsor Bonus", value: Number(userData?.SponsorIncome) || 0, color: "#F59E0B", hoverColor: "#D97706" },
+                                                    { label: "Salary", value: Number(userData?.Salary) || 0, color: "#EC4899", hoverColor: "#DB2777" },
+                                                    { label: "Reward", value: Number(userData?.Reward) || 0, color: "#A855F7", hoverColor: "#9333EA" }
                                                 ];
 
                                                 const filteredCategories = categories.filter(c => c.value > 0);
 
-                                                //  Agar koi income nahi hai toh empty chart dikhao
                                                 if (filteredCategories.length === 0) {
                                                     return (
                                                         <>
@@ -1155,7 +1202,7 @@ const Dashboard = () => {
                                                                     labels: ["No Income"],
                                                                     datasets: [{
                                                                         data: [100],
-                                                                        backgroundColor: ["#E0E0E0"],
+                                                                        backgroundColor: ["rgba(255,255,255,0.12)"],
                                                                         borderWidth: 0,
                                                                         cutout: "75%"
                                                                     }]
@@ -1169,22 +1216,18 @@ const Dashboard = () => {
                                                                     }
                                                                 }}
                                                             />
-                                                            <div style={{
+                                                            <div className="chart-center-label" style={{
                                                                 position: "absolute",
                                                                 top: "50%",
                                                                 left: "50%",
                                                                 transform: "translate(-50%, -50%)",
                                                                 textAlign: "center",
                                                                 pointerEvents: 'none',
-                                                                zIndex: 1
                                                             }}>
-                                                                <h6 className="fw-bold mb-0" style={{
-                                                                    fontSize: "clamp(11px, 1.2vw, 14px)",
-                                                                    color: "#999"
-                                                                }}>
+                                                                <h6 style={{ fontSize: "clamp(11px, 1.2vw, 14px)" }}>
                                                                     $0.00
                                                                 </h6>
-                                                                <small className="" style={{ fontSize: "clamp(7px, 0.8vw, 9px)" }}>
+                                                                <small style={{ fontSize: "clamp(7px, 0.8vw, 9px)" }}>
                                                                     No Income
                                                                 </small>
                                                             </div>
@@ -1228,39 +1271,30 @@ const Dashboard = () => {
                                                                         bodyColor: "#ffffff",
                                                                         padding: 10,
                                                                         cornerRadius: 6,
-                                                                        titleFont: { size: 12, weight: 'bold' },
-                                                                        bodyFont: { size: 11 },
                                                                         callbacks: {
                                                                             label: function (context) {
                                                                                 const value = context.parsed || 0;
                                                                                 const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                                                                 const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
                                                                                 return `💰 $${value.toFixed(2)} (${percentage}%)`;
-                                                                            },
-                                                                            title: function (context) {
-                                                                                return context[0].label;
                                                                             }
                                                                         }
                                                                     }
                                                                 }
                                                             }}
                                                         />
-                                                        <div style={{
+                                                        <div className="chart-center-label" style={{
                                                             position: "absolute",
                                                             top: "50%",
                                                             left: "50%",
                                                             transform: "translate(-50%, -50%)",
                                                             textAlign: "center",
                                                             pointerEvents: 'none',
-                                                            zIndex: 1
                                                         }}>
-                                                            <h6 className="fw-bold mb-0" style={{
-                                                                fontSize: "clamp(11px, 1.2vw, 14px)",
-                                                                color: "#5A6A85"
-                                                            }}>
+                                                            <h6 style={{ fontSize: "clamp(11px, 1.2vw, 14px)" }}>
                                                                 ${Number(userData?.TotalIncome || 0).toFixed(2)}
                                                             </h6>
-                                                            <small className="" style={{ fontSize: "clamp(7px, 0.8vw, 9px)" }}>
+                                                            <small style={{ fontSize: "clamp(7px, 0.8vw, 9px)" }}>
                                                                 Total Income
                                                             </small>
                                                         </div>
@@ -1275,11 +1309,11 @@ const Dashboard = () => {
                                         <div className="d-flex flex-column gap-1">
                                             {(() => {
                                                 const categories = [
-                                                    { label: "Bot Income", value: Number(userData?.AIBOTIncome) || 0, color: "#5D87FF" },
-                                                    { label: "Trading Level Bonus", value: Number(userData?.TradingLevelIncome) || 0, color: "#28a745" },
-                                                    { label: "Sponsor Bonus", value: Number(userData?.SponsorIncome) || 0, color: "#FFB74D" },
-                                                    { label: "Salary", value: Number(userData?.Salary) || 0, color: "#FF6B6B" },
-                                                    { label: "Reward", value: Number(userData?.Reward) || 0, color: "#9C27B0" }
+                                                    { label: "Bot Income", value: Number(userData?.AIBOTIncome) || 0, color: "#22C55E" },
+                                                    { label: "Trading Level Bonus", value: Number(userData?.TradingLevelIncome) || 0, color: "#14B8A6" },
+                                                    { label: "Sponsor Bonus", value: Number(userData?.SponsorIncome) || 0, color: "#F59E0B" },
+                                                    { label: "Salary", value: Number(userData?.Salary) || 0, color: "#EC4899" },
+                                                    { label: "Reward", value: Number(userData?.Reward) || 0, color: "#A855F7" }
                                                 ];
 
                                                 return categories.map((cat, index) => {
@@ -1289,14 +1323,11 @@ const Dashboard = () => {
                                                     return (
                                                         <div
                                                             key={index}
-                                                            className="d-flex align-items-center justify-content-between"
+                                                            className="income-list-row d-flex align-items-center justify-content-between"
                                                             style={{
-                                                                padding: "2px 6px",
-                                                                borderRadius: "4px",
                                                                 background: isHovered ? cat.color + '25' : 'transparent',
                                                                 border: isHovered ? `2px solid ${cat.color}` : '1px solid transparent',
                                                                 cursor: hasValue ? 'pointer' : 'default',
-                                                                transition: 'all 0.3s ease',
                                                                 opacity: hoveredIncome && !isHovered ? 0.4 : 1,
                                                                 pointerEvents: hasValue ? 'auto' : 'none'
                                                             }}
@@ -1311,28 +1342,27 @@ const Dashboard = () => {
                                                                 <span style={{
                                                                     width: "clamp(6px, 0.8vw, 10px)",
                                                                     height: "clamp(6px, 0.8vw, 10px)",
-                                                                    borderRadius: "2px",
+                                                                    borderRadius: "50%",
                                                                     backgroundColor: cat.color,
                                                                     display: "inline-block",
                                                                     opacity: hasValue ? 1 : 0.3,
+                                                                    transform: isHovered ? 'scale(1.3)' : 'scale(1)',
                                                                     transition: 'all 0.3s ease',
-                                                                    transform: isHovered ? 'scale(1.3)' : 'scale(1)'
+                                                                    boxShadow: hasValue ? `0 0 8px ${cat.color}80` : 'none'
                                                                 }}></span>
-                                                                <span style={{
+                                                                <span className="income-label" style={{
                                                                     fontSize: "clamp(8px, 0.9vw, 11px)",
-                                                                    color: isHovered ? cat.color : (hasValue ? '#555' : '#bbb'),
                                                                     fontWeight: isHovered ? '700' : (hasValue ? '500' : '400'),
                                                                     whiteSpace: 'nowrap',
-                                                                    transition: 'all 0.3s ease'
+                                                                    color: isHovered ? cat.color : ''
                                                                 }}>
                                                                     {cat.label}
                                                                 </span>
                                                             </div>
-                                                            <span style={{
+                                                            <span className="income-value" style={{
                                                                 fontSize: "clamp(8px, 0.9vw, 11px)",
                                                                 fontWeight: isHovered ? '700' : '600',
-                                                                color: isHovered ? cat.color : (hasValue ? '#333' : '#bbb'),
-                                                                transition: 'all 0.3s ease'
+                                                                color: isHovered ? cat.color : ''
                                                             }}>
                                                                 ${cat.value.toFixed(2)}
                                                             </span>
@@ -1346,27 +1376,55 @@ const Dashboard = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+
+
+                {/* game and bot section */}
+                <div className=" row g-3 ">
+
+                    {/* Game Slider */}
+                    <div className="col-12 col-md-6">
+                        <Link to="/dashboard/game">
+                            <div className="game-slider-wrapper glow-card">
+                                <GameSlider />
+                            </div>
+                        </Link>
+                    </div>
+
+    {/* Bot Image */}
+<div className="col-12 col-md-6">
+  <Link to="/dashboard/bot" className="d-block bot-card-link">
+    <div className="bot-image-wrapper glow-card">
+      <img
+        src={botimg}
+        alt="Smart Trading Bot"
+        className="bot-card-img"
+      />
+    </div>
+  </Link>
+</div>
+                </div>
 
 
 
 
-
+                <div className='row mt-5 '>
                     <div className="col-12 col-lg-8">
                         <div className="row g-2">
 
                             {/* Card 1 - BOT INCOME */}
                             <div className="col-6 col-lg-4 d-flex align-items-stretch">
-                                <div className="card01 w-100 border-0 shadow-sm" style={{ cursor: "pointer" }} onClick={() => goToStatement("AI Bot Income")}>
-                                    <div className="card-body02 bonus-card p-3">
+                                <div className="card01 w-100 h-100 income-stat-card" onClick={() => goToStatement("AI Bot Income")}>
+                                    <div className="card-body02 p-3">
                                         <div className="d-flex justify-content-between align-items-start mb-2">
                                             <div>
-                                                <p className=" mb-1">Bot Income</p>
-                                                <div className="amount-report">
+                                                <p className="income-stat-label mb-1">Bot Income</p>
+                                                <div className="income-stat-value">
                                                     ${userData?.AIBOTIncome?.toLocaleString() || '0.00'}
                                                 </div>
                                             </div>
-                                            <div className="p-2 bg-primary-subtle rounded-2">
-                                                <i class="ti ti-bot-id"></i>
+                                            <div className="income-stat-icon icon-blue">
+                                                <i className="ti ti-bot-id"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -1375,17 +1433,17 @@ const Dashboard = () => {
 
                             {/* Card 2 - Trading Level Bonus */}
                             <div className="col-6 col-lg-4 d-flex align-items-stretch">
-                                <div className="card01 w-100 border-0 shadow-sm" style={{ cursor: "pointer" }} onClick={() => goToStatement("Trading Level Bonus")}>
-                                    <div className="card-body02 bonus-card01 p-3">
+                                <div className="card01 w-100 h-100 income-stat-card" onClick={() => goToStatement("Trading Level Bonus")}>
+                                    <div className="card-body02 p-3">
                                         <div className="d-flex justify-content-between align-items-start mb-2">
                                             <div>
-                                                <p className=" mb-1">Trading Level Bonus</p>
-                                                <h5 className="fw-bold mb-0 amount-report">
+                                                <p className="income-stat-label mb-1">Trading Level Bonus</p>
+                                                <div className="income-stat-value">
                                                     ${userData?.TradingLevelIncome?.toLocaleString() || '0.00'}
-                                                </h5>
+                                                </div>
                                             </div>
-                                            <div className="p-2 bg-success-subtle rounded-2">
-                                                <i class="ti ti-brand-vinted"></i>
+                                            <div className="income-stat-icon icon-green">
+                                                <i className="ti ti-brand-vinted"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -1394,17 +1452,17 @@ const Dashboard = () => {
 
                             {/* Card 3 - Direct Income */}
                             <div className="col-12 col-lg-4 col-md-12 d-flex align-items-stretch">
-                                <div className="card01 w-100 border-0 shadow-sm" style={{ cursor: "pointer" }} onClick={() => goToStatement("Sponsor Bonus")}>
-                                    <div className="card-body02 bonus-card p-3">
-                                        <div className="d-flex  justify-content-between align-items-start mb-2">
+                                <div className="card01 w-100 h-100 income-stat-card" onClick={() => goToStatement("Sponsor Bonus")}>
+                                    <div className="card-body02 p-3">
+                                        <div className="d-flex justify-content-between align-items-start mb-2">
                                             <div>
-                                                <p className=" mb-1">Sponsor Bonus</p>
-                                                <h5 className="fw-bold mb-0 amount-report">
+                                                <p className="income-stat-label mb-1">Sponsor Bonus</p>
+                                                <div className="income-stat-value">
                                                     ${userData?.SponsorIncome?.toLocaleString() || '0.00'}
-                                                </h5>
+                                                </div>
                                             </div>
-                                            <div className="p-2 bg-info-subtle rounded-2">
-                                                <i class="ti ti-fidget-spinner"></i>
+                                            <div className="income-stat-icon icon-cyan">
+                                                <i className="ti ti-fidget-spinner"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -1413,24 +1471,22 @@ const Dashboard = () => {
 
                         </div>
 
-                        {/* Row 2 - 3 Cards (Salary, Reward, APEX Mining) */}
-                        <div className="row g-2 mt-1">
+                        {/* Row 2 - 3 Cards */}
+                        <div className="row g-2" style={{marginTop: "1px"}}>
 
                             {/* Card 4 - Salary */}
                             <div className="col-6 col-lg-4 d-flex align-items-stretch">
-                                <div className="card01 w-100 border-0 shadow-sm" style={{ cursor: "pointer" }} onClick={() => goToStatement("Salary")}>
-                                    <div className="card-body02 bonus-card01 p-3">
+                                <div className="card01 w-100 h-100 income-stat-card" onClick={() => goToStatement("Salary")}>
+                                    <div className="card-body02 p-3">
                                         <div className="d-flex justify-content-between align-items-start mb-2">
-                                            <div className="text-decoration-none w-100">
-                                                <div>
-                                                    <p className=" mb-1">Salary</p>
-                                                    <h5 className="fw-bold mb-0 amount-report">
-                                                        ${userData?.Salary?.toLocaleString() || '0.00'}
-                                                    </h5>
+                                            <div className="w-100">
+                                                <p className="income-stat-label mb-1">Salary</p>
+                                                <div className="income-stat-value">
+                                                    ${userData?.Salary?.toLocaleString() || '0.00'}
                                                 </div>
                                             </div>
-                                            <div className="p-2 bg-warning-subtle rounded-2">
-                                                <i class="ti ti-moneybag"></i>
+                                            <div className="income-stat-icon icon-yellow">
+                                                <i className="ti ti-moneybag"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -1439,17 +1495,17 @@ const Dashboard = () => {
 
                             {/* Card 5 - Reward */}
                             <div className="col-6 col-lg-4 d-flex align-items-stretch">
-                                <div className="card01 w-100 border-0 shadow-sm" style={{ cursor: "pointer" }} onClick={() => goToStatement("Reward")}>
-                                    <div className="card-body02 bonus-card p-3">
+                                <div className="card01 w-100 h-100 income-stat-card" onClick={() => goToStatement("Reward")}>
+                                    <div className="card-body02 p-3">
                                         <div className="d-flex justify-content-between align-items-start mb-2">
                                             <div>
-                                                <p className=" mb-1">Reward</p>
-                                                <h5 className="fw-bold mb-0 amount-report">
+                                                <p className="income-stat-label mb-1">Reward</p>
+                                                <div className="income-stat-value">
                                                     ${userData?.Reward?.toLocaleString() || '0.00'}
-                                                </h5>
+                                                </div>
                                             </div>
-                                            <div className="p-2 bg-primary-subtle rounded-2">
-                                                <i className="ti ti-crown fs-5 text-warning"></i>
+                                            <div className="income-stat-icon icon-pink">
+                                                <i className="ti ti-crown"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -1457,18 +1513,18 @@ const Dashboard = () => {
                             </div>
 
                             {/* Card 6 - Payoutable */}
-                            <div className="col-12 col-lg-4 col-md-12 d-flex align-items-stretch mb-2 mb-lg-0">
-                                <div className="card01 w-100 border-0 shadow-sm" style={{ cursor: "pointer" }} >
-                                    <div className="card-body02 bonus-card01 p-3">
+                            <div className="col-12 col-lg-4 col-md-12 d-flex align-items-stretch mb-2 mb-lg-0 ">
+                                <div className="card01 w-100 h-100 income-stat-card">
+                                    <div className="card-body02 p-3">
                                         <div className="d-flex justify-content-between align-items-start mb-2">
                                             <div>
-                                                <p className=" mb-1">Payoutable</p>
-                                                <h5 className="fw-bold mb-0 amount-report">
+                                                <p className="income-stat-label mb-1">Payoutable</p>
+                                                <div className="income-stat-value">
                                                     ${userData?.WorkingWallet?.toLocaleString() || '0.00'}
-                                                </h5>
+                                                </div>
                                             </div>
-                                            <div className="p-2 bg-warning-subtle rounded-2">
-                                                <i class="ti ti-building-bank"></i>
+                                            <div className="income-stat-icon icon-yellow">
+                                                <i className="ti ti-building-bank"></i>
                                             </div>
                                         </div>
                                     </div>
@@ -1478,12 +1534,11 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-
-                    {/* Apex mind Token */}
-                    <div className="col-lg-4">
+                    {/* ===== Apex Mind Token (Right Card) ===== */}
+                    <div className="col-lg-4 ">
                         <div className="row">
                             <div className="col-sm-12 d-flex align-items-stretch">
-                                <div className="card w-100">
+                                <div className="card w-100 apex-token-card">
                                     <div className="card-body02">
                                         <div className='d-flex justify-content-between align-items-center'>
                                             <div className='d-flex'>
@@ -1491,48 +1546,40 @@ const Dashboard = () => {
                                                     <img
                                                         src={apexcoin}
                                                         alt="Apex Coin"
-                                                        style={{
-                                                            width: "24px",
-                                                            height: "24px",
-                                                            borderRadius: "50%"
-                                                        }}
+                                                        style={{ width: "24px", height: "24px", borderRadius: "50%" }}
                                                     />
                                                 </div>
-                                                <div className='mt-1 ms-1' style={{ fontSize: "18px", fontWeight: '800' }}>APEX</div>
+                                                <div className='mt-1 ms-1 apex-token-title'>APEX</div>
                                             </div>
 
-                                            {/*  Price Change Indicator */}
-                                            <div style={{
-                                                fontSize: '12px',
-                                                fontWeight: '600',
-                                                color: priceChange >= 0 ? '#28a745' : '#dc3545',
-                                                background: priceChange >= 0 ? 'rgba(40,167,69,0.1)' : 'rgba(220,53,69,0.1)',
-                                                padding: '2px 10px',
-                                                borderRadius: '20px',
-                                                marginTop: "-20px"
+                                            {/* Price Change Indicator */}
+                                            <div className="apex-price-badge" style={{
+                                                color: priceChange >= 0 ? '#00e5a0' : '#ff6b6b',
+                                                background: priceChange >= 0 ? 'rgba(0,229,160,0.12)' : 'rgba(255,107,107,0.12)',
+                                                border: priceChange >= 0 ? '1px solid rgba(0,229,160,0.35)' : '1px solid rgba(255,107,107,0.35)'
                                             }}>
                                                 {priceChange >= 0 ? '▲' : '▼'} {Math.abs(priceChange).toFixed(2)}%
                                             </div>
                                         </div>
 
-                                        {/*  Live Dynamic Chart - Aage Badhta Hua */}
+                                        {/* Live Chart */}
                                         <div style={{ height: "65px" }}>
                                             <Line
                                                 data={{
-                                                    labels: labels, //  Dynamic labels (time)
+                                                    labels: labels,
                                                     datasets: [{
                                                         data: chartData,
-                                                        borderColor: priceChange >= 0 ? "#28a745" : "#dc3545",
+                                                        borderColor: priceChange >= 0 ? "#00e5a0" : "#ff6b6b",
                                                         backgroundColor: priceChange >= 0
-                                                            ? "rgba(40,167,69,0.10)"
-                                                            : "rgba(220,53,69,0.10)",
+                                                            ? "rgba(0,229,160,0.15)"
+                                                            : "rgba(255,107,107,0.15)",
                                                         fill: true,
                                                         tension: 0.4,
                                                         borderWidth: 3,
                                                         pointRadius: 2,
                                                         pointHoverRadius: 5,
                                                         pointBackgroundColor: "#ffffff",
-                                                        pointBorderColor: priceChange >= 0 ? "#28a745" : "#dc3545",
+                                                        pointBorderColor: priceChange >= 0 ? "#00e5a0" : "#ff6b6b",
                                                         pointBorderWidth: 2
                                                     }],
                                                 }}
@@ -1554,36 +1601,23 @@ const Dashboard = () => {
                                                         }
                                                     },
                                                     scales: {
-                                                        x: {
-                                                            display: false,
-                                                            grid: { display: false },
-                                                            border: { display: false }
-                                                        },
-                                                        y: {
-                                                            display: false,
-                                                            grid: { display: false },
-                                                            border: { display: false },
-                                                            suggestedMin: 0,
-                                                            suggestedMax: 45
-                                                        }
+                                                        x: { display: false, grid: { display: false }, border: { display: false } },
+                                                        y: { display: false, grid: { display: false }, border: { display: false }, suggestedMin: 0, suggestedMax: 45 }
                                                     },
-                                                    animation: {
-                                                        duration: 750, //  Smooth animation
-                                                        easing: 'easeInOutQuad'
-                                                    }
+                                                    animation: { duration: 750, easing: 'easeInOutQuad' }
                                                 }}
                                             />
                                         </div>
 
-                                        {/*  Live Price Display */}
-                                        <div style={{ cursor: "pointer" }} className="mt-2">
+                                        {/* Live Price Display */}
+                                        <div className="mt-2 apex-live-price-wrap">
                                             <div className="d-flex align-items-center justify-content-between">
                                                 <div>
-                                                    <h4 className="fw-semibold d-flex align-content-center amount-report" style={{ marginBottom: '2px' }}>
+                                                    <h4 className="apex-live-price d-flex align-items-center mb-1">
                                                         ${price.toFixed(2)}
-                                                        <i className={`ti ti-arrow-up-right fs-5 ${priceChange >= 0 ? 'text-success' : 'text-danger'}`}></i>
+                                                        <i className={`ti ti-arrow-up-right fs-5 ms-1 ${priceChange >= 0 ? 'text-success' : 'text-danger'}`}></i>
                                                     </h4>
-                                                    <div className="mb-0" style={{ fontSize: '13px', color: '#6c757d' }}>Live Token Price</div>
+                                                    <div className="apex-live-label">Live Token Price</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1593,15 +1627,29 @@ const Dashboard = () => {
                             </div>
                         </div>
                     </div>
+                </div>
 
 
-                    <hr className='mb-2' style={{ backgroundColor: "black", height: "1px" }} />
-                    <div className='text-dark'>
-                        <h3 className='mb-3'>Apex Minning Program</h3>
+
+
+
+
+
+
+
+
+
+
+                <div>
+                    {/* ===== SECTION HEADER ===== */}
+                    <div className="d-flex align-items-center justify-content-between mt-4 mb-3 mining-header-wrap">
+                        <div className="d-flex align-items-center gap-2">
+                            <h3 className="mining-header-title mb-0">Apex Mining Program</h3>
+                        </div>
                     </div>
 
                     {/* Team/Business Details Section */}
-                    <div className="container-fluid">
+                    <div className="">
                         <div className="row g-3">
 
                             {/* Left Side - col-8 */}
@@ -1613,60 +1661,24 @@ const Dashboard = () => {
                                         <div className="row g-2">
 
                                             {/* Card 1 - Invest Token */}
-                                            <div className="col-6 col-md-4 col-lg-4 d-flex align-items-stretch">
-                                                <div
-                                                    className="card02 w-100 border-0 shadow-sm h-100"
-                                                    style={{
-                                                        cursor: "pointer",
-                                                        borderRadius: "12px",
-                                                        transition: "all 0.3s ease"
-                                                    }}
-
-                                                >
+                                            <div className="col-6 col-md-4 col-lg-4 d-flex align-items-stretch glow-card03">
+                                                <div className="card02 w-100 h-100 mining-card">
                                                     <div className="card-body02 p-3 d-flex flex-column">
                                                         <div className="d-flex justify-content-between align-items-start mb-2">
-                                                            <div className="flex-grow-1 ">
-                                                                <p style={{
-                                                                    fontSize: "15px",
-                                                                    fontWeight: "600",
-                                                                    color: "#6c757d",
-                                                                    marginBottom: "2px"
-                                                                }}>
-                                                                    Invest Amount
-                                                                </p>
+                                                            <div className="flex-grow-1">
+                                                                <p className="mining-label">Invest Amount</p>
                                                                 <h3 className='amount-report01'>
                                                                     <Link to="/dashboard/InvestTokenHistory">
-                                                                        ${userData?.TotalAmountBuyToken || '0'}</Link>
+                                                                        ${userData?.TotalAmountBuyToken || '0'}
+                                                                    </Link>
                                                                 </h3>
-
-
-
-
-
-
                                                                 <div className='mt-1'>
-                                                                    <p style={{
-                                                                        fontSize: "16px",
-                                                                        fontWeight: "600",
-                                                                        color: "#6c757d",
-                                                                        marginBottom: "0"
-                                                                    }}>
-                                                                        Invest Token
-                                                                    </p>
-                                                                    <div className='mt-1 amount-report01' style={{
-                                                                        display: "flex",
-                                                                        alignItems: "center",
-                                                                        gap: "8px",
-
-                                                                    }}>
+                                                                    <p className="mining-label">Invest Token</p>
+                                                                    <div className='mt-1 amount-report01 d-flex align-items-center gap-2'>
                                                                         <img
                                                                             src={apexcoin}
                                                                             alt="Apex Coin"
-                                                                            style={{
-                                                                                width: "24px",
-                                                                                height: "24px",
-                                                                                borderRadius: "50%"
-                                                                            }}
+                                                                            style={{ width: "24px", height: "24px", borderRadius: "50%" }}
                                                                         />
                                                                         <Link to="/dashboard/InvestTokenHistory">
                                                                             {userData?.TotalTokenInWallet || '0'}
@@ -1674,12 +1686,8 @@ const Dashboard = () => {
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <div className="p-2 bg-primary-subtle rounded-2 ms-2" style={{
-                                                                backgroundColor: "rgba(253, 53, 13, 0.1)",
-                                                                borderRadius: "8px",
-                                                                padding: "8px"
-                                                            }}>
-                                                                <i className="ti ti-users fs-5 text-primary" style={{ fontSize: "20px", color: "#0d6efd" }}></i>
+                                                            <div className="mining-icon-box icon-blue ms-2">
+                                                                <i className="ti ti-wallet"></i>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1687,224 +1695,111 @@ const Dashboard = () => {
                                             </div>
 
                                             {/* Card 2 - Overall Token */}
-                                            <div className="col-6 col-md-4 col-lg-4 d-flex align-items-stretch">
-                                                <div
-                                                    className="card02 w-100 border-0 shadow-sm h-100"
-                                                    style={{
-                                                        cursor: "pointer",
-                                                        borderRadius: "12px",
-                                                        transition: "all 0.3s ease"
-                                                    }}
-
-                                                >
+                                            <div className="col-6 col-md-4 col-lg-4 d-flex align-items-stretch glow-card03">
+                                                <div className="card02 w-100 h-100 mining-card">
                                                     <div className="card-body02 p-3 d-flex flex-column">
                                                         <div className="d-flex justify-content-between align-items-start mb-2">
-                                                            <div className="flex-grow-1 p-">
-
-                                                                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-
-                                                                    <div className=''>
-                                                                        <p style={{
-                                                                            fontSize: "16x",
-                                                                            fontWeight: "600",
-                                                                            color: "#6c757d",
-                                                                            marginBottom: "0"
-                                                                        }}>
-                                                                            Earned Token
-                                                                        </p>
-
-                                                                        <div className='mt-1 amount-report01' style={{
-                                                                            display: "flex",
-                                                                            alignItems: "center",
-                                                                            gap: "8px",
-                                                                        }}>
-                                                                            <img
-                                                                                src={apexcoin}
-                                                                                alt="Apex Coin"
-                                                                                style={{
-                                                                                    width: "24px",
-                                                                                    height: "24px",
-                                                                                    borderRadius: "50%"
-                                                                                }}
-                                                                            />
-                                                                            <div className='' onClick={() => goToHistory("")}>
-                                                                                {userData?.TotalEarnTokenInWallet || '0'}
-                                                                            </div>
-                                                                        </div></div>
+                                                            <div className="flex-grow-1">
+                                                                <p className="mining-label">Earned Token</p>
+                                                                <div className='mt-1 amount-report01 d-flex align-items-center gap-2'>
+                                                                    <img
+                                                                        src={apexcoin}
+                                                                        alt="Apex Coin"
+                                                                        style={{ width: "24px", height: "24px", borderRadius: "50%" }}
+                                                                    />
+                                                                    <div onClick={() => goToHistory("")}>
+                                                                        {userData?.TotalEarnTokenInWallet || '0'}
+                                                                    </div>
                                                                 </div>
-                                                                <div className='' style={{
-                                                                    fontSize: "16px",
-                                                                    fontWeight: "600",
-                                                                    color: "#6c757d",
-                                                                    marginTop: "10px"
-
-                                                                }}>
-                                                                    Current Value
-                                                                </div>
+                                                                <div className="mining-label mt-2">Current Value</div>
                                                                 <div className='amount-report01 mt-1'>
                                                                     ${((userData?.TotalEarnTokenInWallet || 0) * price).toFixed(2)}
                                                                 </div>
                                                             </div>
+                                                            <div className="mining-icon-box icon-cyan ms-2">
+                                                                <i className="ti ti-chart-line"></i>
+                                                            </div>
                                                         </div>
-
-                                                        <p style={{
-                                                            fontSize: "15px",
-                                                            fontWeight: "500",
-                                                            color: "#6c757d",
-                                                            marginBottom: "0",
-                                                            marginTop: "4px"
-                                                        }}>
+                                                        <p className="mining-live-price mt-2 mb-0">
                                                             Live Token Price:
-                                                            <span style={{
-                                                                color: "green",
-                                                                fontWeight: "700",
-                                                                marginLeft: "4px",
-                                                                fontSize: "15px"
-                                                            }}>
-                                                                {price.toFixed(2)}
-                                                            </span>
+                                                            <span className="live-price-value">{price.toFixed(2)}</span>
                                                         </p>
-                                                    </div>
-                                                    <div className="p-2 bg-success-subtle rounded-2 ms-2" style={{
-                                                        backgroundColor: "rgba(40, 167, 69, 0.1)",
-                                                        borderRadius: "8px",
-                                                        padding: "8px"
-                                                    }}>
-                                                        <i className="ti ti-gift fs-5 text-success" style={{ fontSize: "20px", color: "green" }}></i>
                                                     </div>
                                                 </div>
                                             </div>
 
-
-
                                             {/* Card 3 - Mining(ROI) */}
-                                            <div className="col-12 col-md-4 col-lg-4 d-flex align-items-stretch">
-                                                <div
-                                                    className="card02 w-100 border-0 shadow-sm h-100"
-                                                    style={{
-                                                        cursor: "pointer",
-                                                        borderRadius: "12px",
-                                                        transition: "all 0.3s ease"
-                                                    }}
-
-                                                >
+                                            <div className="col-12 col-md-4 col-lg-4 d-flex align-items-stretch glow-card03">
+                                                <div className="card02 w-100 h-100 mining-card">
                                                     <div className="card-body02 p-3 d-flex flex-column">
                                                         <div className="d-flex justify-content-between align-items-start mb-2">
                                                             <div className="flex-grow-1">
-                                                                <p style={{
-                                                                    fontSize: "16px",
-                                                                    fontWeight: "600",
-                                                                    color: "#6c757d",
-                                                                    marginBottom: "4px"
-                                                                }}>
-                                                                    Mining (ROI)
-                                                                </p>
-
-                                                                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                                                                <p className="mining-label">Mining (ROI)</p>
+                                                                <div className="d-flex align-items-center gap-2 mb-2">
                                                                     <img
                                                                         src={apexcoin}
                                                                         alt="Apex Coin"
-                                                                        style={{
-                                                                            width: "24px",
-                                                                            height: "24px",
-                                                                            borderRadius: "50%"
-                                                                        }}
+                                                                        style={{ width: "24px", height: "24px", borderRadius: "50%" }}
                                                                     />
-
-                                                                    <h5 className='amount-report01'>
-
-                                                                        <div className='' onClick={() => goToHistory("Token Stake Bonus")}>
+                                                                    <h5 className='amount-report01 mb-0'>
+                                                                        <div onClick={() => goToHistory("Token Stake Bonus")}>
                                                                             {userData?.TokenStakeBonus?.toLocaleString() || '0'}
                                                                         </div>
-
                                                                     </h5>
                                                                 </div>
-                                                                <div className='mt-2' style={{
-                                                                    fontSize: "16px",
-                                                                    fontWeight: "600",
-                                                                    color: "#6c757d",
-                                                                    marginBottom: "2px"
-                                                                }}>
-
-                                                                    Level Income
-                                                                </div>
-                                                                <h5 className='amount-report01' style={{
-                                                                    display: "flex",
-                                                                    alignItems: "center",
-                                                                    gap: "8px"
-                                                                }}>
+                                                                <div className='mining-label mt-2 mb-1'>Level Income</div>
+                                                                <h5 className='amount-report01 d-flex align-items-center gap-2 mb-0'>
                                                                     <img
                                                                         src={apexcoin}
                                                                         alt="Apex Coin"
-                                                                        style={{
-                                                                            width: "24px",
-                                                                            height: "24px",
-                                                                            borderRadius: "50%"
-                                                                        }}
+                                                                        style={{ width: "24px", height: "24px", borderRadius: "50%" }}
                                                                     />
-                                                                    <div className='' onClick={() => goToHistory("Level Income")}>
+                                                                    <div onClick={() => goToHistory("Level Income")}>
                                                                         {userData?.LevelIncome
                                                                             ? Number(userData.LevelIncome).toLocaleString(undefined, {
                                                                                 minimumFractionDigits: 2,
                                                                                 maximumFractionDigits: 2
                                                                             })
-                                                                            : '0.00'
-                                                                        }
+                                                                            : '0.00'}
                                                                     </div>
                                                                 </h5>
-
-
                                                             </div>
-                                                            <div className="p-2 bg-info-subtle rounded-2 ms-2" style={{
-                                                                backgroundColor: "rgba(23, 162, 184, 0.1)",
-                                                                borderRadius: "8px",
-                                                                padding: "8px"
-                                                            }}>
-                                                                <i className="ti ti-building fs-5 text-info" style={{ fontSize: "20px", color: "#17a2b8" }}></i>
+                                                            <div className="mining-icon-box icon-cyan ms-2">
+                                                                <i className="ti ti-hammer"></i>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
 
-
-
-                                    {/* Row 2 - 2 Cards  */}
+                                    {/* Row 2 - 2 Cards */}
                                     <div className="col-12 mt-2">
                                         <div className="row g-2">
 
                                             {/* Card 4 - Social Media Bonus */}
-                                            <div className="col-12 col-md-6 d-flex align-items-stretch">
-                                                <div className="card02 bonus-card w-100 border-0 shadow-sm h-100" style={{ cursor: "pointer" }}>
-                                                    <div className="card-body p-3 d-flex flex-column">
+                                            <div className="col-12 col-md-6 d-flex align-items-stretch glow-card03">
+                                                <div className="card02 w-100 h-100 mining-card">
+                                                    <div className="card-body02 p-3 d-flex flex-column">
                                                         <div className="d-flex justify-content-between align-items-start mb-2">
-
                                                             <div>
-                                                                <div className="" style={{ fontWeight: "600", fontSize: "16px", color: "#6c757d" }}>Social Media Bonus</div>
-
-                                                                <div className='mt-3' style={{ display: "flex", alignItems: "center", gap: "8px", }}>
+                                                                <div className="mining-label">Social Media Bonus</div>
+                                                                <div className='mt-3 d-flex align-items-center gap-2'>
                                                                     <img
                                                                         src={apexcoin}
                                                                         alt="Apex Coin"
-                                                                        style={{
-                                                                            width: "24px",
-                                                                            height: "24px",
-                                                                            borderRadius: "50%"
-                                                                        }}
+                                                                        style={{ width: "24px", height: "24px", borderRadius: "50%" }}
                                                                     />
-                                                                    <h5 style={{ fontWeight: "800", fontSize: "23px", color: "green" }}>
-                                                                        <div className='' onClick={() => goToHistory("Social Media Bonus")}>
+                                                                    <h5 className="mining-value-lg mb-0">
+                                                                        <div onClick={() => goToHistory("Social Media Bonus")}>
                                                                             {userData?.SocialBonus?.toLocaleString() || '0'}
                                                                         </div>
                                                                     </h5>
                                                                 </div>
                                                             </div>
-
-                                                            <div className="p-2 bg-primary-subtle rounded-2 ms-2">
-                                                                <i className="ti ti-user fs-5 text-primary"></i>
+                                                            <div className="mining-icon-box icon-blue ms-2">
+                                                                <i className="ti ti-user"></i>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1912,125 +1807,107 @@ const Dashboard = () => {
                                             </div>
 
                                             {/* Card 5 - Air drop */}
-                                            <div className="col-12 col-md-6 d-flex align-items-stretch">
-                                                <div className="card02 bonus-card01 w-100 border-0 shadow-sm h-100" style={{ cursor: "pointer" }} >
+                                            <div className="col-12 col-md-6 d-flex align-items-stretch glow-card03">
+                                                <div className="card02 w-100 h-100 mining-card">
                                                     <div className="card-body02 p-3 d-flex flex-column">
                                                         <div className="d-flex justify-content-between align-items-start mb-2">
                                                             <div className="flex-grow-1">
-                                                                <div style={{ fontWeight: "600", color: "#6c757d", fontSize: "16px" }}>Air Drop</div>
-                                                                <div className='mt-3' style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                                                                <div className="mining-label">Air Drop</div>
+                                                                <div className='mt-3 d-flex align-items-center gap-2 mb-2'>
                                                                     <img
                                                                         src={apexcoin}
                                                                         alt="Apex Coin"
-                                                                        style={{
-                                                                            width: "24px",
-                                                                            height: "24px",
-                                                                            borderRadius: "50%"
-                                                                        }}
+                                                                        style={{ width: "24px", height: "24px", borderRadius: "50%" }}
                                                                     />
-                                                                    <h5 style={{ fontWeight: "800", color: "green" }}>
-                                                                        <div className='' onClick={() => goToHistory("Invest Token Bonus")}>
+                                                                    <h5 className="mining-value-lg mb-0">
+                                                                        <div onClick={() => goToHistory("Invest Token Bonus")}>
                                                                             {userData?.tokenBonusOnUpgrade?.toLocaleString() || '0'}
                                                                         </div>
                                                                     </h5>
                                                                 </div>
                                                             </div>
-                                                            <div className="p-2 bg-warning-subtle rounded-2 ms-2">
-                                                                <i className="ti ti-crown fs-5 text-warning"></i>
+                                                            <div className="mining-icon-box icon-purple ms-2">
+                                                                <i className="ti ti-crown"></i>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
 
-                            {/* Right Side - Team/Business Details Card (col-4) */}
-                            <div className="col-12 col-lg-4 d-flex align-items-stretch">
-                                <div className="card02 w-100 border-0 shadow-sm h-100">
+                            {/* Right Side - Team/Business Details */}
+                            <div className="col-12 col-lg-4 d-flex align-items-stretch glow-card03">
+                                <div className="card02 w-100 h-100 mining-card">
                                     <div className="card-body02 p-3">
-                                        <h5 className="card-title fw-semibold mb-3">Team/Business Details</h5>
+                                        <h5 className="team-title mb-3">Team/Business Details</h5>
 
-                                        <div className="d-flex align-items-center justify-content-between mb-2">
+                                        <div className="d-flex align-items-center justify-content-between mb-3">
                                             <div className="d-flex align-items-center gap-2">
-                                                <div className="p-2 bg-primary-subtle rounded-2">
-                                                    <i className="ti ti-user fs-5 text-primary"></i>
+                                                <div className="mining-icon-box icon-purple">
+                                                    <i className="ti ti-users"></i>
                                                 </div>
-                                                <h6 className="mb-0 fw-semibold">Total Team</h6>
+                                                <h6 className="team-label mb-0">Total Team</h6>
                                             </div>
-                                            <h6 className="mb-0 fw-semibold">{userData?.TeamCount || '0'}</h6>
+                                            <h6 className="team-value mb-0">{userData?.TeamCount || '0'}</h6>
                                         </div>
 
                                         <div className="d-flex align-items-center justify-content-between mb-2">
                                             <div className="d-flex align-items-center gap-2">
-                                                <div className="p-2" >
-                                                    <i className="ti ti-chart-line fs-5" style={{ color: '#1976D2' }}></i>
-                                                </div>
-                                                <h6 className="mb-0 fw-semibold">Active Team</h6>
+                                                <i className="ti ti-chart-line team-icon"></i>
+                                                <h6 className="team-label mb-0">Active Team</h6>
                                             </div>
-                                            <h6 className="mb-0 fw-semibold">{userData?.ActiveTeam || '0'}</h6>
+                                            <h6 className="team-value mb-0">{userData?.ActiveTeam || '0'}</h6>
                                         </div>
 
                                         <div className="d-flex align-items-center justify-content-between mb-2">
                                             <div className="d-flex align-items-center gap-2">
-                                                <div className="p-2">
-                                                    <i className="ti ti-arrows-exchange fs-5" style={{ color: '#1976D2' }}></i>
-                                                </div>
-                                                <h6 className="mb-0 fw-semibold">Inactive Team</h6>
+                                                <i className="ti ti-arrows-exchange team-icon"></i>
+                                                <h6 className="team-label mb-0">Inactive Team</h6>
                                             </div>
-                                            <h6 className="mb-0 fw-semibold">{userData?.InactiveTeam || '0'}</h6>
+                                            <h6 className="team-value mb-0">{userData?.InactiveTeam || '0'}</h6>
                                         </div>
 
                                         <div className="d-flex align-items-center justify-content-between mb-2">
                                             <div className="d-flex align-items-center gap-2">
-                                                <div className="p-2" >
-                                                    <i className="ti ti-repeat fs-5" style={{ color: '#1976D2' }}></i>
-                                                </div>
-                                                <h6 className="mb-0 fw-semibold">Active Direct</h6>
+                                                <i className="ti ti-repeat team-icon"></i>
+                                                <h6 className="team-label mb-0">Active Direct</h6>
                                             </div>
-                                            <h6 className="mb-0 fw-semibold">{userData?.directId || '0'}</h6>
+                                            <h6 className="team-value mb-0">{userData?.directId || '0'}</h6>
                                         </div>
 
                                         <div className="d-flex align-items-center justify-content-between mb-2">
                                             <div className="d-flex align-items-center gap-2">
-                                                <div className="p-2" >
-                                                    <i className="ti ti-calendar-stats fs-5" style={{ color: '#1976D2' }}></i>
-                                                </div>
-                                                <h6 className="mb-0 fw-semibold">Level Open</h6>
+                                                <i className="ti ti-calendar-stats team-icon"></i>
+                                                <h6 className="team-label mb-0">Level Open</h6>
                                             </div>
-                                            <h6 className="mb-0 fw-semibold">{userData?.OpenLevel || '0'}</h6>
+                                            <h6 className="team-value mb-0">{userData?.OpenLevel || '0'}</h6>
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
 
                         </div>
                     </div>
-
                 </div>
 
 
-
-
-
-
-                <hr className='mb-2 mt-4' style={{ backgroundColor: "black", height: "1px" }} />
-                <div className='text-dark'>
-                    <h3 className='mb-3'>All Payout</h3>
+                <div className='mining-header-wrap mt-5 mb-3'>
+                    <div className='d-flex align-items-center gap-2'>
+                        <i className='ti ti-cash-banknote mining-header-icon'></i>
+                        <h3 className='mining-header-title mb-0'>All Payout</h3>
+                    </div>
                 </div>
 
                 {/* payout */}
-                <div className='row '>
-                    {/* PayOut Card */}
+                <div className='row'>
+                    {/* ===== Income Payout Card ===== */}
                     <div className="col-12 col-lg-4 d-flex align-items-stretch">
-                        <div className="card w-100 border-0">
-                            <div className="d-flex justify-content-between p-2 mt-2 px-3">
-                                <div style={{ fontWeight: "900", fontSize: "20px" }}>Income Payout</div>
+                        <div className="card w-100 payout-card">
+                            <div className="d-flex justify-content-between align-items-center p-3 pt-3 px-3">
+                                <div className="payout-title">Income Payout</div>
                                 <div className='mint-box'><GiProfit /></div>
                             </div>
                             <div className="c-box">
@@ -2041,16 +1918,13 @@ const Dashboard = () => {
                                         placeholder='Enter Amount'
                                         value={payoutAmount}
                                         onChange={(e) => setPayoutAmount(e.target.value)}
-                                        style={{ padding: "10px", fontWeight: "800", color: "green" }}
                                     />
                                     <div className="d-flex align-items-center justify-content-between mt-4">
-                                        <Link to="/dashboard/IncomePayOutHistory">
-                                            <h5 className='amount-report'>
+                                        <Link to="/dashboard/IncomePayOutHistory" className="text-decoration-none">
+                                            <h5 className='amount-report mb-1'>
                                                 ${userData?.WorkingWallet?.toLocaleString() || '0.00'}
                                             </h5>
-                                            <p className="mb-2">
-                                                Payout Amount
-                                            </p>
+                                            <p className="payout-sub-label mb-0">Payout Amount</p>
                                         </Link>
                                         <button
                                             type="button"
@@ -2060,19 +1934,20 @@ const Dashboard = () => {
                                             PayOut
                                         </button>
                                     </div>
-                                    <div className='d-flex align-items-center gap-2'>
-                                        <span style={{ color: "green", fontWeight: "bold" }}>Note :</span>
-                                        <p style={{ margin: 0, color: "#666", fontSize: "13px" }}>Min Withdrawal $10</p>
+                                    <div className='d-flex align-items-center gap-2 mt-3'>
+                                        <span className="payout-note-label">Note :</span>
+                                        <p className="payout-note-text">Min Withdrawal $10</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {/* Self Trading Payout */}
+
+                    {/* ===== Self Trading Payout ===== */}
                     <div className="col-12 col-lg-4 d-flex align-items-stretch">
-                        <div className="card w-100 border-0">
-                            <div className="d-flex justify-content-between p-2 mt-2 px-3">
-                                <div style={{ fontWeight: "900", fontSize: "20px" }}>Self Trading Payout</div>
+                        <div className="card w-100 payout-card">
+                            <div className="d-flex justify-content-between align-items-center p-3 pt-3 px-3">
+                                <div className="payout-title">Self Trading Payout</div>
                                 <div className='mint-box'><GiProfit /></div>
                             </div>
                             <div className="c-box">
@@ -2083,38 +1958,36 @@ const Dashboard = () => {
                                         placeholder='Enter Amount'
                                         value={selfPayoutAmount}
                                         onChange={(e) => setSelfPayoutAmount(e.target.value)}
-                                        style={{ padding: "10px", fontWeight: "800", color: "green" }}
                                     />
                                     <div className="d-flex align-items-center justify-content-between mt-4">
-                                        <Link to="/dashboard/SelfPayoutHistory">
-                                            <h5 className='amount-report'>
+                                        <Link to="/dashboard/SelfPayoutHistory" className="text-decoration-none">
+                                            <h5 className='amount-report mb-1'>
                                                 ${Number(userData?.SelfTrade || 0).toFixed(2)}
                                             </h5>
-                                            <p className="mb-2">
-                                                Payout Amount
-                                            </p>
+                                            <p className="payout-sub-label mb-0">Payout Amount</p>
                                         </Link>
                                         <button
                                             type="button"
                                             className="custtom-button"
-                                            onClick={handleSelfPayoutButtonClick}  //  Updated
+                                            onClick={handleSelfPayoutButtonClick}
                                         >
                                             PayOut
                                         </button>
                                     </div>
-                                    <div className='d-flex align-items-center gap-2'>
-                                        <span style={{ color: "green", fontWeight: "bold" }}>Note :</span>
-                                        <p style={{ margin: 0, color: "#666", fontSize: "13px" }}>Min Withdrawal $10</p>
+                                    <div className='d-flex align-items-center gap-2 mt-3'>
+                                        <span className="payout-note-label">Note :</span>
+                                        <p className="payout-note-text">Min Withdrawal $10</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    {/* Token Payout */}
+
+                    {/* ===== Token Payout ===== */}
                     <div className="col-12 col-lg-4 d-flex align-items-stretch">
-                        <div className="card w-100 border-0">
-                            <div className="d-flex justify-content-between p-2 mt-2 px-3">
-                                <div style={{ fontWeight: "900", fontSize: "20px" }}>Token Payout</div>
+                        <div className="card w-100 payout-card">
+                            <div className="d-flex justify-content-between align-items-center p-3 pt-3 px-3">
+                                <div className="payout-title">Token Payout</div>
                                 <div className='mint-box'><GiProfit /></div>
                             </div>
                             <div className="c-box">
@@ -2125,27 +1998,20 @@ const Dashboard = () => {
                                         placeholder='Enter Amount'
                                         value={tokenPayoutAmount}
                                         onChange={(e) => setTokenPayoutAmount(e.target.value)}
-                                        style={{ padding: "10px", fontWeight: "800", color: "green" }}
                                     />
                                     <div className="d-flex align-items-center justify-content-between mt-4">
-
                                         <div className='d-flex align-items-center gap-2'>
                                             <img
                                                 src={apexcoin}
                                                 alt="Apex Coin"
-                                                style={{
-                                                    width: "24px",
-                                                    height: "24px",
-                                                    borderRadius: "50%"
-                                                }}
+                                                style={{ width: "24px", height: "24px", borderRadius: "50%" }}
                                             />
                                             <h5 className='amount-report mb-0'>
-                                                <div className='' style={{ fontWeight: "800" }} onClick={() => goToHistory("Fund Withdrawal")}>
+                                                <div style={{ fontWeight: "800" }} onClick={() => goToHistory("Fund Withdrawal")}>
                                                     {userData?.TotalEarnTokenInWallet?.toLocaleString() || '0.00'}
                                                 </div>
                                             </h5>
                                         </div>
-
                                         <button
                                             type="button"
                                             className="custtom-button"
@@ -2154,19 +2020,17 @@ const Dashboard = () => {
                                             PayOut
                                         </button>
                                     </div>
-                                    <p className="mb-2">
-                                        Payout Token
-                                    </p>
+                                    <p className="payout-sub-label mt-2 mb-2">Payout Token</p>
                                     <div className='d-flex align-items-center gap-2'>
-                                        <span style={{ color: "green", fontWeight: "bold" }}>Note :</span>
-                                        <p style={{ margin: 0, color: "#666", fontSize: "13px" }}>Min Withdrawal Tokens 10</p>
+                                        <span className="payout-note-label">Note :</span>
+                                        <p className="payout-note-text">Min Withdrawal Tokens 10</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* ✅ Withdraw Modal - Without Success State */}
+                    {/* ==================== WITHDRAW MODAL ==================== */}
                     {showWithdrawModal && (
                         <div className="modal-overlay">
                             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -2189,7 +2053,6 @@ const Dashboard = () => {
                                 </div>
 
                                 <div className="modal-body">
-                                    {/* Balance Info */}
                                     <div className="balance-info">
                                         <h6>Available balance</h6>
                                         <strong>${displayBalance?.toLocaleString() || '0.00'}</strong>
@@ -2206,18 +2069,13 @@ const Dashboard = () => {
                                         <div className="saved-details-box mt-3">
                                             <div className="details-content">
                                                 <div className="detail-row">
-                                                    <span className="detail-value" style={{
-                                                        wordBreak: 'break-all',
-                                                        fontSize: '13px',
-                                                        color: '#495057'
-                                                    }}>
+                                                    <span className="detail-value">
                                                         {userData.walletid || 'No wallet address found'}
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* Amount Input */}
                                         <div className="amount-area mb-3 mt-3">
                                             <div className="amount-label">Enter Amount</div>
                                             <div className="amount-input-wrapper">
@@ -2233,7 +2091,6 @@ const Dashboard = () => {
                                             </div>
                                         </div>
 
-                                        {/* OTP Section */}
                                         <div className="amount-area mb-3 mt-3">
                                             <div className="d-flex align-items-center gap-3">
                                                 <div className="amount-input-wrapper w-100">
@@ -2267,23 +2124,10 @@ const Dashboard = () => {
                                             </div>
                                         </div>
 
-                                        {/* Submit Button */}
                                         <button
-                                            className="modal-button mt-3"
+                                            className="modal-submit-btn mt-3"
                                             onClick={handleWithdraw}
                                             disabled={withdrawLoading || !otpVerified}
-                                            style={{
-                                                opacity: (withdrawLoading || !otpVerified) ? 0.6 : 1,
-                                                cursor: (withdrawLoading || !otpVerified) ? 'not-allowed' : 'pointer',
-                                                width: '100%',
-                                                padding: '12px',
-                                                borderRadius: '8px',
-                                                border: 'none',
-                                                background: (withdrawLoading || !otpVerified) ? '#6c757d' : '#667eea',
-                                                color: 'white',
-                                                fontWeight: '600',
-                                                fontSize: '15px'
-                                            }}
                                         >
                                             {withdrawLoading ? (
                                                 <>
@@ -2302,7 +2146,7 @@ const Dashboard = () => {
                         </div>
                     )}
 
-                    {/* Self Trading Payout Modal */}
+                    {/* ==================== SELF TRADING MODAL ==================== */}
                     {showSelfPayoutModal && (
                         <div className="modal-overlay" onClick={() => resetSelfPayoutModal()}>
                             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -2312,20 +2156,9 @@ const Dashboard = () => {
                                 </div>
 
                                 <div className="modal-body">
-                                    {/* Balance Info */}
-                                    <div style={{
-                                        background: '#e8f5e9',
-                                        padding: '12px 16px',
-                                        borderRadius: '8px',
-                                        marginBottom: '20px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center'
-                                    }}>
-                                        <span style={{ fontSize: '14px', color: '#2e7d32' }}>Available Balance</span>
-                                        <span style={{ fontSize: '18px', fontWeight: '700', color: '#1b5e20' }}>
-                                            ${Number(userData?.SelfTrade || 0).toFixed(2)}
-                                        </span>
+                                    <div className="balance-info">
+                                        <h6>Available Balance</h6>
+                                        <strong>${Number(userData?.SelfTrade || 0).toFixed(2)}</strong>
                                     </div>
 
                                     <div className="methods-grid mt-3">
@@ -2338,50 +2171,27 @@ const Dashboard = () => {
                                     <div className="saved-details-box mt-3">
                                         <div className="details-content">
                                             <div className="detail-row">
-                                                <span className="detail-value" style={{
-                                                    wordBreak: 'break-all',
-                                                    fontSize: '13px',
-                                                    color: '#495057'
-                                                }}>
+                                                <span className="detail-value">
                                                     {userData.walletid || 'No wallet address found'}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Amount Input */}
-                                    <div style={{ marginBottom: '20px' }}>
-                                        <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
-                                            Enter Amount
-                                        </label>
-                                        <div style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            background: '#f5f5f5',
-                                            borderRadius: '8px',
-                                            border: '1px solid #e0e0e0',
-                                            overflow: 'hidden'
-                                        }}>
-                                            <span style={{ padding: '12px 16px', background: '#e0e0e0', fontWeight: '700', color: '#333' }}>$</span>
+                                    <div className="mt-3">
+                                        <label className="amount-label">Enter Amount</label>
+                                        <div className="amount-input-wrapper">
+                                            <span className="currency-symbol">$</span>
                                             <input
                                                 type="number"
-                                                className="form-control"
+                                                className="amount-input"
                                                 placeholder="Enter amount"
                                                 value={selfPayoutAmount}
                                                 onChange={(e) => setSelfPayoutAmount(e.target.value)}
-                                                style={{
-                                                    flex: 1,
-                                                    padding: '12px 16px',
-                                                    border: 'none',
-                                                    outline: 'none',
-                                                    fontSize: '16px',
-                                                    background: 'transparent'
-                                                }}
                                             />
                                         </div>
                                     </div>
 
-                                    {/* ✅ OTP Section - REUSED MAIN OTP */}
                                     <div className="amount-area mb-3 mt-3">
                                         <div className="d-flex align-items-center gap-3">
                                             <div className="amount-input-wrapper w-100">
@@ -2406,7 +2216,7 @@ const Dashboard = () => {
                                             ) : (
                                                 <button
                                                     className="btn btn-success py-2 px-4 text-nowrap"
-                                                    onClick={handleVerifyOTP}  // ✅ SAME FUNCTION
+                                                    onClick={handleVerifyOTP}
                                                     disabled={loading || otp.length < 6}
                                                 >
                                                     {loading ? "Verifying..." : "Verify OTP"}
@@ -2415,26 +2225,13 @@ const Dashboard = () => {
                                         </div>
                                     </div>
 
-                                    {/* Payout Button */}
                                     <button
+                                        className="modal-submit-btn"
                                         onClick={handleSelfTradingPayout}
                                         disabled={selfPayoutLoading || !otpVerified}
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            background: (selfPayoutLoading || !otpVerified) ? '#999' : '#667eea',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '8px',
-                                            fontSize: '15px',
-                                            fontWeight: '600',
-                                            cursor: (selfPayoutLoading || !otpVerified) ? 'not-allowed' : 'pointer',
-                                            transition: 'all 0.3s ease',
-                                            opacity: (selfPayoutLoading || !otpVerified) ? 0.7 : 1,
-                                        }}
                                     >
                                         {selfPayoutLoading ? (
-                                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                            <span className="d-flex align-items-center justify-content-center gap-2">
                                                 <span className="spinner-border spinner-border-sm" role="status"></span>
                                                 Processing...
                                             </span>
@@ -2446,16 +2243,14 @@ const Dashboard = () => {
                                     </button>
 
                                     <div className='mt-3 ms-1'>
-                                        <span style={{ fontSize: '12px', color: 'red' }}>
-                                            Note: Minimum Withdraw Limit $10
-                                        </span>
+                                        <span className="modal-note-text">Note: Minimum Withdraw Limit $10</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* Token Payout Modal */}
+                    {/* ==================== TOKEN PAYOUT MODAL ==================== */}
                     {showTokenPayoutModal && (
                         <div className="modal-overlay" onClick={() => setShowTokenPayoutModal(false)}>
                             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -2467,68 +2262,25 @@ const Dashboard = () => {
                                             resetWithdrawModal();
                                             setTokenPayoutAmount('');
                                         }}
-
                                     >
                                         ✕
                                     </button>
                                 </div>
 
                                 <div className="modal-body">
-                                    {/* Balance Info */}
-                                    <div style={{
-                                        background: '#e8f5e9',
-                                        padding: '12px 16px',
-                                        borderRadius: '8px',
-                                        marginBottom: '20px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center'
-                                    }}>
-                                        <span style={{ fontSize: '14px', color: '#2e7d32' }}>
-                                            Available Tokens
-                                        </span>
-                                        <span style={{
-                                            fontSize: '18px',
-                                            fontWeight: '700',
-                                            color: '#1b5e20',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '8px'
-                                        }}>
-                                            <img
-                                                src={apexcoin}
-                                                alt="Apex Coin"
-                                                style={{
-                                                    width: "24px",
-                                                    height: "24px",
-                                                    borderRadius: "50%"
-                                                }}
-                                            />
+                                    <div className="balance-info">
+                                        <h6>Available Tokens</h6>
+                                        <strong className="d-flex align-items-center gap-2">
+                                            <img src={apexcoin} alt="Apex Coin" style={{ width: "24px", height: "24px", borderRadius: "50%" }} />
                                             {userData?.TotalEarnTokenInWallet?.toLocaleString() || '0.00'}
-                                        </span>
+                                        </strong>
                                     </div>
 
-                                    {/* Token Rate Info */}
-                                    <div style={{
-                                        background: '#e3f2fd',
-                                        padding: '10px 16px',
-                                        borderRadius: '8px',
-                                        marginBottom: '20px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center'
-                                    }}>
-                                        <span style={{ fontSize: '14px', color: '#0d47a1' }}>
-                                            Live Token Price
-                                        </span>
-                                        <span style={{
-                                            fontSize: '16px',
-                                            fontWeight: '700',
-                                            color: '#0d47a1'
-                                        }}>
-                                            {price.toFixed(2)}
-                                        </span>
+                                    <div className="token-rate-info">
+                                        <span>Live Token Price</span>
+                                        <span className="token-rate-value">{price.toFixed(2)}</span>
                                     </div>
+
                                     <div className="methods-grid mt-3">
                                         <div className="method-chip active">
                                             <FaCreditCard />
@@ -2539,73 +2291,31 @@ const Dashboard = () => {
                                     <div className="saved-details-box mt-3">
                                         <div className="details-content">
                                             <div className="detail-row">
-                                                <span className="detail-value" style={{
-                                                    wordBreak: 'break-all',
-                                                    fontSize: '13px',
-                                                    color: '#495057'
-                                                }}>
+                                                <span className="detail-value">
                                                     {userData?.TokenAddress || 'No wallet address found'}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Amount Input */}
-                                    <div style={{ marginBottom: '20px' }}>
-                                        <label style={{
-                                            display: 'block',
-                                            fontSize: '14px',
-                                            fontWeight: '600',
-                                            color: '#333',
-                                            marginBottom: '8px'
-                                        }}>
-                                            Enter Token Amount
-                                        </label>
-                                        <div style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            background: '#f5f5f5',
-                                            borderRadius: '8px',
-                                            border: '1px solid #e0e0e0',
-                                            overflow: 'hidden'
-                                        }}>
-                                            <span style={{
-                                                padding: '12px 16px',
-                                                background: '#e0e0e0',
-                                                fontWeight: '700',
-                                                color: '#333'
-                                            }}>
-                                                <img
-                                                    src={apexcoin}
-                                                    alt="Apex Coin"
-                                                    style={{
-                                                        width: "20px",
-                                                        height: "20px",
-                                                        borderRadius: "50%"
-                                                    }}
-                                                />
+                                    <div className="mt-3">
+                                        <label className="amount-label">Enter Token Amount</label>
+                                        <div className="amount-input-wrapper">
+                                            <span className="currency-symbol">
+                                                <img src={apexcoin} alt="Apex Coin" style={{ width: "20px", height: "20px", borderRadius: "50%" }} />
                                             </span>
                                             <input
                                                 type="number"
-                                                className="form-control"
+                                                className="amount-input"
                                                 placeholder="Enter token amount"
                                                 value={tokenPayoutAmount}
                                                 onChange={(e) => setTokenPayoutAmount(e.target.value)}
-                                                style={{
-                                                    flex: 1,
-                                                    padding: '12px 16px',
-                                                    border: 'none',
-                                                    outline: 'none',
-                                                    fontSize: '16px',
-                                                    background: 'transparent'
-                                                }}
                                             />
                                         </div>
                                     </div>
 
                                     <div className="amount-area mb-3 mt-3">
                                         <div className="d-flex align-items-center gap-3">
-
                                             <div className="amount-input-wrapper w-100">
                                                 <input
                                                     type="number"
@@ -2619,7 +2329,7 @@ const Dashboard = () => {
 
                                             {!otpSent ? (
                                                 <button
-                                                    className=" btn-primary py-2 px-4 text-nowrap"
+                                                    className="btn-primary py-2 px-4 text-nowrap"
                                                     onClick={handleSendOTP}
                                                     disabled={loading}
                                                 >
@@ -2634,57 +2344,28 @@ const Dashboard = () => {
                                                     {loading ? "Verifying..." : "Verify OTP"}
                                                 </button>
                                             )}
-
                                         </div>
                                     </div>
 
-                                    {/* Buttons */}
-                                    <div style={{
-                                        display: 'flex',
-                                        gap: '12px',
-                                        marginTop: '10px'
-                                    }}>
-                                        {/* Token Payout Modal - Submit Button */}
-                                        <button
-                                            onClick={handleTokenPayoutSubmit}  //  New function
-                                            disabled={tokenPayoutLoading || !otpVerified}
-                                            style={{
-                                                flex: 2,
-                                                padding: '12px',
-                                                background: (tokenPayoutLoading || !otpVerified)
-                                                    ? '#999'
-                                                    : '#667eea',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '8px',
-                                                fontSize: '15px',
-                                                fontWeight: '600',
-                                                cursor: (tokenPayoutLoading || !otpVerified) ? 'not-allowed' : 'pointer',
-                                                transition: 'all 0.3s ease',
-                                                opacity: (tokenPayoutLoading || !otpVerified) ? 0.7 : 1,
-                                            }}
-                                        >
-                                            {tokenPayoutLoading ? (
-                                                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                                    <span className="spinner-border spinner-border-sm" role="status"></span>
-                                                    Processing...
-                                                </span>
-                                            ) : !otpVerified ? (
-                                                "Payout Tokens (Verify OTP First)"
-                                            ) : (
-                                                "Payout Tokens"
-                                            )}
-                                        </button>
-                                    </div>
+                                    <button
+                                        className="modal-submit-btn mt-3"
+                                        onClick={handleTokenPayoutSubmit}
+                                        disabled={tokenPayoutLoading || !otpVerified}
+                                    >
+                                        {tokenPayoutLoading ? (
+                                            <span className="d-flex align-items-center justify-content-center gap-2">
+                                                <span className="spinner-border spinner-border-sm" role="status"></span>
+                                                Processing...
+                                            </span>
+                                        ) : !otpVerified ? (
+                                            "Payout Tokens"
+                                        ) : (
+                                            "Payout Tokens"
+                                        )}
+                                    </button>
 
-                                    {/* Note */}
                                     <div className='mt-3 ms-1'>
-                                        <span style={{
-                                            fontSize: '12px',
-                                            color: 'red',
-                                        }}>
-                                            Note: Minimum Withdraw Limit 10 Tokens
-                                        </span>
+                                        <span className="modal-note-text">Note: Minimum Withdraw Limit 10 Tokens</span>
                                     </div>
                                 </div>
                             </div>
@@ -2692,6 +2373,10 @@ const Dashboard = () => {
                     )}
 
                 </div>
+
+
+
+
             </div>
         </>
 

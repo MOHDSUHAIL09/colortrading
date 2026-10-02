@@ -1,48 +1,51 @@
 import React from 'react';
 
-const CustomTable = ({ 
-  columns, 
-  children, 
-  loading = false, 
-  emptyMessage = "No data found" 
+
+const CustomTable = ({
+  columns,
+  children,
+  loading = false,
+  emptyMessage = "No data found"
 }) => {
   return (
-    <div className="table-responsive">
-      <table className="table table-hover align-middle mb-0">
-        <thead className="table-light">
-          <tr>
-            {columns.map((column, index) => (
-              <th key={index} className="py-3 px-4 fw-semibold">
-                {column}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
+    <div className="custom-table-wrapper">
+      <div className="table-responsive custom-table-responsive">
+        <table className="table custom-table mb-0">
+          <thead className="custom-table-head">
             <tr>
-              <td colSpan={columns.length} className="text-center py-5">
-                <div className="d-flex justify-content-center align-items-center">
-                  <div className="spinner-border text-primary me-2" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                  <span>Loading...</span>
-                </div>
-              </td>
-            </tr>            
-          
-          ) : (
-            children
-          )}
-          {!loading && !children && (
-            <tr>
-              <td colSpan={columns.length} className="text-center py-5 text-muted">
-                {emptyMessage}
-              </td>
+              {columns.map((column, index) => (
+                <th key={index} className="custom-th">
+                  {column}
+                </th>
+              ))}
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="custom-table-body">
+            {loading ? (
+              <tr>
+                <td colSpan={columns.length} className="custom-td text-center py-5">
+                  <div className="custom-table-loading">
+                    <div className="custom-table-spinner" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <span className="custom-table-loading-text">Loading...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              children
+            )}
+
+            {!loading && !children && (
+              <tr>
+                <td colSpan={columns.length} className="custom-td text-center py-5 custom-empty-msg">
+                  {emptyMessage}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

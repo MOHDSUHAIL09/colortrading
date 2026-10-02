@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import apiClient from "../../api/apiClient";
 
+
 const SeftradingHistory = () => {
     const [records, setRecords] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -12,14 +13,11 @@ const SeftradingHistory = () => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [recordCount, setRecordCount] = useState(0);
 
-    // Pagination state
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Get regno from sessionStorage
     const regno = sessionStorage.getItem('Regno');
 
-    // Format Date
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         try {
@@ -36,7 +34,6 @@ const SeftradingHistory = () => {
         }
     };
 
-    // Format Amount
     const formatAmount = (amount) => {
         return `$${parseFloat(amount || 0).toLocaleString(undefined, {
             minimumFractionDigits: 2,
@@ -44,7 +41,6 @@ const SeftradingHistory = () => {
         })}`;
     };
 
-    // ✅ Fetch Self Trading Payout History - FIXED with query params
     const fetchSelfTradingHistory = async () => {
         if (!regno) {
             toast.error('Registration number not found');
@@ -54,11 +50,10 @@ const SeftradingHistory = () => {
 
         try {
             setLoading(true);
-            
-            // ✅ POST with query parameters
+
             const response = await apiClient.post(
                 '/Trading/SelfTradingPayoutHistory',
-                null, // No body
+                null,
                 {
                     params: {
                         regno: parseInt(regno),
@@ -68,14 +63,12 @@ const SeftradingHistory = () => {
                 }
             );
 
-            // ✅ Axios automatically parses JSON
             const data = response.data;
             if (data.result === "true" || data.result === true) {
                 const historyData = data.response || data.data || [];
                 setRecords(historyData);
                 setRecordCount(historyData.length);
-                
-                // Calculate total amount
+
                 const total = historyData.reduce((sum, item) => {
                     return sum + (parseFloat(item.payoutAmount) || parseFloat(item.Amount) || parseFloat(item.amount) || 0);
                 }, 0);
@@ -88,10 +81,10 @@ const SeftradingHistory = () => {
             }
         } catch (err) {
             console.error('Error fetching report:', err);
-            
-            const errorMessage = err.response?.data?.message || 
-                                err.message || 
-                                'Something went wrong';
+
+            const errorMessage = err.response?.data?.message ||
+                err.message ||
+                'Something went wrong';
             toast.error(errorMessage);
             setRecords([]);
             setTotalAmount(0);
@@ -105,7 +98,6 @@ const SeftradingHistory = () => {
         fetchSelfTradingHistory();
     }, [pageIndex, itemsPerPage]);
 
-    // Filter records based on search term
     const filteredRecords = records.filter((row) => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -121,13 +113,11 @@ const SeftradingHistory = () => {
         );
     });
 
-    // Pagination logic
     const totalItems = filteredRecords.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (pageIndex - 1) * itemsPerPage;
     const currentRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
 
-    // Reset to first page when search term changes
     useEffect(() => {
         setPageIndex(1);
     }, [searchTerm]);
@@ -144,47 +134,53 @@ const SeftradingHistory = () => {
         <>
             <ToastContainer position="top-right" />
             <div className="Table-container royalty-main-wrapper mb-5 p-4">
-                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-                    <h3 className="mb-0 text-dark"> Self Trading Payout History</h3>
-                    {/* {totalAmount > 0 && (
-                        <div className="total-income-badge">
-                            <span className="text-dark">Total Payout: </span>
-                            <span style={{ color: "#10b981", fontWeight: "bold", fontSize: "18px" }}>
-                                {formatAmount(totalAmount)}
-                            </span>
+
+                {/* ===== HEADER CARD ===== */}
+                <div className="dh-header-card">
+                    <div className="dh-header-icon">
+                        <i className="ti ti-chart-candle"></i>
+                    </div>
+                    <div className="dh-header-texts">
+                        <h2>Self Trading Payout History</h2>
+                        <p>View your self trading payout transaction records</p>
+                    </div>
+                    {totalAmount > 0 && (
+                        <div className="sth-total-badge">
+                            <span>Total Payout</span>
+                            <strong>{formatAmount(totalAmount)}</strong>
                         </div>
-                    )} */}
+                    )}
                 </div>
 
-                {/* Filters Row */}
-                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3 entries-search-bar">
-                    <div className="entries-control d-flex align-items-center gap-2">
-                        <label className="text-dark mb-0">Show entries:</label>
-                        <select 
-                            className="form-select" 
-                            value={itemsPerPage} 
+                {/* ===== FILTERS BAR ===== */}
+                <div className="dh-filters-bar">
+                    <div className="dh-filter-item">
+                        <label className="dh-filter-label">Show entries:</label>
+                        <select
+                            className="dh-select"
+                            value={itemsPerPage}
                             onChange={e => {
                                 setItemsPerPage(Number(e.target.value));
                                 setPageIndex(1);
                             }}
-                            style={{ width: '80px' }}
                         >
                             {[10, 25, 50, 75, 100].map(n => <option key={n} value={n}>{n}</option>)}
                         </select>
                     </div>
 
-                    <div className="search-wrapper">
+                    <div className="dh-search-wrap">
+                        <i className="ti ti-search dh-search-icon"></i>
                         <input
-                            className="form-control search-input"
-                            placeholder="🔍 Search records..."
+                            className="dh-search-input"
+                            placeholder="Search records..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            style={{ width: '250px' }}
                         />
                     </div>
                 </div>
 
-                <div className="report-card">
+                {/* ===== TABLE CARD ===== */}
+                <div className="dh-table-card">
                     <CustomTable columns={columns} loading={loading}>
                         {currentRecords.length > 0 ? (
                             currentRecords.map((row, index) => (
@@ -194,26 +190,20 @@ const SeftradingHistory = () => {
                                             {startIndex + index + 1}
                                         </div>
                                     </td>
-                                    <td style={{ color: "#6b7280", fontSize: "13px" }}>
+                                    <td className="sth-date">
                                         {formatDate(row.EntryDate || row.date || row.payoutDate)}
                                     </td>
-                                    <td style={{ color: "#10b981", fontWeight: "600" }}>
+                                    <td className="sth-payout-amount">
                                         {formatAmount(row.Amount || row.payoutAmount || row.amount || 0)}
                                     </td>
-                                    <td style={{ color: "#8b5cf6", fontWeight: "600" }}>
+                                    <td className="sth-remaining-amount">
                                         {formatAmount(row.lcount || row.remainingAmount || row.balance || 0)}
-                                    </td>                       
-                                    <td style={{ 
-                                        color: "#6b7280", 
-                                        fontSize: "13px", 
-                                        maxWidth: "300px",
-                                        wordBreak: "break-word"
-                                    }} 
-                                    title={row.remark || row.Remark || "-"}>
+                                    </td>
+                                    <td className="sth-remark" title={row.remark || row.Remark || "-"}>
                                         {row.remark || row.Remark ? (
-                                            (row.remark || row.Remark).length > 50 ? 
-                                            (row.remark || row.Remark).substring(0, 50) + '...' : 
-                                            (row.remark || row.Remark)
+                                            (row.remark || row.Remark).length > 50 ?
+                                                (row.remark || row.Remark).substring(0, 50) + '...' :
+                                                (row.remark || row.Remark)
                                         ) : "-"}
                                     </td>
                                 </tr>
@@ -221,7 +211,7 @@ const SeftradingHistory = () => {
                         ) : (
                             <tr>
                                 <td colSpan={columns.length} className="text-center py-4">
-                                    {loading ? "⏳ Loading..." : "📭 No records found"}
+                                    {loading ? "Loading..." : "No records found"}
                                 </td>
                             </tr>
                         )}
@@ -237,27 +227,6 @@ const SeftradingHistory = () => {
                     )}
                 </div>
             </div>
-
-            <style jsx>{`
-                .sr-no-circle {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: 28px;
-                    height: 28px;
-                    border-radius: 50%;
-                    background: #f3f4f6;
-                    color: #4b5563;
-                    font-size: 13px;
-                    font-weight: 600;
-                }
-                .total-income-badge {
-                    background: #f0fdf4;
-                    padding: 8px 16px;
-                    border-radius: 8px;
-                    border: 1px solid #bbf7d0;
-                }
-            `}</style>
         </>
     );
 };

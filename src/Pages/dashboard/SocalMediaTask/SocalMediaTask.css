@@ -1,249 +1,228 @@
-
+/* ============================================
+   SOCIAL MEDIA TASK — Navy Theme
+   ============================================ */
 
 .social-task-container {
-  align-items: center;
-  justify-content: center;
-  padding: 20px !important;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Toast Notification Styles */
-.toast-notification {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: white;
-  padding: 14px 28px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-  z-index: 9999;
-  text-align: center;
-  min-width: 80px;
-  max-width: 420px;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  animation: slideDown 0.3s ease-in-out;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.toast-notification.success {
-  background-color: #10b981;
-}
-
-.toast-notification.error {
-  background-color: #ef4444;
-}
-
-.toast-content {
   display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 24px 40px;
+  background: transparent;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ===== FORM CARD ===== */
+.st-form-card {
+  background: linear-gradient(135deg, #0d1f5c 0%, #081542 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(120, 90, 255, 0.35);
+  box-shadow: 0 4px 20px rgba(84, 32, 245, 0.2);
+  overflow: hidden;
+  position: relative;
+  max-width: 100%;
+}
+
+.st-form-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(160, 120, 255, 0.7), transparent);
+}
+
+/* ===== FORM HEADER ===== */
+.st-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(120, 160, 255, 0.15);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.st-form-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.st-history-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #0878ff 0%, #5420f5 70%, #e91bea 100%);
+  color: #ffffff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px rgba(84, 32, 245, 0.4);
+}
+
+.st-history-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 22px rgba(84, 32, 245, 0.6);
+}
+
+.st-history-btn i {
+  font-size: 16px;
+}
+
+/* ===== FORM BODY ===== */
+.st-form-body {
+  padding: 22px 22px 26px;
+}
+
+.st-form-group {
+  margin-bottom: 20px;
+}
+
+.st-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #a9b7d6;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.st-label i {
+  font-size: 16px;
+  color: #b794ff;
+}
+
+.st-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(120, 160, 255, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.st-input::placeholder {
+  color: #7b8ba8;
+}
+
+.st-input:hover {
+  border-color: rgba(120, 160, 255, 0.5);
+}
+
+.st-input:focus {
+  border-color: rgba(123, 95, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(123, 95, 255, 0.15);
+}
+
+/* ===== SUBMIT BUTTON ===== */
+.st-submit-btn {
+  width: 100%;
+  padding: 14px 20px;
+  margin-top: 8px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(90deg, #0878ff 0%, #5420f5 70%, #e91bea 100%);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 18px rgba(84, 32, 245, 0.45);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
 }
 
-.toast-icon {
+.st-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(84, 32, 245, 0.65);
+}
+
+.st-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.st-submit-btn i {
   font-size: 18px;
 }
 
-/* Form Card Styles */
-.form-card {
-  max-width: 70%;
-  width: 100%;
-  background-color: white;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  transition: transform 0.3s ease;
-}
-
-.form-card:hover {
-  transform: translateY(-5px);
-}
-@media (max-width: 768px) {
-.form-card {
-  max-width: 100%;
-}
-.social-task-container{
-  padding: 0px !important;
-}
-}
-
-.header-title {
-  margin: 0;
-  color: white;
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-.header-subtitle {
-  margin: 8px 0 0;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 14px;
-}
-
-/* Form Body Styles */
-.form-body {
-  padding: 32px 28px;
-}
-
-/* .form-group {
-  margin-bottom: 24px;
-} */
-
-.form-label {
-  display: block;
-  color: #374151;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.form-input {
-  width: 100%;
-  padding: 12px 16px;
-  font-size: 15px;
-  border: 2px solid #e5e7eb;
-  border-radius: 12px;
-  outline: none;
-  transition: all 0.3s ease;
-  font-family: inherit;
-  box-sizing: border-box;
-}
-
-.form-input:hover {
-  border-color: #9ca3af;
-}
-
-.form-input:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-/* Button Styles */
-.submit-btn {
-  width: 100%;
-  padding: 14px;
-  background-color: #667eea;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background-color: #764ba2;
-  transform: translateY(-2px);
-}
-
-.submit-btn:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.loading-spinner {
-  display: flex;
+/* Loading */
+.st-loading {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.spinner {
+.st-spinner {
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid white;
-  border-top-color: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
   border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  animation: st-spin 0.6s linear infinite;
 }
 
-/* Animations */
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-100%);
+@keyframes st-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .social-task-container {
+    padding: 14px 12px 30px;
   }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+
+  .st-form-header {
+    padding: 16px 18px;
+  }
+
+  .st-form-header h3 {
+    font-size: 16px;
+  }
+
+  .st-history-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .st-form-body {
+    padding: 18px 18px 22px;
+  }
+
+  .st-submit-btn {
+    font-size: 14px;
+    padding: 12px 16px;
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 640px) {
-  .form-body {
-    padding: 24px 20px;
+@media (max-width: 480px) {
+  .st-form-header {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .header-title {
-    font-size: 24px;
-  }
-
-  .toast-notification {
-    min-width: 240px;
-    padding: 12px 20px;
-  }
-}
-
-
-
-
-
-
-
-
-
-
-/* Complete Styles for Header Section */
-
-
-.history-btn {
-  padding: 10px 16px;
-  background: linear-gradient(135deg, #647ceb, #3e51a5);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(100, 124, 235, 0.3);
-}
-
-.history-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 18px rgba(100, 124, 235, 0.4);
-}
-
-.history-btn:active {
-  transform: scale(0.98);
-}
-
-
-/* Mobile Responsive */
-@media (max-width: 550px) {  
-  .form-header {
-    text-align: center;
-  }
-  
-  .history-btn {
-    width: auto;
-    min-width: 120px;
+  .st-history-btn {
+    width: 100%;
     justify-content: center;
   }
 }

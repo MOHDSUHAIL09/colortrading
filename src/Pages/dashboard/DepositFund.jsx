@@ -8,9 +8,10 @@ import apiClient from '../../api/apiClient';
 import Toast from '../../Componenets/ui/Toast';
 import { useUser } from '../../context/UserContext';
 
+
 const DepositFund = () => {
     const { userData, refreshData } = useUser();
-    
+
     const [walletAddress, setWalletAddress] = useState(null);
     const [loading, setLoading] = useState(true);
     const [confirmLoading, setConfirmLoading] = useState(false);
@@ -25,45 +26,21 @@ const DepositFund = () => {
 
     // FundDeposit API Call
     const callFundDepositAPI = async () => {
-        if (!walletAddress || !regno) {
-            console.warn('⚠️ Missing walletAddress or regno');
-            return;
-        }       
+        if (!walletAddress || !regno) return;
         try {
-            const payload = {
-                walletAddress: walletAddress,
-                regno: parseInt(regno)
-            };
-
-            const response = await apiClient.post('/DepositReport/FundDeposit', payload);
-            console.log('FundDeposit API Response:', response.data);
-
+            const payload = { walletAddress, regno: parseInt(regno) };
+            await apiClient.post('/DepositReport/FundDeposit', payload);
         } catch (err) {
-            console.error(' FundDeposit API Error:', err);
-            if (err.response) {
-                console.error('Error Response Data:', err.response.data);
-                console.error('Error Status:', err.response.status);
-            }
+            console.error('FundDeposit API Error:', err);
         }
     };
 
-    // NEW: Call FundDeposit API every 60 seconds
     useEffect(() => {
         if (!walletAddress || !regno) return;
-
-        // Call immediately on mount
         callFundDepositAPI();
-
-        // Set interval for every 60 seconds
-        const intervalId = setInterval(() => {
-            callFundDepositAPI();
-        }, 60000); // 60,000 ms = 1 minute
-
-        // Cleanup interval on unmount
-        return () => {
-            if (intervalId) clearInterval(intervalId);
-        };
-    }, [walletAddress, regno]); // Re-run if walletAddress or regno changes
+        const intervalId = setInterval(() => { callFundDepositAPI(); }, 60000);
+        return () => { if (intervalId) clearInterval(intervalId); };
+    }, [walletAddress, regno]);
 
     // Fetch wallet address
     useEffect(() => {
@@ -71,20 +48,18 @@ const DepositFund = () => {
             try {
                 setLoading(true);
                 setError(null);
-
                 if (userData?.NameAppearOncheque) {
                     setWalletAddress(userData.NameAppearOncheque);
                     setLoading(false);
                     return;
                 }
-
                 const response = await apiClient.get(`/DepositReport/DepositAddress/${regno}`);
                 if (response.data?.result === "true") {
                     const walletId = response.data.response?.walletid;
                     if (walletId && walletId !== 'null') {
                         setWalletAddress(walletId);
-                    } else { 
-                        setError("No wallet address found"); 
+                    } else {
+                        setError("No wallet address found");
                     }
                 } else {
                     setError(response.data?.message || "Failed to fetch address");
@@ -98,19 +73,16 @@ const DepositFund = () => {
         fetchAddress();
     }, [regno, userData?.NameAppearOncheque]);
 
-    // Timer with auto-check
+    // Timer
     useEffect(() => {
         let timer = null;
-
         if (isTimerRunning && timeLeft > 0) {
             timer = setInterval(() => {
                 setTimeLeft(prev => {
                     const newTime = prev - 1;
-
                     if (newTime % 60 === 0 && newTime < 300 && newTime > 0) {
                         confirmDeposit(false);
                     }
-
                     if (newTime <= 0) {
                         setIsTimerRunning(false);
                         setIsTimerComplete(true);
@@ -120,13 +92,9 @@ const DepositFund = () => {
                 });
             }, 1000);
         }
-
-        return () => {
-            if (timer) clearInterval(timer);
-        };
+        return () => { if (timer) clearInterval(timer); };
     }, [isTimerRunning, timeLeft]);
 
-    // Show Success Modal
     const showSuccessModal = (message) => {
         Swal.fire({
             icon: 'success',
@@ -143,33 +111,19 @@ const DepositFund = () => {
         });
     };
 
-    // Confirm Deposit
     const confirmDeposit = async (isManual = false) => {
         if (!walletAddress || !regno) {
             if (isManual) toast.error("Required data missing");
             return;
         }
-
-        if (isManual) {
-            setConfirmLoading(true);
-        }
-
+        if (isManual) setConfirmLoading(true);
         try {
-            if (!isManual) {
-                setAutoCheckCount(prev => prev + 1);
-            }
-
-            const payload = {
-                walletAddress: walletAddress,
-                regno: parseInt(regno)
-            };
-
+            if (!isManual) setAutoCheckCount(prev => prev + 1);
+            const payload = { walletAddress, regno: parseInt(regno) };
             const response = await apiClient.post('/DepositReport/ConfirmDeposit', payload);
             if (response.data?.result === "true" || response.data?.result === true) {
                 showSuccessModal(response.data?.message || 'Deposit confirmed successfully!');
-                
                 await refreshData();
-
                 if (isManual) {
                     setTimeLeft(300);
                     setIsTimerRunning(true);
@@ -182,7 +136,6 @@ const DepositFund = () => {
                 }
                 return;
             }
-
             if (isManual) {
                 if (response.data?.message?.toLowerCase().includes('hash already exists')) {
                     toast.error('This deposit has already been confirmed.');
@@ -191,14 +144,10 @@ const DepositFund = () => {
                 }
             }
         } catch (err) {
-            console.error(`Confirm ERROR (${isManual ? 'Manual' : 'Auto'}):`, err);
-            if (isManual) {
-                toast.error(err.response?.data?.message || "Server error. Please try again.");
-            }
+            console.error(`Confirm ERROR:`, err);
+            if (isManual) toast.error(err.response?.data?.message || "Server error.");
         } finally {
-            if (isManual) {
-                setConfirmLoading(false);
-            }
+            if (isManual) setConfirmLoading(false);
         }
     };
 
@@ -218,7 +167,6 @@ const DepositFund = () => {
             textArea.value = walletAddress;
             textArea.style.position = 'fixed';
             textArea.style.left = '-9999px';
-            textArea.style.top = '-9999px';
             document.body.appendChild(textArea);
             textArea.select();
             document.execCommand('copy');
@@ -228,11 +176,7 @@ const DepositFund = () => {
     };
 
     const handleShare = async () => {
-        if (!walletAddress) {
-            toast.error("No address to share");
-            return;
-        }
-
+        if (!walletAddress) { toast.error("No address to share"); return; }
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -243,7 +187,6 @@ const DepositFund = () => {
                 toast.success("Shared successfully!");
             } catch (error) {
                 if (error.name === 'AbortError') return;
-                console.error('Share error:', error);
                 toast.error("Share failed. Copying address instead...");
                 handleCopy();
             }
@@ -264,11 +207,13 @@ const DepositFund = () => {
             <Toast />
 
             <div className="unique-df-main-wrapper">
-                <div className="unique-df-card-container">
+                {/* ONE MAIN CARD - Left aligned, plain border */}
+                <div className="unique-df-card">
 
+                    {/* ===== HEADER ===== */}
                     <div className="unique-df-top-header">
                         <div className="unique-df-header-left">
-                            <div className="unique-df-wallet-bg btn-primary">
+                            <div className="unique-df-wallet-bg">
                                 <Wallet size={24} color="white" fill="white" />
                             </div>
                             <div className="unique-df-header-texts">
@@ -276,13 +221,16 @@ const DepositFund = () => {
                                 <p>Scan the QR code or copy wallet address to deposit funds</p>
                             </div>
                         </div>
-                        <Link to="/dashboard/FundDepositStatus" className="btn-primary gap-1 unique-df-history-btn">
+                        <Link to="/dashboard/FundDepositStatus" className="unique-df-history-btn">
                             <History size={18} />
                             <span>History</span>
                         </Link>
                     </div>
 
+                    {/* ===== CONTENT BODY ===== */}
                     <div className="unique-df-content-body">
+
+                        {/* QR Section */}
                         <div className="unique-df-qr-section">
                             <div className="unique-df-qr-frame">
                                 {loading ? (
@@ -299,6 +247,7 @@ const DepositFund = () => {
                             </div>
                         </div>
 
+                        {/* Address Card */}
                         {walletAddress && (
                             <div className="unique-df-address-info-card">
                                 <div className="unique-df-address-input-pill">
@@ -309,7 +258,6 @@ const DepositFund = () => {
                                             className="unique-df-copy-icon-btn"
                                             onClick={handleShare}
                                             aria-label="Share"
-                                            title="Share wallet address"
                                         >
                                             <Share2 size={18} />
                                         </button>
@@ -317,7 +265,6 @@ const DepositFund = () => {
                                             className="unique-df-copy-icon-btn"
                                             onClick={handleCopy}
                                             aria-label="Copy"
-                                            title="Copy wallet address"
                                         >
                                             <Copy size={18} />
                                         </button>
@@ -338,7 +285,7 @@ const DepositFund = () => {
                                     )}
 
                                     <button
-                                        className={`btn-primary unique-df-confirm-btn ${confirmLoading ? 'loading' : ''}`}
+                                        className={`unique-df-confirm-btn ${confirmLoading ? 'loading' : ''}`}
                                         onClick={isTimerComplete ? () => confirmDeposit(true) : null}
                                         disabled={confirmLoading || (!isTimerComplete && isTimerRunning)}
                                         style={{
@@ -363,6 +310,7 @@ const DepositFund = () => {
                             </div>
                         )}
 
+                        {/* Bottom Note */}
                         <div className="unique-df-bottom-note">
                             <AlertCircle size={18} />
                             <p>Note: If your wallet balance is not updated immediately, please wait a few minutes and try again.</p>

@@ -12,14 +12,11 @@ const InvestTokenHistory = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [activeTab, setActiveTab] = useState("running");
 
-    // Pagination state
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Get regno from sessionStorage
     const regno = sessionStorage.getItem('Regno') || 1;
 
-    // Format amount function
     const formatAmount = (amount) => {
         return `$${parseFloat(amount || 0).toLocaleString(undefined, {
             minimumFractionDigits: 2,
@@ -27,7 +24,6 @@ const InvestTokenHistory = () => {
         })}`;
     };
 
-    // Format Date
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         const date = new Date(dateString);
@@ -40,7 +36,6 @@ const InvestTokenHistory = () => {
         });
     };
 
-    // Fetch Token Mining History
     const fetchTokenHistory = async (type = "running") => {
         if (!regno) {
             toast.error('Registration number not found');
@@ -50,18 +45,14 @@ const InvestTokenHistory = () => {
 
         try {
             setLoading(true);
-// ✅ New apiClient
-const response = await apiClient.get('/Token/TokenMiningHistoryAsync', {
-    params: { regno, type }
-}); 
-const data = response.data;
+            const response = await apiClient.get('/Token/TokenMiningHistoryAsync', {
+                params: { regno, type }
+            });
+            const data = response.data;
 
             if (data.result === "true" || data.result === true) {
                 const historyData = data.data || [];
                 setRecords(historyData);
-                // if (historyData.length === 0) {
-                //     toast.info(`No ${type} investments found`);
-                // }
             } else {
                 toast.error(data.message || 'Failed to fetch history');
                 setRecords([]);
@@ -79,7 +70,6 @@ const data = response.data;
         fetchTokenHistory(activeTab);
     }, [activeTab]);
 
-    // Filter records based on search term
     const filteredRecords = records.filter((row) => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -92,13 +82,11 @@ const data = response.data;
         );
     });
 
-    // Pagination logic
     const totalItems = filteredRecords.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (pageIndex - 1) * itemsPerPage;
     const currentRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
 
-    // Reset to first page when search term or items per page changes
     useEffect(() => {
         setPageIndex(1);
     }, [searchTerm, itemsPerPage]);
@@ -115,56 +103,92 @@ const data = response.data;
         "Remark",
     ];
 
-    // Handle Tab Change
     const handleTabChange = (type) => {
         setActiveTab(type);
         setPageIndex(1);
+    };
+
+    // ✅ Tab style helper
+    const getTabStyle = (tabName) => {
+        const isActive = activeTab === tabName;
+        return {
+            padding: "9px 22px",
+            borderRadius: "10px",
+            fontSize: "13px",
+            fontWeight: isActive ? 700 : 600,
+            cursor: "pointer",
+            transition: "all 0.3s ease",
+            border: isActive ? "none" : "1px solid rgba(120, 160, 255, 0.3)",
+            background: isActive
+                ? "linear-gradient(90deg, #0878ff 0%, #5420f5 70%, #e91bea 100%)"
+                : "rgba(255, 255, 255, 0.05)",
+            color: isActive ? "#ffffff" : "#a9b7d6",
+            boxShadow: isActive ? "0 4px 16px rgba(84, 32, 245, 0.45)" : "none",
+            outline: "none",
+        };
     };
 
     return (
         <>
             <ToastContainer position="top-right" />
             <div className="Table-container royalty-main-wrapper mb-5 p-4">
-                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-                    <h3 className="mb-0 text-dark"> Token Mining History</h3>
+
+                {/* ===== HEADER CARD ===== */}
+                <div className="dh-header-card">
+                    <div className="dh-header-icon">
+                        <i className="ti ti-coin"></i>
+                    </div>
+                    <div className="dh-header-texts">
+                        <h2>Token Mining History</h2>
+                        <p>View your token mining transaction records</p>
+                    </div>
                 </div>
 
-                {/* Tabs */}
-                <div className="d-flex gap-2 mb-3 flex-wrap">
-                    <button 
-                        className={`btn ${activeTab === 'running' ? 'btn-warning' : 'btn-outline-secondary'}`}
+                {/* ===== TABS (inline styles) ===== */}
+                <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    flexWrap: "wrap",
+                    marginBottom: "18px"
+                }}>
+                    <button
                         onClick={() => handleTabChange('running')}
+                        style={getTabStyle('running')}
                     >
-                         Running
+                        Running
                     </button>
-                    <button 
-                        className={`btn ${activeTab === 'completed' ? 'btn-success' : 'btn-outline-secondary'}`}
+                    <button
                         onClick={() => handleTabChange('completed')}
+                        style={getTabStyle('completed')}
                     >
-                         Completed
+                        Completed
                     </button>
-                    <button 
-                        className={`btn ${activeTab === 'all' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                    <button
                         onClick={() => handleTabChange('all')}
+                        style={getTabStyle('all')}
                     >
-                         All
+                        All
                     </button>
                 </div>
 
-                <div className="d-flex justify-content-between entries-search-bar entries-control mb-3">
-                    <div className="entries-control">
-                        <label className="text-dark">Show entries:</label>
-                        <select 
-                            className="form-select" 
-                            value={itemsPerPage} 
+                {/* ===== FILTERS BAR ===== */}
+                <div className="dh-filters-bar">
+                    <div className="dh-filter-item">
+                        <label className="dh-filter-label">Show entries:</label>
+                        <select
+                            className="dh-select"
+                            value={itemsPerPage}
                             onChange={e => setItemsPerPage(Number(e.target.value))}
                         >
                             {[10, 25, 50, 75, 100].map(n => <option key={n} value={n}>{n}</option>)}
                         </select>
                     </div>
-                    <div className="search-wrapper mt-3">
+
+                    <div className="dh-search-wrap">
+                        <i className="ti ti-search dh-search-icon"></i>
                         <input
-                            className="form-control search-input"
+                            className="dh-search-input"
                             placeholder="Search records..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
@@ -172,7 +196,8 @@ const data = response.data;
                     </div>
                 </div>
 
-                <div className="report-card">
+                {/* ===== TABLE CARD ===== */}
+                <div className="dh-table-card">
                     <CustomTable columns={columns} loading={loading}>
                         {currentRecords.length > 0 ? (
                             currentRecords.map((row, index) => (
@@ -182,30 +207,28 @@ const data = response.data;
                                             {startIndex + index + 1}
                                         </div>
                                     </td>
-                                    <td>{formatDate(row.Rdate)}</td>
+                                    <td className="ith-date">{formatDate(row.Rdate)}</td>
                                     <td>
-                                        <span className="text-primary">
+                                        <span className="ith-plan">
                                             {row.investtype || 'Tier'}
                                         </span>
                                     </td>
-                                    <td style={{ color: "#10b981", fontWeight: "600" }}>
+                                    <td className="ith-amount">
                                         {formatAmount(row.Rkprice)}
                                     </td>
-                                    <td>{row.RKbv || 0}</td>
-                                    <td style={{ color: "#10b981", fontWeight: "600" }}>
-                                        {row.slabfine}
-                                    </td>
+                                    <td className="ith-tokens">{row.RKbv || 0}</td>
+                                    <td className="ith-percent">{row.slabfine}</td>
                                     <td>
-                                        <span className="text-primary">
+                                        <span className="ith-lockup">
                                             {row.booster || 0} Months
                                         </span>
                                     </td>
                                     <td>
-                                        <span className={`badge ${row.TranNO === 'Running' ? 'bg-warning' : 'bg-success'}`}>
-                                            {row.TranNO === 'Running' ? ' Running' : ' Completed'}
+                                        <span className={`ith-badge ${row.TranNO === 'Running' ? 'ith-badge-warning' : 'ith-badge-success'}`}>
+                                            {row.TranNO === 'Running' ? 'Running' : 'Completed'}
                                         </span>
                                     </td>
-                                    <td style={{ color: "#6b7280", fontSize: "13px", maxWidth: "200px", wordBreak: "break-word" }} title={row.remark || "-"}>
+                                    <td className="ith-remark" title={row.remark || "-"}>
                                         {row.remark || "-"}
                                     </td>
                                 </tr>
@@ -219,7 +242,6 @@ const data = response.data;
                         )}
                     </CustomTable>
 
-                    {/* Pagination Component */}
                     {totalPages > 1 && (
                         <Pagination
                             currentPage={pageIndex}

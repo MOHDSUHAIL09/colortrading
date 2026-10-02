@@ -1,9 +1,10 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import CustomTable from '../../Componenets/ui/customtable/CustomTable';
 import Pagination from '../../Componenets/ui/pagination/Pagination';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import apiClient from '../../api/apiClient';
+
 
 const DownlineTeam = () => {
   const [loading, setLoading] = useState(false);
@@ -13,12 +14,10 @@ const DownlineTeam = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [findlvl, setFindlvl] = useState(1);
   const [levelOptions] = useState([...Array(10).keys()].map(i => i + 1));
-  const [pageSize] = useState(10); 
+  const [pageSize] = useState(10);
 
-  // Get regno from sessionStorage
   const regno = sessionStorage.getItem('Regno');
 
-  // Table Columns
   const columns = [
     "S.No.",
     "Downline Info",
@@ -27,7 +26,6 @@ const DownlineTeam = () => {
     "Status",
   ];
 
-  // Format Amount
   const formatAmount = (amount) => {
     return `$${parseFloat(amount || 0).toLocaleString(undefined, {
       minimumFractionDigits: 2,
@@ -35,19 +33,18 @@ const DownlineTeam = () => {
     })}`;
   };
 
-  // Get Status Badge
+  // ===== Status Badge (navy theme) =====
   const getStatusBadge = (status) => {
     switch (status?.toLowerCase()) {
       case 'active':
-        return <span className="badge bg-success"> Active</span>;
+        return <span className="dl-badge dl-badge-success">Active</span>;
       case 'inactive':
-        return <span className="badge bg-danger"> Inactive</span>;
+        return <span className="dl-badge dl-badge-danger">Inactive</span>;
       default:
-        return <span className="badge bg-secondary">{status || 'Unknown'}</span>;
+        return <span className="dl-badge dl-badge-neutral">{status || 'Unknown'}</span>;
     }
   };
 
-  // ✅ Fetch Downline Team Data - FIXED
   const fetchDownlineTeam = async () => {
     if (!regno) {
       toast.error('Registration number not found');
@@ -57,7 +54,6 @@ const DownlineTeam = () => {
 
     setLoading(true);
     try {
-      // ✅ FIX: Remove leading space and use proper axios POST
       const response = await apiClient.post(
         '/Dashboard/DownLineTeam',
         {
@@ -66,17 +62,15 @@ const DownlineTeam = () => {
           pageIndex: currentPage,
           pageSize: pageSize
         },
-     
       );
 
-      // ✅ FIX: Axios automatically parses JSON, so response.data is the parsed object
       const data = response.data;
 
       if (data.result === "true" || data.result === true) {
         const teamData = data.response?.data || [];
         const totalCount = data.response?.recordCount || teamData.length;
         const totalBiz = data.response?.totalBusiness || 0;
-        
+
         setDownlineData(teamData);
         setRecordCount(totalCount);
         setTotalBusiness(totalBiz);
@@ -87,14 +81,13 @@ const DownlineTeam = () => {
         setTotalBusiness(0);
       }
     } catch (error) {
-      console.error(" Error fetching downline team:", error);
-      
-      // Better error handling
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
-                          'Something went wrong';
+      console.error("Error fetching downline team:", error);
+
+      const errorMessage = error.response?.data?.message ||
+        error.message ||
+        'Something went wrong';
       toast.error(errorMessage);
-      
+
       setDownlineData([]);
       setRecordCount(0);
       setTotalBusiness(0);
@@ -107,143 +100,98 @@ const DownlineTeam = () => {
     fetchDownlineTeam();
   }, [currentPage, findlvl, pageSize]);
 
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  // Handle level change
   const handleLevelChange = (e) => {
     setFindlvl(parseInt(e.target.value));
     setCurrentPage(1);
   };
 
-  // Pagination
   const totalPages = Math.ceil(recordCount / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
 
-  return (  
+  return (
     <>
       <ToastContainer position="top-right" />
-      <div className="Table-container container-fluid p-3">
-        {/* Header Section */}
-        <div className="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-          <div>
-            <h4 className="fw-bold" style={{ color: "#2A3547" }}>Downline Team</h4>
+      <div className="Table-container royalty-main-wrapper mb-5 p-4">
+
+        {/* ===== HEADER CARD ===== */}
+        <div className="dh-header-card">
+          <div className="dh-header-icon">
+            <i className="ti ti-users-group"></i>
+          </div>
+          <div className="dh-header-texts">
+            <h2>Downline Team</h2>
+            <p>View your team members and their details</p>
           </div>
         </div>
 
-        {/* Filters + Summary Cards */}
-        <div className="card border-0 shadow-sm mb-4">
-          <div className="card-body p-3">
-            <div className="row g-3 align-items-center">
-              {/* Level Filter */}
-              <div className="col-md-3">
-                <label className="form-label fw-semibold mb-1">Select Level</label>
-                <select 
-                  className="form-select form-select-sm"
-                  value={findlvl} 
-                  onChange={handleLevelChange}
-                >
-                  {levelOptions.map(level => (
-                    <option key={level} value={level}>Level {level}</option>
-                  ))}
-                </select>
-              </div>
-              
-              {/* Summary Cards */}
-              <div className="col-md-9">
-                <div className="d-flex gap-3 justify-content-end flex-wrap">
-                  <div className="bg-primary-subtle rounded-3 p-3 text-center0" style={{ minWidth: "130px" }}>
-                    <span className="text-muted" style={{ fontSize: "12px" }}>Total Members</span>
-                    <h5 className="fw-bold mb-0 text-primary">{recordCount}</h5>
-                  </div>
-                  <div className="bg-success-subtle rounded-3 p-3 text-center" style={{ minWidth: "150px" }}>
-                    <span className="text-muted" style={{ fontSize: "12px" }}>Team Business</span>
-                    <h5 className="fw-bold mb-0 text-success">{formatAmount(totalBusiness)}</h5>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* ===== FILTERS + SUMMARY BAR ===== */}
+        <div className="dh-filters-bar dl-filters-bar">
+          {/* Level Filter */}
+          <div className="dh-filter-item">
+            <label className="dh-filter-label">Select Level:</label>
+            <select
+              className="dh-select"
+              value={findlvl}
+              onChange={handleLevelChange}
+            >
+              {levelOptions.map(level => (
+                <option key={level} value={level}>Level {level}</option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Table Section */}
-        <CustomTable 
-          columns={columns} 
-          loading={loading}
-          emptyMessage="No downline members found"
-        >
-          {downlineData.map((item, index) => (
-            <tr key={item.regno || index}>
-              <td className="py-3 px-3 text-center">
-                <div className="sr-no-circle">
-                  {startIndex + index + 1}
-                </div>
-              </td>
-              <td className="py-3 px-3">
-                <div className="d-flex flex-column">
-                  <div>
-                    <span className="fw-semibold d-block">{item.Name || '-'}</span>
-                    <span className="small" style={{fontSize: "15px"}}>{item.loginid || '-'}</span>
+        {/* ===== TABLE CARD ===== */}
+        <div className="dh-table-card">
+          <CustomTable
+            columns={columns}
+            loading={loading}
+            emptyMessage="No downline members found"
+          >
+            {downlineData.map((item, index) => (
+              <tr key={item.regno || index}>
+                <td className="text-center">
+                  <div className="sr-no-circle">
+                    {startIndex + index + 1}
                   </div>
-                </div>
-              </td>
-              <td className="py-3 px-3">
-                <div className="d-flex flex-column">
-                  <span className="fw-semibold">{item.Sponsor || '-'}</span>
-                  {/* <span className="text-muted small">{item.introName || '-'}</span> */}
-                </div>
-              </td>
-              <td className="py-3 px-3">
-                <div className="d-flex flex-column">
-                  <span className="fw-bold " style={{color: "green"}}>{formatAmount(item.kitPrice || item.Stake)}</span>             
-                </div>
-              </td>
-              <td className="py-3 px-3">
-                {getStatusBadge(item.status)}
-              </td>
-            </tr>
-          ))}
-        </CustomTable>
+                </td>
+                <td>
+                  <div className="dl-info-cell">
+                    <span className="dl-name">{item.Name || '-'}</span>
+                  </div>
+                         <span className="dl-loginid">{item.loginid || '-'}</span>
+                </td>
+                <td>
+                  <div className="dl-info-cell">
+                    <span className="dl-sponsor">{item.Sponsor || '-'}</span>
+                  </div>
+                </td>
+                <td>
+                  <span className="dl-amount">
+                    {formatAmount(item.kitPrice || item.Stake)}
+                  </span>
+                </td>
+                <td>
+                  {getStatusBadge(item.status)}
+                </td>
+              </tr>
+            ))}
+          </CustomTable>
 
-        {/* Pagination */}
-        {!loading && totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalRecords={recordCount}
-            onPageChange={handlePageChange}
-          />
-        )}
+          {!loading && totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalRecords={recordCount}
+              onPageChange={handlePageChange}
+            />
+          )}
+        </div>
       </div>
-
-      <style jsx>{`
-      
-        .badge {
-          padding: 6px 12px;
-          font-weight: 500;
-          border-radius: 5px;
-        }
-        .bg-success {
-          background-color: #10b981 !important;
-          color: white;
-        }
-        .bg-danger {
-          background-color: #ef4444 !important;
-          color: white;
-        }
-        .bg-secondary {
-          background-color: #6b7280 !important;
-          color: white;
-        }
-        .bg-primary-subtle {
-          background-color: #dbeafe;
-        }
-        .bg-success-subtle {
-          background-color: #d1fae5;
-        }
-      `}</style>
     </>
   );
 };

@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import apiClient from "../../api/apiClient";
 
+
 const SelfTradingHistory = () => {
     const [records, setRecords] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,14 +15,11 @@ const SelfTradingHistory = () => {
     const [totalLoss, setTotalLoss] = useState(0);
     const [recordCount, setRecordCount] = useState(0);
 
-    // Pagination state
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Get regno from sessionStorage
     const regno = sessionStorage.getItem('Regno');
 
-    // Format Date
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         try {
@@ -39,7 +37,6 @@ const SelfTradingHistory = () => {
         }
     };
 
-    // Format Amount
     const formatAmount = (amount) => {
         return `$${parseFloat(amount || 0).toLocaleString(undefined, {
             minimumFractionDigits: 2,
@@ -47,7 +44,6 @@ const SelfTradingHistory = () => {
         })}`;
     };
 
-    // Format Currency Rate
     const formatRate = (rate) => {
         return parseFloat(rate || 0).toLocaleString(undefined, {
             minimumFractionDigits: 2,
@@ -55,7 +51,6 @@ const SelfTradingHistory = () => {
         });
     };
 
-    //  Fetch Self Trading History
     const fetchSelfTradingHistory = async () => {
         if (!regno) {
             toast.error('Registration number not found');
@@ -65,7 +60,7 @@ const SelfTradingHistory = () => {
 
         try {
             setLoading(true);
-            
+
             const response = await apiClient.get('/Trading/BidReport', {
                 params: {
                     regno: parseInt(regno),
@@ -74,31 +69,29 @@ const SelfTradingHistory = () => {
                 }
             });
 
-
             const data = response.data;
 
             if (data.result === "true" || data.result === true) {
                 const historyData = data.response?.data || [];
                 const totalRecords = data.response?.recordCount || 0;
-                
+
                 setRecords(historyData);
                 setRecordCount(totalRecords);
-                
-                // Calculate totals
+
                 let totalBet = 0;
                 let winCount = 0;
                 let lossCount = 0;
-                
+
                 historyData.forEach(item => {
                     totalBet += parseFloat(item.betAmount) || 0;
                     if (item.type?.toLowerCase() === 'win') winCount++;
                     if (item.type?.toLowerCase() === 'loss') lossCount++;
                 });
-                
+
                 setTotalAmount(totalBet);
                 setTotalWin(winCount);
                 setTotalLoss(lossCount);
-                
+
             } else {
                 toast.error(data.message || 'Failed to fetch history');
                 setRecords([]);
@@ -107,10 +100,10 @@ const SelfTradingHistory = () => {
             }
         } catch (err) {
             console.error('Error fetching report:', err);
-            
-            const errorMessage = err.response?.data?.message || 
-                                err.message || 
-                                'Something went wrong';
+
+            const errorMessage = err.response?.data?.message ||
+                err.message ||
+                'Something went wrong';
             toast.error(errorMessage);
             setRecords([]);
             setTotalAmount(0);
@@ -124,7 +117,6 @@ const SelfTradingHistory = () => {
         fetchSelfTradingHistory();
     }, [pageIndex, itemsPerPage]);
 
-    // Filter records based on search term
     const filteredRecords = records.filter((row) => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -141,18 +133,15 @@ const SelfTradingHistory = () => {
         );
     });
 
-    // Pagination logic
     const totalItems = filteredRecords.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (pageIndex - 1) * itemsPerPage;
     const currentRecords = filteredRecords.slice(startIndex, startIndex + itemsPerPage);
 
-    // Reset to first page when search term changes
     useEffect(() => {
         setPageIndex(1);
     }, [searchTerm]);
 
-    //  COLUMNS
     const columns = [
         "Sl.No.",
         "Date",
@@ -166,32 +155,31 @@ const SelfTradingHistory = () => {
         "Remark",
     ];
 
-    //  Get status badge - TYPE se check karo
+    // ===== Status Badge (Win/Loss) =====
     const getStatusBadge = (type) => {
-        if (type?.toLowerCase() === 'win') {
-            return <span className="badge bg-success"> Win</span>;
-        } else if (type?.toLowerCase() === 'loss') {
-            return <span className="badge bg-danger">Loss</span>;
+        const t = type?.toLowerCase();
+        if (t === 'win') {
+            return <span className="st-badge st-badge-win">Win</span>;
+        } else if (t === 'loss') {
+            return <span className="st-badge st-badge-loss">Loss</span>;
         }
-        return <span className="badge bg-secondary">-</span>;
+        return <span className="st-badge st-badge-neutral">-</span>;
     };
 
-    //  Get prediction badge
+    // ===== Prediction Badge (Up/Down) =====
     const getPredictionBadge = (predict) => {
-        if (predict?.toLowerCase() === 'up') {
-            return <span className="badge bg-success"> UP</span>;
-        } else if (predict?.toLowerCase() === 'down') {
-            return <span className="badge bg-danger"> DOWN</span>;
+        const p = predict?.toLowerCase();
+        if (p === 'up') {
+            return <span className="st-badge st-badge-up">▲ UP</span>;
+        } else if (p === 'down') {
+            return <span className="st-badge st-badge-down">▼ DOWN</span>;
         }
-        return <span className="badge bg-secondary">{predict || '-'}</span>;
+        return <span className="st-badge st-badge-neutral">{predict || '-'}</span>;
     };
 
-    //  Get slot display
     const getSlotDisplay = (slot) => {
         if (!slot) return '-';
-        if (typeof slot === 'number') {
-            return `${slot} min`;
-        }
+        if (typeof slot === 'number') return `${slot} min`;
         return slot;
     };
 
@@ -199,39 +187,47 @@ const SelfTradingHistory = () => {
         <>
             <ToastContainer position="top-right" />
             <div className="Table-container royalty-main-wrapper mb-5 p-4">
-                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-                    <h3 className="mb-0 text-dark">Self Trading History</h3>
+
+                {/* ===== HEADER CARD ===== */}
+                <div className="dh-header-card">
+                    <div className="dh-header-icon">
+                        <i className="ti ti-chart-candle"></i>
+                    </div>
+                    <div className="dh-header-texts">
+                        <h2>Self Trading History</h2>
+                        <p>View your self trading transaction records</p>
+                    </div>
                 </div>
 
-                {/* Filters Row */}
-                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3 entries-search-bar">
-                    <div className="entries-control d-flex align-items-center gap-2">
-                        <label className="text-dark mb-0">Show entries:</label>
-                        <select 
-                            className="form-select" 
-                            value={itemsPerPage} 
+                {/* ===== FILTERS BAR ===== */}
+                <div className="dh-filters-bar">
+                    <div className="dh-filter-item">
+                        <label className="dh-filter-label">Show entries:</label>
+                        <select
+                            className="dh-select"
+                            value={itemsPerPage}
                             onChange={e => {
                                 setItemsPerPage(Number(e.target.value));
                                 setPageIndex(1);
                             }}
-                            style={{ width: '80px' }}
                         >
                             {[10, 25, 50, 75, 100].map(n => <option key={n} value={n}>{n}</option>)}
                         </select>
                     </div>
 
-                    <div className="search-wrapper">
+                    <div className="dh-search-wrap">
+                        <i className="ti ti-search dh-search-icon"></i>
                         <input
-                            className="form-control search-input"
-                            placeholder="🔍 Search records..."
+                            className="dh-search-input"
+                            placeholder="Search records..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            style={{ width: '250px' }}
                         />
                     </div>
                 </div>
 
-                <div className="report-card">
+                {/* ===== TABLE CARD ===== */}
+                <div className="dh-table-card">
                     <CustomTable columns={columns} loading={loading}>
                         {currentRecords.length > 0 ? (
                             currentRecords.map((row, index) => (
@@ -241,45 +237,39 @@ const SelfTradingHistory = () => {
                                             {startIndex + index + 1}
                                         </div>
                                     </td>
-                                    <td style={{ color: "#6b7280", fontSize: "13px" }}>
+                                    <td className="st-date">
                                         {formatDate(row.entryDate || row.endtime)}
                                     </td>
                                     <td>
-                                        <span className="badge bg-info">
+                                        <span className="st-badge st-badge-currency">
                                             {row.currency?.toUpperCase() || '-'}
                                         </span>
                                     </td>
-                                    <td style={{ color: "#3b82f6", fontWeight: "600" }}>
+                                    <td className="st-bet-amount">
                                         {formatAmount(row.betAmount || 0)}
                                     </td>
                                     <td>
-                                        <span className="badge bg-warning text-dark">
-                                             {getSlotDisplay(row.slot)}
+                                        <span className="st-badge st-badge-slot">
+                                            {getSlotDisplay(row.slot)}
                                         </span>
                                     </td>
                                     <td>
                                         {getPredictionBadge(row.predict)}
                                     </td>
-                                       <td style={{ color: "#8b5cf6", fontWeight: "500" }}>
+                                    <td className="st-rate">
                                         ${formatRate(row.currencyRate)}
                                     </td>
-                                    <td style={{ color: "#8b5cf6", fontWeight: "500" }}>
+                                    <td className="st-rate">
                                         ${formatRate(row.sellingRate)}
                                     </td>
                                     <td>
-                                        {getStatusBadge(row.type)}  {/*  TYPE se check */}
+                                        {getStatusBadge(row.type)}
                                     </td>
-                                    <td style={{ 
-                                        color: "#6b7280", 
-                                        fontSize: "13px", 
-                                        maxWidth: "300px",
-                                        wordBreak: "break-word"
-                                    }} 
-                                    title={row.remark || "-"}>
+                                    <td className="st-remark" title={row.remark || "-"}>
                                         {row.remark ? (
-                                            row.remark.length > 50 ? 
-                                            row.remark.substring(0, 50) + '...' : 
-                                            row.remark
+                                            row.remark.length > 50 ?
+                                                row.remark.substring(0, 50) + '...' :
+                                                row.remark
                                         ) : "-"}
                                     </td>
                                 </tr>
@@ -287,7 +277,7 @@ const SelfTradingHistory = () => {
                         ) : (
                             <tr>
                                 <td colSpan={columns.length} className="text-center py-4">
-                                    {loading ? "⏳ Loading..." : "📭 No records found"}
+                                    {loading ? "Loading..." : "No records found"}
                                 </td>
                             </tr>
                         )}

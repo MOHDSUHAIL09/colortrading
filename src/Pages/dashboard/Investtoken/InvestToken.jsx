@@ -171,7 +171,7 @@ const ApexMiningProgram = () => {
 
     <div className=" d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4 apex-header p-4 rounded-4"
     style={{
-      background: '#ffff',
+      background: '#0a0828',
       boxShadow: '0 2px 0px rgba(0, 0, 0, 0.1)',   
       overflow: 'hidden',
       zIndex: 1

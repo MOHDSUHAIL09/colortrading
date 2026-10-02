@@ -1,587 +1,1440 @@
-import  { useState, useEffect } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { BsTwitterX } from "react-icons/bs";
-import { GrNotes } from "react-icons/gr";
-import '../../assets/index.css';
-
-
-import logoApex from '../../assets/images/logo/logo-apex.png';
-import logoFooter from '../../assets/images/logo/footer-logo.png';
-// import logoMobile from '../../assets/images/logo/Apexmindai logo 170x50-5-05.png';
-// import playstoreImg from '../../assets/images/logo/playstore.png';
-// import appstoreImg from '../../assets/images/logo/appstore.webp';
-
-// Hero Section Images
-import heroImg from '../../assets/images/hero_img.png';
-import ellipse1Img from '../../assets/images/ellipse-1.png';
-import ellipse2Img from '../../assets/images/ellipse-2.png';
-import rocketImg from '../../assets/images/rocket.png';
-import globeImg from '../../assets/images/globe.png';
-import bannerCoinImg from '../../assets/images/banner-coin.png';
-import coin1Img from '../../assets/images/coin-1.png';
-
-// Explore Section Icons
-import spotTradingImg from '../../assets/images/spot-trading.png';
-import marginTradeImg from '../../assets/images/margin-trade.png';
-import derivativeImg from '../../assets/images/derivative.png';
-import earnImg from '../../assets/images/earn.png';
-// import buyImg from '../..brands';
-import marginImg from '../../assets/images/margin.png';
-
-// Try Section
-import tryImg from '../../assets/images/try.png';
-
-// FAQ Section
-import faqImg from '../../assets/images/faq/faqimg-Photoroom.png';
 import { Link } from 'react-router-dom';
-import { FaFacebook, FaInstagram, FaWhatsapp, FaYoutube } from 'react-icons/fa';
 
+// Bootstrap CSS (npm package se)
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+// Bootstrap Icons CSS (agar icons bhi chahiye)
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
+
+
+// Logo
+import logoLisht from '../../assets/img/logo/logolisht.png';
+import favicon from '../../assets/img/logo/favicon.png';
+// Banner
+import bannerThumb2 from '../../assets/img/bn/banner-thumb2.png';
+import lineDash3 from '../../assets/img/bn/line-dash3.png';
+import profileImg from '../../assets/img/bn/profile.jpg';
+// Freelancer
+import f1 from '../../assets/img/frelancer/f1.png';
+import f2 from '../../assets/img/frelancer/f2.png';
+import f3 from '../../assets/img/frelancer/f3.png';
+import f7 from '../../assets/img/frelancer/f7.png';
+import f8 from '../../assets/img/frelancer/f8.png';
+import f9 from '../../assets/img/frelancer/f9.png';
+import f10 from '../../assets/img/frelancer/f10.png';
+// Custom Icons
+import job60 from '../../assets/img/custom-icon/job60.png';
+import frelancer60 from '../../assets/img/custom-icon/frelancer60.png';
+import working60 from '../../assets/img/custom-icon/working60.png';
+import payment60 from '../../assets/img/custom-icon/payment60.png';
+// Choose Images
+import chooseai1 from '../../assets/img/choose/chooseai1.jpg';
+import chooseai2 from '../../assets/img/choose/chooseai2.jpg';
+import chooseai3 from '../../assets/img/choose/chooseai3.jpg';
+import chooseai4 from '../../assets/img/choose/chooseai4.jpg';
+// Element Images
+import chooseElement from '../../assets/img/choose/choose-element.png';
+import chooseElement4 from '../../assets/img/choose/choose-element4.png';
+// Category Icons
+import ainlp from '../../assets/img/categories/ainlp.png';
+import dataScient from '../../assets/img/categories/data-scient.png';
+import aibraind from '../../assets/img/categories/aibraind.png';
+import deepLearning from '../../assets/img/categories/deep-learning.png';
+import bigrobotic from '../../assets/img/categories/bigrobotic.png';
+import airound from '../../assets/img/categories/airound.png';
+import chatbot from '../../assets/img/categories/chatbot.png';
+import dataAnalysis from '../../assets/img/categories/data-analysis.png';
+// Feature Icons
+import searchBase2 from '../../assets/img/categories/searchbase2.png';
+import aibrainBase2 from '../../assets/img/categories/aibrainbase2.png';
+import airoundBase2 from '../../assets/img/categories/airoundbase2.png';
+import qualityBase2 from '../../assets/img/categories/qualitybase2.png';
+// About Images
+import aboutImg from '../../assets/img/about/about.png';
+import lineBase from '../../assets/img/about/linebase.png';
+import lineBase2 from '../../assets/img/about/linebase2.png';
+// App Store Images
+import appStore from '../../assets/img/app/appstore.png';
+import googlePlay from '../../assets/img/app/googlepaly.png';
+import app1 from '../../assets/img/app/app1.png';
+
+// FAQ Images
+import ha1 from '../../assets/img/faq/ha1.png';
+import ha2 from '../../assets/img/faq/ha2.png';
+import ha3 from '../../assets/img/faq/ha3.png';
+import ha4 from '../../assets/img/faq/ha4.png';
+import ha5 from '../../assets/img/faq/ha5.png';
+import faqImg from '../../assets/img/faq/faq.jpg';
+import faqCircle from '../../assets/img/faq/faq-circle.png';
+import faqLine from '../../assets/img/faq/faqline.png';
+
+// Task Images
+import task1 from '../../assets/img/task/tast1.jpg';
+import task2 from '../../assets/img/task/tast2.jpg';
+
+import robotVideo from '../../assets/video/robort.mp4';
+
+
+import '../../assets/landingcss.css'
 const LandingPage = () => {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileMenu, setMobileMenu] = useState(false);
-  const [activeTab, setActiveTab] = useState('all');
-  const [cryptoData, setCryptoData] = useState([]);
-  const [activeFaq, setActiveFaq] = useState(2);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    country: 0,
-    investor: 0,
-    coin: 0,
-    volume: 0
-  });
-
-  // Scroll handler
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    setTimeout(() => setLoading(false), 300);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Fetch crypto data
-  useEffect(() => {
-    const fetchCryptoData = async () => {
-      try {
-        const response = await fetch(
-          "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false"
-        );
-        const data = await response.json();
-        setCryptoData(data);
-      } catch (error) {
-        console.error("Error fetching crypto data:", error);
-      }
-    };
-    fetchCryptoData();
-    const interval = setInterval(fetchCryptoData, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Animate stats
-  useEffect(() => {
-    const animateValue = (start, end, duration, setter) => {
-      let startTimestamp = null;
-      const step = (timestamp) => {
-        if (!startTimestamp) startTimestamp = timestamp;
-        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-        setter(Math.floor(progress * (end - start) + start));
-        if (progress < 1) window.requestAnimationFrame(step);
-      };
-      window.requestAnimationFrame(step);
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          animateValue(0, 20, 2000, (val) => setStats(prev => ({ ...prev, country: val })));
-          animateValue(0, 6, 2000, (val) => setStats(prev => ({ ...prev, investor: val })));
-          animateValue(0, 700, 2000, (val) => setStats(prev => ({ ...prev, coin: val })));
-          animateValue(0, 1.36, 2000, (val) => setStats(prev => ({ ...prev, volume: val.toFixed(2) })));
-          observer.disconnect();
-        }
-      });
-    }, { threshold: 0.5 });
-
-    const statsSection = document.querySelector('.stats-section');
-    if (statsSection) observer.observe(statsSection);
-  }, []);
-
-  const scrollToSection = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      const offset = 80;
-      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({ top: elementPosition - offset, behavior: "smooth" });
-    }
-    setMobileMenu(false);
-  };
-
-  const handleFaqToggle = (index) => {
-    setActiveFaq(activeFaq === index ? null : index);
-  };
-
-  // Explore items with imported images
-  const exploreItems = [
-    { title: "Price Prediction", icon: spotTradingImg, desc: "Predict the movement of crypto prices and earn rewards for accurate forecasts." },
-    { title: "Real-Time Insights", icon: marginTradeImg, desc: "Get live market data and analytics to make informed trading decisions." },
-    { title: "Apexmindai Trading", icon: derivativeImg, desc: "Our smart bot trades for you, offering automated and precise predictions for better results." },
-    { title: "Risk-Free Trading", icon: earnImg, desc: "Trade without buying or selling crypto—just predict price movements and win." },
-    // { title: "Secure & Fast", icon: buyImg, desc: "Experience fast and secure trading with advanced security features and instant transactions." },
-    { title: "Instant Rewards", icon: marginImg, desc: "Borrow, trade, and repay. Leverage your assets with margin trading." }
-  ];
-
-  const highlights = [
-    { icon: "infinity", title: "Accurate Predictions", desc: "Predict crypto price movements with precision and stay ahead in the market." },
-    { icon: "shield-bolt", title: "Secure & Reliable", desc: "Trade with confidence using our rock-solid security and encrypted transactions." },
-    { icon: "brand-speedtest", title: "Instant Results", desc: "Get real-time prediction outcomes in seconds and react to market changes fast!" },
-    { icon: "droplet", title: "Smart Trading Bot", desc: "Let our AI-powered bot analyze the market and trade for you automatically." }
-  ];
-
-  const faqData = [
-    { q: "1. What is the Apexmindai app?", a: "Apexmindai is a trading prediction platform where users can bet on crypto price movements and win rewards." },
-    { q: "2. Does Apexmindai involve real trading?", a: "No, users do not buy or sell crypto assets. Instead, they predict whether the price will go up or down and earn rewards based on their predictions." },
-    { q: "3. How does the trading bot work?", a: "Apexmindai's AI-powered trading bot analyzes market trends and makes automated trading decisions to increase your chances of winning." },
-    { q: "4. Do I need to trade manually to use the bot?", a: "No, the bot is fully automated. You just need to set your preferences, and the bot will trade for you without any manual effort." }
-  ];
-
   return (
     <>
-      {/* Loader */}
-      {loading && (
-        <div className="duration-700 fixed inset-0 z-[60] grid place-content-center bg-accent5">
-          <div className="loader">
-            <img src="/apexcoin.png" alt="loader" />
-          </div>
-        </div>
-      )}
 
 
-      {/* Header */}
-      <header className={`d-flex z-10  border-b border-neutral4/15 fixed top-0 left-0 right-0 w-full transition-all duration-300 ${scrolled ? 'bg-accent2' : ''}`}>
-        <div className="container flex justify-between items-center header-main p-3">
-          <a href="#" onClick={(e) => { e.preventDefault(); scrollToSection('home'); }}>
-            <img src={logoApex} className="max-sm:w-28" width="130" alt="Site logo icon" />
-          </a>
-          
-          <ul className="hidden lg:flex gap-3 lg:gap-4 xxl:gap-8 xl:text-lg mx-auto">
-            <li><a className="lg:text-lg py-2 inline-flex cursor-pointer" onClick={() => scrollToSection('home')}>Home</a></li>
-            <li><a className="lg:text-lg py-2 inline-flex cursor-pointer" onClick={() => scrollToSection('explore')}>Explore</a></li>
-            <li><a className="lg:text-lg py-2 inline-flex cursor-pointer" onClick={() => scrollToSection('market')}>Market</a></li>
-            <li><a className="lg:text-lg py-2 inline-flex cursor-pointer" onClick={() => scrollToSection('start')}>Get Started</a></li>
-            <li><a className="lg:text-lg py-2 inline-flex cursor-pointer" onClick={() => scrollToSection('faq')}>Faq</a></li>
-          </ul>
 
-<div className="flex gap-3">
-  {/* Desktop View */}
-  <div className="hidden lg:flex gap-3">
-    <Link to="/login" >
-    <div className="btn-primary color-d">
-      Login
-      </div>
-    </Link>
-    
-    <Link to="/signup" className="btn-primary color-d">
-      Register
-    </Link>
-  </div>
-  
-  {/* Download White Ppaer */}
-  <a 
-    className="btn-primary color-d" 
-    href="/Presentation.pdf" 
-    download
-  >
-    <GrNotes/>
-    <span className="hidden sm:inline">Download</span>
-  </a>
-  
-  {/* Mobile Menu Button */}
-  <button onClick={() => setMobileMenu(!mobileMenu)} className="text-2xl lg:hidden text-white">
-    <i className="ti ti-menu-2"></i>
-  </button>
-</div>
-        </div>
-        {/* Mobile Menu */}
-      {/* Mobile Menu */}
-<div className={`fixed h-screen overflow-y-auto bg-accent51 lg:hidden top-0 left-0 z-50 duration-300 p-4 w-[400px] ${mobileMenu ? 'translate-x-0' : '-translate-x-full'}`}>
-  <div className="flex justify-between items-center mb-6">
-    <img src={logoApex} className="max-sm:w-28" width="130" alt="Site logo icon" />
-    <button onClick={() => setMobileMenu(false)} className="text-xl text-white">
-      <i className="ti ti-x"></i>
-    </button>
-  </div>
-  
-  {/* Mobile Menu Buttons - Login & Register */}
-<div className="flex gap-3 mt-4" >
-  <Link to="/login" className="btn-primary color-d  text-center py-2">
-    Login
-  </Link>
-  <Link to="/signup" className="btn-primary color-d text-center py-2" >
-    Register
-  </Link>
-</div>
-  
-  {/* Divider */}
-  <div className="border-t border-accent4 my-3 "></div>
-  
-  {/* Mobile Navigation Links */}
-  <ul className="flex flex-col gap-3 lg:gap-4 text-white">
-    <li><a className="py-2 inline-flex cursor-pointer text-lg" onClick={() => scrollToSection('home')}>Home</a></li>
-    <li><a className="py-2 inline-flex cursor-pointer text-lg" onClick={() => scrollToSection('explore')}>Explore</a></li>
-    <li><a className="py-2 inline-flex cursor-pointer text-lg" onClick={() => scrollToSection('market')}>Market</a></li>
-    <li><a className="py-2 inline-flex cursor-pointer text-lg" onClick={() => scrollToSection('start')}>Get Started</a></li>
-    <li><a className="py-2 inline-flex cursor-pointer text-lg" onClick={() => scrollToSection('faq')}>Faq</a></li>
-  </ul>
-</div>
-        {mobileMenu && <div onClick={() => setMobileMenu(false)} className="fixed bg-neutral1/10 z-20 w-full h-full inset-0 lg:hidden"></div>}
-      </header>
 
-      {/* Go to Top Button */}
-      {/* <div className="fixed bottom-5 right-5 xl:right-7 xl:bottom-7 z-30">
-        <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className={`size-12 ease-bounce duration-500 f-center rounded-full bg-primary shadow-xl text-2xl ${scrolled ? 'translate-y-0' : 'translate-y-[300px]'}`}>
-          <i className="ti ti-arrow-up"></i>
-        </button>        
-      </div> */}
 
- <div className="whatsapp-float">
-      {/* ✅ Bubbling Rings */}
-      <div className="bubble-ring ring-1"></div>
-      <div className="bubble-ring ring-2"></div>
-      <div className="bubble-ring ring-3"></div>
-      
-      {/* <a
-        href="https://wa.me/447400402001"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="whatsapp-btn"
-        aria-label="Chat on WhatsApp"
-      >
-        <FaWhatsapp />
-      </a> */}
-    </div>
-
-      {/* Main Content */}
-      <main className="mt-[82px] xxl:mt-[98px]">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden" id="home">
-          <img className="max-xxl:hidden absolute left-0 top-8" src={ellipse1Img} alt="" />
-          <img className="max-xl:hidden absolute right-0 bottom-16" src={ellipse2Img} alt="" />
-          <img className="max-xl:hidden rocket absolute left-10 bottom-8 z-[2]" src={rocketImg} alt="" />
-          <img className="max-md:hidden absolute right-5 top-12 animate-slow-rotate" src={globeImg} alt="" />
-          <img className="absolute absolute-coin left-[5%] bottom-[30%] animate-slow-rotate-reverse" src='/apexcoin.png' alt="" />
-          <img className="absolute right-[12%] top-[40%] animate-slow-rotate" src={coin1Img} alt="" />
-                  <div class="max-lg:hidden w-[250px] h-[204px] xxl:w-[404px] xxl:h-[404px] absolute bottom-[-15%] blur-[85px] left-[-12%] bg-[rgba(240,185,11,0.50)]"></div>
-        <div class="max-lg:hidden w-[250px] xxl:w-[350px] h-[250px] xxl:h-[350px] absolute top-[6%] blur-[85px] left-[-12%] bg-primary/50"></div>
-        <div class="max-lg:hidden w-[250px] xxl:w-[350px] h-[250px] xxl:h-[350px] absolute bottom-[6%] blur-[85px] right-[-8%] bg-accent1/50"></div>
-          
-          <div className="container pt-120 pb-120 grid grid-cols-12 gap-6 items-center">
-            <div className="col-span-12 lg:col-span-6 relative z-[2] max-lg:flex max-lg:flex-col ">
-              <h2 className="display-4 mb-4 text-white">
-                Powering Your Trades, Maximizing Your Profits! For
-                <span className="text-primary display-4 underline">Apex</span>
-                <span className="display-4 underline" style={{ color: "#ffbb55" }}>Mindai</span>
-              </h2>
-              <p className="mb-8 xl:mb-10 max-w-md lg:text-lg text-white">At Apexmindai, we empower traders with cutting-edge tools and insights, ensuring every trade is strategic and every profit is maximized.</p>
-            </div>
-            <div className="col-span-12 lg:col-span-5 lg:col-start-8 relative max-lg:flex max-lg:justify-center">
-              <img src={heroImg} className="relative z-[3]" alt="" />
-              <div className="w-[280px] h-[280px] md:w-[350px] md:h-[350px] absolute top-[6%] blur-[85px] left-0 bg-primary/50"></div>
-            </div>
-
-            {/* Stats Section */}
-            <div className="stats-section col-span-12 gap-6 grid grid-cols-12 xl:divide-x divide-neutral4/60 pt-120 relative z-[2]">
-              <div className="col-span-6 md:col-span-3">
-                <h3 className="h3 mb-3 text-white">{stats.country}+</h3>
-                <p className="text-neutral1/80 lg:text-lg t">Countries Covered</p>
-              </div>
-              <div className="col-span-6 md:col-span-3 xl:pl-8">
-                <h3 className="h3 mb-3 text-white">{stats.investor} Million</h3>
-                <p className="text-neutral1/80 lg:text-lg">Global Investors</p>
-              </div>
-              <div className="col-span-6 md:col-span-3 xl:pl-8">
-                <h3 className="h3 mb-3 text-white">{stats.coin}+</h3>
-                <p className="text-neutral1/80 lg:text-lg">Coins</p>
-              </div>
-              <div className="col-span-6 md:col-span-3 xl:pl-8">
-                <h3 className="h3 mb-3 text-white">${stats.volume} Million</h3>
-                <p className="text-neutral1/80 lg:text-lg">24h Trading Volume</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Explore Section */}
-        <section className="bg-accent5 relative overflow-hidden" id="explore">
-          <div className="container pb-120 pt-120 relative z-[2]">
-            <div className="mb-10 xl:mb-[60px] flex flex-wrap justify-between items-center gap-5">
-              <div className="max-w-lg">
-                <h2 className="mb-2 text-white">Explore <span className="text-primary h2 underline">Apex</span><span style={{ color: "#ffbb55" }}>Mindai</span></h2>
-                <p className="lg:text-lg text-neutral4">Coin Apexmindai is the easiest, safest, and fastest way to buy &amp; sell crypto asset exchange.</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-12 gap-4 lg:gap-6 text-white">
-              {exploreItems.map((item, index) => (
-                <div key={index} className="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-4 group">
-                  <div className="bg-accent5 text-center group-hover:bg-accent6 duration-300 px-6 lg:px-10 py-5 lg:py-8 rounded-xl border border-accent4 flex flex-col items-center h-full">
-                    <div className="size-20 rounded-full group-hover:bg-primary border border-primary flex justify-center items-center mb-6 xl:mb-8">
-                      <img src={item.icon} alt={item.title} />
-                    </div>
-                    <h4 className="mb-3 text-white">{item.title}</h4>
-                    <p className="text-neutral4 lg:text-lg">{item.desc}</p>
-                  </div>
+      {/* Hero Section Here  */}
+      <div className="header__section__two banner__section bg__img1 ralt overhid " style={{ background: "#000000" }}>
+        {/* Header Here */}
+        <div className="header__section__attachment header__section__two">
+          <div className="aihire__headertop">
+            <div className="container">
+              <div className="haderbar__top header__toptwo d-flex align-items-center justify-content-between">
+                <div className="logo__left d-flex align-items-center">
+                  <a href="index.html" className="top__logo">
+                    <img src={logoLisht} alt="logo" />
+                  </a>
+                  <a href="how-work.html" className="text-white mdnone inter fw-400">
+                    How It Works
+                  </a>
+                  <a href="about.html" className="text-white mdnone inter fw-400">
+                    Why AIHire
+                  </a>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
+                <div className="header__topsearch d-flex align-items-center">
+                  <button type="button" id="searchBtn" className="d-lg-none">
+                    <i className="bi bi-search"></i>
+                  </button>
+                  <form action="#0" className="search__form search__formtwo d-flex align-items-center">
+                    <i className="bi bi-search"></i>
+                    <input type="text" placeholder="Search" />
+                  </form>
 
-        {/* Market Section */}
-        <section className="bg-accent2" id="market">
-          <div className="container pt-120 pb-120">
-            <div className="flex justify-between flex-wrap items-center gap-4 mb-5 xl:mb-8">
-              <div className="flex flex-wrap gap-4 xl:gap-6">
-                <button className={`text-xl xl:text-2xl py-2.5 font-medium ${activeTab === 'all' ? 'border-b border-secondary text-neutral1' : 'text-neutral4/70'}`} onClick={() => setActiveTab('all')}>
-                  All Cryptos
-                </button>
-              </div>
-            </div>
-
-            {activeTab === 'all' && (
-              <div className="overflow-x-auto mb-10 xl:mb-[60px]">
-                <table className="w-full whitespace-nowrap">
-                  <thead>
-                    <tr className="bg-accent6 text-start text-white">
-                      <th className="px-6 py-4">Coin</th>
-                      <th className="px-6 py-4">Price (USD)</th>
-                      <th className="px-6 py-4">Rate Change (%)</th>
-                      <th className="px-6 py-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cryptoData.map((coin) => (
-                      <tr key={coin.id} className="hover:bg-accent5 duration-300">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <img src={coin.image} alt={coin.name} width="32" />
-                            <p className="text-neutral1 font-medium">
-                              {coin.symbol.toUpperCase()}
-                              <span className="text-xs text-neutral4/70 ms-2">{coin.name}</span>
-                            </p>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-white">${coin.current_price?.toFixed(2)}</td>
-                        <td className={`px-6 py-4 ${coin.price_change_percentage_24h > 0 ? 'green' : 'red'}`}>
-                          {coin.price_change_percentage_24h?.toFixed(2)}%
-                        </td>
-                        <td className="px-6 py-4 text-white">
-                          <div className="flex gap-2">
-                            <a href="#" className="text-xl"><i className="ti ti-file-search"></i></a>
-                            <a href="#" className="text-xl"><i className="ti ti-trending-up"></i></a>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* How To Get Started Section */}
-        <section className="bg-accent5 relative overflow-x-hidden" id="start">
-          <div className="container pt-120 pb-120">
-            <h2 className="mb-10 xl:mb-[60px] text-center text-white">How To Get <span className="h2 text-primary underline">Started</span></h2>
-            <div className="grid grid-cols-12 gap-4 xl:gap-6">
-
-              <div className="col-span-12 md:col-span-6 xl:col-span-3 p-4 lg:p-6 rounded-xl bg-primary flex flex-col items-center">
-                <div className="size-[60px] text-primary text-2xl f-center rounded-full bg-neutral1 mb-4 xl:mb-6">
-                  <i className="ti ti-user-plus"></i>
-                </div>
-                <Link to="/Login">
-                <h4 className="mb-4 xl:mb-6">1. Register</h4>
-                </Link>
-                <p className="mb-7 xl:mb-10 lg:text-lg text-center">Get the Apexmindai app on your device and start your trading journey with ease.</p>
-              </div>
-              <div className="col-span-12 md:col-span-6 xl:col-span-3 p-4 lg:p-6 rounded-xl flex flex-col items-center text-white">
-                <div className="size-[60px] text-2xl f-center rounded-full bg-accent4 mb-4 xl:mb-6"><h5 className='text-white'>02</h5></div>
-                <h4 className="mb-4 xl:mb-6 text-white">2. Account Setup</h4>
-                <p className="mb-7 xl:mb-10 text-neutral1/80 lg:text-lg text-center">Sign up, confirm your registration, and log in to start predicting market trends on Apexmindai.</p>
-              </div>
-              <div className="col-span-12 md:col-span-6 xl:col-span-3 p-4 lg:p-6 rounded-xl flex flex-col items-center text-white">
-                <div className="size-[60px] text-2xl f-center rounded-full bg-accent4 mb-4 xl:mb-6"><h5 className='text-white'>03</h5></div>
-                <h4 className="mb-4 xl:mb-6 text-white">3. Start Predicting</h4>
-                <p className="mb-7 xl:mb-10 text-neutral1/80 lg:text-lg text-center">After logging in, you can predict coin price movements and place your bets instantly on Apexmindai.</p>
-              </div>
-              <div className="col-span-12 md:col-span-6 xl:col-span-3 p-4 lg:p-6 rounded-xl flex flex-col items-center text-white">
-                <div className="size-[60px] text-2xl f-center rounded-full bg-accent4 mb-4 xl:mb-6"><h5 className='text-white'>04</h5></div>
-                <h4 className="mb-4 xl:mb-6 text-white">4. Auto Trade</h4>
-                <p className="mb-7 xl:mb-10 text-neutral1/80 lg:text-lg text-center">Use the smart trading bot on Apexmindai to automate your predictions and trade hands-free with advanced accuracy.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Try Bot Section */}
-        <section className="bg-accent5 relative overflow-hidden">
-          <div className="container pt-120 pb-120 grid grid-cols-12 gap-6 xl:gap-10 items-center relative z-[2]">
-            <div className="col-span-12 lg:col-span-5">
-              <img src={tryImg} alt="Try Bot" />
-            </div>
-            <div className="col-span-12 lg:col-span-7">
-              <h2 className="mb-4 text-white">Try <span className="text-primary h2 underline">Apex</span><span style={{ color: "#ffbb55" }}>Mind</span> Now!</h2>
-              <p className="lg:text-lg mb-8 xl:mb-10 text-white">Predict Crypto Price Movements & Place Your Bets Instantly!</p>
-              <div className="rounded-3xl p-4 lg:p-6 xxl:p-8 bg-accent6 border border-accent4 flex gap-4 flex-wrap items-center justify-between">
-                <div className="max-w-sm">
-                  <h3 className="mb-3 text-white">Download Now</h3>
-                  <p className="lg:text-lg text-neutral4">Join Apexmindai and Start Predicting Today!</p>
-                </div>
-                <div className="flex gap-3">
-                  <Link to="Login">
-                  <div className="py-3 text-sm md:text-base xl:text-lg px-5 rounded-3xl bg-primary inline-flex items-center gap-3 text-white">
-                    Download App <i className="ti ti-chevron-right"></i>
+                  <Link to="/login">
+                    <div className="cmn--btn">
+                      <span>Login</span>
                     </div>
                   </Link>
-                  {/* <a href="ApexmindaiAI.apk" download><img src={playstoreImg} alt="Play Store" className="h-12" /></a> */}
-                  {/* <a href="ApexmindaiAI.apk" download><img src={appstoreImg} alt="App Store" className="h-12" /></a> */}
+                  <Link to="/signup">
+                    <div className="cmn--btn">
+                      <span>Signup</span>
+                    </div>
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
-        </section>
 
-        {/* App Highlights Section */}
-        <section className="bg-accent2 relative overflow-hidden ">
-          <div className="container pb-120 pt-120 relative z-[2] text-center">
-            <h2 className="mb-10 xl:mb-[60px] text-white">App <span className="text-primary h2 underline">Highlights</span></h2>
-            <div className="grid grid-cols-12 gap-6 text-white">
-              {highlights.map((item, index) => (
-                <div key={index} className=" col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3">
-                  <div className="group bg-accent5 text-center hover:bg-accent6 duration-300 p-5 xl:p-7 rounded-xl border border-accent4 flex flex-col items-center h-full">
-                    <div className="size-20 rounded-full group-hover:bg-primary border border-primary flex justify-center items-center mb-6 xl:mb-8 text-4xl">
-                      <i className={`ti ti-${item.icon}`}></i>
+          <div className="ralt">
+            <header className="header-section menubordert header__section__two menuborderb">
+              <div className="container">
+                <div className="header-wrapper">
+                  <div className="logo-menu d-xl-none">
+                    <a href="index.html" className="small__logo">
+                      <img src={favicon} alt="logo" />
+                    </a>
+                  </div>
+                  <ul className="main-menu">
+                    <li>
+                      <a href="javascript:void(0)" className="fz-24">
+                        Home <i className="bi bi-chevron-down"></i>
+                      </a>
+                      <ul className="sub-menu">
+                        <li><a href="index.html">Home [1]</a></li>
+                        <li><a href="index-2.html">Home [2]</a></li>
+                        <li><a href="index-3.html">Home [3]</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="javascript:void(0)">
+                        Browse Job <i className="bi bi-chevron-down"></i>
+                      </a>
+                      <ul className="sub-menu">
+                        <li><a href="service-grid.html">Service Grid</a></li>
+                        <li><a href="service-details.html">Service Details</a></li>
+                        <li><a href="project.html">Project</a></li>
+                        <li><a href="project-details.html">Project Details</a></li>
+                        <li><a href="fearuedjob.html">Featured Job</a></li>
+                        <li><a href="featurejob-details.html">Featured Details</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="javascript:void(0)">
+                        Find Talent <i className="bi bi-chevron-down"></i>
+                      </a>
+                      <ul className="sub-menu">
+                        <li className="subtwohober"><a href="freelancer.html">Freelancer</a></li>
+                        <li><a href="freelancer-details.html">Freelancer Details</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="javascript:void(0)">
+                        Pages <i className="bi bi-chevron-down"></i>
+                      </a>
+                      <ul className="sub-menu">
+                        <li className="subtwohober"><a href="about.html">About</a></li>
+                        <li><a href="employer.html">Employer</a></li>
+                        <li><a href="employer-details.html">Employer Details</a></li>
+                        <li><a href="faqs.html">FAQs</a></li>
+                        <li><a href="help-support.html">Help & Support</a></li>
+                        <li><a href="singin.html">Sign In</a></li>
+                        <li><a href="signup.html">Sign Up</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="blog-details.html">Blog Details</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="error.html">Error</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="javascript:void(0)">
+                        Blog <i className="bi bi-chevron-down"></i>
+                      </a>
+                      <ul className="sub-menu">
+                        <li className="subtwohober"><a href="blog.html">Blog</a></li>
+                        <li><a href="blog-details.html">Blog Details</a></li>
+                      </ul>
+                    </li>
+                    <li>
+                      <a href="contact.html">Contact</a>
+                    </li>
+                  </ul>
+
+                  <div className="menu__right__components d-flex align-items-center">
+                    <div className="menu__components d-flex align-items-center">
+                      <div className="dropdown">
+                        <a href="#" className="link glose__icon d-flex align-items-center" data-bs-toggle="dropdown" data-bs-offset="0,14" aria-expanded="true">
+                          <i className="bi bi-globe"></i>
+                        </a>
+                        <div className="dropdown-menu dropdown-start" data-popper-placement="bottom-start">
+                          <ul className="list">
+                            <li>
+                              <a href="#" className="link d-inline-block dropdown-item">
+                                <span className="d-block bborder pb-1"> English </span>
+                                <span className="d-block bborder pb-1"> United States </span>
+                                <span className="d-block bborder pb-1"> Spanish </span>
+                                <span className="d-block "> Spain </span>
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="dropdown notification__dropdown">
+                        <a href="#" className="link glose__icon globe__active" data-bs-toggle="dropdown" data-bs-offset="0,16" aria-expanded="true">
+                          <i className="bi bi-chat-text"></i>
+                        </a>
+                        <div className="dropdown-menu dropdown-menu-end " data-popper-placement="bottom-end">
+                          <ul className="list">
+                            <li className="mb-16">
+                              <a href="#" className="link d-flex dropdown-item">
+                                <img src={f10} className="notification__thumb" alt="img" />
+                                <span className="notify__content">
+                                  <span className="fz-16 d-block fw-600 title inter">Alex Sandro</span>
+                                  <span className="fz-14 message d-block fw-500 pra inter">Meetup Started</span>
+                                  <span className="fz-10 fw-400 pra inter">6:25 am</span>
+                                </span>
+                              </a>
+                            </li>
+                            <li className="mb-16">
+                              <a href="#" className="link d-flex dropdown-item">
+                                <img src={f9} className="notification__thumb" alt="img" />
+                                <span className="notify__content">
+                                  <span className="fz-16 d-block fw-600 title inter">Haaland Jr</span>
+                                  <span className="fz-14 message d-block fw-500 pra inter">Meetup Started</span>
+                                  <span className="fz-10 fw-400 pra inter">11:25 am</span>
+                                </span>
+                              </a>
+                            </li>
+                            <li className="mb-16">
+                              <a href="#" className="link d-flex dropdown-item">
+                                <img src={f8} className="notification__thumb" alt="img" />
+                                <span className="notify__content">
+                                  <span className="fz-16 d-block fw-600 title inter">Courtney Jr</span>
+                                  <span className="fz-14 message d-block fw-500 pra inter">Meetup Started</span>
+                                  <span className="fz-10 fw-400 pra inter">4:45 pm</span>
+                                </span>
+                              </a>
+                            </li>
+                            <li>
+                              <a href="#" className="link d-flex dropdown-item">
+                                <img src={f7} className="notification__thumb" alt="img" />
+                                <span className="notify__content">
+                                  <span className="fz-16 d-block fw-600 title inter">Paquate Shaw</span>
+                                  <span className="fz-14 message d-block fw-500 pra inter">Meetup Started</span>
+                                  <span className="fz-10 fw-400 pra inter">8:35 pm</span>
+                                </span>
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="dropdown notification__dropdown">
+                        <a href="#" className="link glose__icon globe__active" data-bs-toggle="dropdown" data-bs-offset="0,14" aria-expanded="true">
+                          <i className="bi bi-bell"></i>
+                        </a>
+                        <div className="dropdown-menu dropdown-menu-end " data-popper-placement="bottom-end">
+                          <ul className="list">
+                            <li className="mb-16">
+                              <a href="#" className="link d-flex dropdown-item">
+                                <img src={f1} className="notification__thumb" alt="img" />
+                                <span className="notify__content">
+                                  <span className="fz-16 d-block fw-600 title inter">Jenny95</span>
+                                  <span className="fz-14 message d-block fw-500 pra inter">Message alert!</span>
+                                  <span className="fz-10 fw-400 pra inter">10 Min ago</span>
+                                </span>
+                              </a>
+                            </li>
+                            <li className="mb-16">
+                              <a href="#" className="link d-flex dropdown-item">
+                                <img src={f2} className="notification__thumb" alt="img" />
+                                <span className="notify__content">
+                                  <span className="fz-16 d-block fw-600 title inter">Arle MCcoy</span>
+                                  <span className="fz-14 message d-block fw-500 pra inter">Message alert!</span>
+                                  <span className="fz-10 fw-400 pra inter">1 days ago</span>
+                                </span>
+                              </a>
+                            </li>
+                            <li>
+                              <a href="#" className="link d-flex dropdown-item">
+                                <img src={f3} className="notification__thumb" alt="img" />
+                                <span className="notify__content">
+                                  <span className="fz-16 d-block fw-600 title inter">Courtney Jr</span>
+                                  <span className="fz-14 message d-block fw-500 pra inter">Message alert!</span>
+                                  <span className="fz-10 fw-400 pra inter">2 Month ago</span>
+                                </span>
+                              </a>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div className="dropdown profie__dropdown">
+                        <a href="#" className="link user__active" data-bs-toggle="dropdown" data-bs-offset="0,16" aria-expanded="true">
+                          <img src={profileImg} alt="image" className="img-fluid rounded-circle objec-fit-cover" />
+                        </a>
+                        <div className="dropdown-menu dropdown-menu-end" data-popper-placement="bottom-end">
+                          <div className="p-6">
+                            <div className="d-flex align-items-center gap-3 max-width">
+                              <div className="jerny__uer ralt">
+                                <img src={profileImg} alt="image" className="img-fluid jenny rounded-circle object-fit-cover flex-shrink-0" />
+                                <i className="bi bi-check checks d-flex align-items-center justify-content-center"></i>
+                              </div>
+                              <div className="flex-grow-1">
+                                <h5 className="fz-20 fw-600 title inter mb-0">Jenny95</h5>
+                                <span className="d-block fw-400 inter pra fz-16">
+                                  <a href="mailto:email@example.com" className="__cf_email__">email@example.com</a>
+                                </span>
+                              </div>
+                            </div>
+                            <div className="switch text-center mt-4 bborderdash pb-24 mb-24">
+                              <a href="singin.html" className="cmn--btn outline__btn">
+                                <span>Switch to Buying</span>
+                              </a>
+                            </div>
+                            <span className="fz-12 pra d-block fw-400 inter mb-16">Account</span>
+                            <ul className="list">
+                              <li className="mb-16">
+                                <a href="profile.html" className="link d-flex align-items-center gap-2 dropdown-item">
+                                  <i className="bi bi-person-check fz-20"></i>
+                                  <span className="d-block fz-16 pra fw-500 inter"> Profile </span>
+                                </a>
+                              </li>
+                              <li className="mb-16">
+                                <a href="post-request.html" className="link d-flex align-items-center gap-2 dropdown-item">
+                                  <i className="bi bi-file-earmark-plus fz-20"></i>
+                                  <span className="d-block fz-16 pra fw-500 inter"> Post a Request </span>
+                                </a>
+                              </li>
+                              <li className="mb-16">
+                                <a href="notification.html" className="link d-flex align-items-center gap-2 dropdown-item">
+                                  <i className="bi bi-bell fz-20"></i>
+                                  <span className="d-block fz-16 pra fw-500 inter"> Notification </span>
+                                </a>
+                              </li>
+                              <li className="mb-16">
+                                <a href="chat-us.html" className="link d-flex align-items-center gap-2 dropdown-item">
+                                  <i className="bi bi-chat-text fz-20"></i>
+                                  <span className="d-block fz-16 pra fw-500 inter"> Chat </span>
+                                </a>
+                              </li>
+                              <li className="mb-24">
+                                <a href="refer-friend.html" className="link d-flex align-items-center gap-2 dropdown-item">
+                                  <i className="bi bi-sliders2 fz-20"></i>
+                                  <span className="d-block fz-16 pra fw-500 inter"> Refer a Friend </span>
+                                </a>
+                              </li>
+                            </ul>
+                            <span className="fz-12 pra d-block fw-400 inter mb-16">Billing</span>
+                            <ul className="list">
+                              <li className="mb-16">
+                                <a href="setting.html" className="link d-flex align-items-center gap-2 dropdown-item">
+                                  <i className="bi bi-gear fz-20"></i>
+                                  <span className="d-block fz-16 pra fw-500 inter"> Settings </span>
+                                </a>
+                              </li>
+                              <li>
+                                <a href="payment.html" className="link d-flex align-items-center gap-2 dropdown-item">
+                                  <i className="bi bi-credit-card-2-back fz-20"></i>
+                                  <span className="d-block fz-16 pra fw-500 inter"> Payments </span>
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <h5 className="mb-3 text-white">{item.title}</h5>
-                    <p className="text-neutral4/70 lg:text-lg">{item.desc}</p>
+                    <div className="header-bar d-lg-none">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="bg-accent2 relative overflow-hidden text-white" id="faq">
-          <div className="container">
-            <div className="row">
-              <div className="col-md-5">
-                <div className="faq-img">
-                  <img src={faqImg} alt="faq" />
-                </div>
               </div>
-              <div className="col-md-7 pb-120">
-                <div className="col-span-12 lg:col-span-7 p-4 lg:p-6 xl:p-8 xxl:px-10 bg-accent5 border border-accent4 rounded-xl flex flex-col gap-4 xxl:gap-7">
-                  {faqData.map((faq, index) => (
-                    <div key={index} className={`p-4 rounded-xl border border-accent4 cursor-pointer ${activeFaq === index + 1 ? 'bg-accent6' : ''}`} onClick={() => handleFaqToggle(index + 1)}>
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm lg:text-base xxl:text-xl font-medium">{faq.q}</p>
-                        <span className={`size-8 md:size-10 cursor-pointer rounded-full f-center text-lg shrink-0 md:text-2xl duration-300 ${activeFaq === index + 1 ? 'bg-primary rotate-180' : 'bg-accent6'}`}>
-                          <i className="ti ti-chevron-down"></i>
-                        </span>
-                      </div>
-                      {activeFaq === index + 1 && (
-                        <p className="text-sm lg:text-base xxl:text-lg pt-3">{faq.a}</p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            </header>
           </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-accent5 relative overflow-hidden footer text-white">
-        <div className="new-pro-pad pt-120 relative z-[2] container grid grid-cols-12 xxl:grid-cols-10 gap-6 lg:divide-x divide-accent4">
-          <div className="col-span-12 md:col-span-6 xl:col-span-6 xxl:col-span-4">
-            <div className="px-4 md:px-6 lg:px-10 xxl:px-16 new-footer">
-              <img src={logoFooter} className="mb-2" width="130" alt="Footer Logo" />
-              <p className="text-left lg:text-lg mb-8 xl:mb-10">Welcome to Apexmindai Your ultimate platform for crypto price predictions and automated trading. Predict, trade, and win with our AI-powered bot. Start your journey today!</p>
-            </div>
-          </div>
-          <div className="col-span-12 md:col-span-6 xl:col-span-3 px-4 md:px-6 lg:px-10 xxl:px-16">
-            <h3 className="mb-4 xl:mb-6 text-white">Quick Links</h3>
-            <div className="grid grid-cols-2">
-              <div className="col-span-1 flex flex-col gap-4">
-                <a href="#" className="cursor-pointer" onClick={(e) => { e.preventDefault(); scrollToSection('explore'); }}>Explore</a>
-                <a href="#" className="cursor-pointer" onClick={(e) => { e.preventDefault(); scrollToSection('market'); }}>Market</a>
-                <a href="#" className="cursor-pointer" onClick={(e) => { e.preventDefault(); scrollToSection('start'); }}>Get Started</a>
-                <a href="#" className="cursor-pointer" onClick={(e) => { e.preventDefault(); scrollToSection('faq'); }}>Faq</a>
-              </div>
-            </div>
-          </div>
-          <div className="col-span-12 xl:col-span-3">
-      <div className="text-center pl-4 lg:pl-6 xxl:pl-10">
-        <h3 className="mb-4 xl:mb-6 text-white">Follow Us</h3>
-        <div className="mb-7 xl:mb-10 flex justify-center gap-4">
-          <a 
-            className="social-link" 
-            href="https://www.facebook.com/profile.php?id=61590782651824" 
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FaFacebook/>
-          </a>
-          <a 
-            className="social-link" 
-            href="https://x.com/aiapexmind" 
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <BsTwitterX />
-          </a>
-          <a 
-            className="social-link" 
-            href="https://www.instagram.com/aiapexmind/" 
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FaInstagram/>
-          </a>
-          <a 
-            className="social-link" 
-            href="https://www.youtube.com/@apexmindai7" 
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <FaYoutube/>
-          </a>
         </div>
-        <p className="text-neutral4 lg:text-lg">
-          empowers you to explore a wide range of popular cryptocurrencies
-        </p>
+        {/* Header End */}
+
+        <div className="container ">
+          <div className="banner__content__wrapper ">
+            <div className="row justify-content-between align-items-center">
+              <div className="col-xl-6 col-lg-7">
+                <div className="banner__content banner__twospace banner__contenttwospace ralt">
+                  <h4 className="base2 mb-16 wow fadeInDown">
+                   Invest Smart, Trade Smarter
+                  </h4>
+                
+                  <span className="d2 text-white mb-24 fw-600 wow fadeInUp">
+                  The Power of Intelligent<a href="#0" className="hover">AI</a> Trading
+                  </span>
+                  <p className="fz-20 fw-400 text-white inter mb-40 wow fadeInDown">
+                    Whether you're just starting or you're a seasoned trader, our platform offers comprehensive secure.
+                  </p>
+                  <div className="banner__btn2 d-flex align-items-center">
+                    <a href="freelancer.html" className="cmn--btn2">
+                      <span>Hire a Frelancer</span>
+                    </a>
+                    <a href="freelancer.html" className="cmn--btn outline__btn2">
+                      <span>Apply as a Freelancer</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+    <div className="col-xl-5 col-lg-5">
+  <div className="banner__thumb2 banner__thumbcustom">
+    <video
+      src={robotVideo}
+      className="  rounded banner__thumb2 banner__thumbcustom"    style={{ background: 'transparent', display: 'block'}}
+       autoPlay
+    loop
+    muted
+    playsInline
+    />
+  </div>
+</div>
+            </div>
+          </div>
+        </div>
+
+        {/*Element*/}
+        <img src={lineDash3} className="line__hotemtwo" alt="img" />
+        {/*Element*/}
       </div>
-    </div>
-        </div>
-        <div className="py-5 xl:py-8 border-t border-accent4">
-          <div className="container text-center flex justify-between gap-2 sm:gap-3 items-center relative z-[2]">
-            <div className="footer-menu">
-              <a href="./Privacy-Policy.html">Privacy Policy</a>
-              <a href="./terms-conditions.html">Terms &amp; Conditions</a>
+      {/* Hero Section End */}
+
+
+      {/* timely worktwo Here */}
+      <section className="timely__wortwo bg__all pb-120 pt-120">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-6">
+              <div className="section__title text-center mb-60">
+                <h4 className="sub ralt base mb-16 wow fadeInUp" data-wow-duration="0.5s">
+                  How It's Work
+                </h4>
+                <h2 className="title mb-24 wow fadeInUp" data-wow-duration="0.7s">
+                  Get Expert in Less Time and Our Work Process
+                </h2>
+                <p className="ptext2 fz-16 fw-400 inter wow fadeInUp" data-wow-duration="0.9s">
+                  Our working process is designed to simplify complex tasks, optimize operations, and maximize productivity. From initial planning and ideation to execution
+                </p>
+              </div>
             </div>
+          </div>
+          <div className="row g-4">
+            <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6 wow fadeInUp">
+              <div className="timelytwo__work text-center">
+                <div className="iconbox d-flex align-items-center justify-content-center">
+                  <div className="iinner d-flex align-items-center justify-content-center">
+                    <img src={job60} alt="icon" />
+                  </div>
+                </div>
+                <div className="content">
+                  <h4 className="mb-10 title">
+                    <a href="fearuedjob.html" className="title">
+                      Post a Job
+                    </a>
+                  </h4>
+                  <p className="fz-14 fw-400 title inter">
+                    Create your free job posting and start receiving Quotes within hours
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6 wow fadeInDown">
+              <div className="timelytwo__work text-center">
+                <div className="iconbox d-flex align-items-center justify-content-center">
+                  <div className="iinner d-flex align-items-center justify-content-center">
+                    <img src={frelancer60} alt="icon" />
+                  </div>
+                </div>
+                <div className="content">
+                  <h4 className="mb-10 title">
+                    <a href="fearuedjob.html" className="title">
+                      Hire Freelancers
+                    </a>
+                  </h4>
+                  <p className="fz-14 fw-400 title inter">
+                    Create your free job posting and start receiving Quotes within hours
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6 wow fadeInUp">
+              <div className="timelytwo__work text-center">
+                <div className="iconbox d-flex align-items-center justify-content-center">
+                  <div className="iinner d-flex align-items-center justify-content-center">
+                    <img src={working60} alt="icon" />
+                  </div>
+                </div>
+                <div className="content">
+                  <h4 className="mb-10 title">
+                    <a href="fearuedjob.html" className="title">
+                      Get Work Done
+                    </a>
+                  </h4>
+                  <p className="fz-14 fw-400 title inter">
+                    Create your free job posting and start receiving Quotes within hours
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6 wow fadeInDown">
+              <div className="timelytwo__work text-center">
+                <div className="iconbox d-flex align-items-center justify-content-center">
+                  <div className="iinner d-flex align-items-center justify-content-center">
+                    <img src={payment60} alt="icon" />
+                  </div>
+                </div>
+                <div className="content">
+                  <h4 className="mb-10 title">
+                    <a href="fearuedjob.html" className="title">
+                      Make Secure Payments
+                    </a>
+                  </h4>
+                  <p className="fz-14 fw-400 title inter">
+                    Create your free job posting and start receiving Quotes within hours
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* timely worktwo End */}
+
+      {/* Choose Here */}
+      <section className="choose__section bgchoose__all ralt pb-120 pt-120 header__section__two">
+        <div className="container">
+          <div className="row g-4 justify-content-between align-items-center">
+            <div className="col-xl-6 col-lg-6">
+              <div className="choose__content">
+                <div className="section__title mb-30">
+                  <h4 className="sub ralt base2 mb-16 wow fadeInUp" data-wow-duration="1.1s">
+                    Why Choose Us
+                  </h4>
+                  <h2 className="text-white mb-24 wow fadeInUp" data-wow-duration="1.2s">
+                    Harnessing the Potential of Artificial Intelligence
+                  </h2>
+                  <p className="text-white fz-16 fw-400 inter wow fadeInUp" data-wow-duration="1.4s">
+                    Our platform connects you with talented AI freelancers from around the world who can help you with your projects and tasks, no matter how big or small.
+                  </p>
+                </div>
+                <ul className="choose__checklist mb-16 d-flex flex-wrap">
+                  <li className="d-flex align-items-center gap-2 mb-16 wow fadeInUp" data-wow-duration="1.7s">
+                    <i className="bi bi-check2-circle base2 fz-24"></i>
+                    <span className="fz-20 fw-500 inter">
+                      Get High Quality Work
+                    </span>
+                  </li>
+                  <li className="d-flex align-items-center gap-2 mb-16 wow fadeInUp" data-wow-duration="1.7s">
+                    <i className="bi bi-check2-circle base2 fz-24"></i>
+                    <span className="fz-20 fw-500 inter">
+                      Stick to your budget service
+                    </span>
+                  </li>
+                  <li className="d-flex align-items-center gap-2 mb-16 wow fadeInUp" data-wow-duration="1.7s">
+                    <i className="bi bi-check2-circle base2 fz-24"></i>
+                    <span className="fz-20 fw-500 inter">
+                      Pay when you're happy
+                    </span>
+                  </li>
+                  <li className="d-flex align-items-center gap-2 mb-16 wow fadeInUp" data-wow-duration="1.7s">
+                    <i className="bi bi-check2-circle base2 fz-24"></i>
+                    <span className="fz-20 fw-500 inter">
+                      Pay when you're happy
+                    </span>
+                  </li>
+                </ul>
+                <a href="fearuedjob.html" className="cmn--btn2">
+                  <span>
+                    Read More
+                  </span>
+                  <span className="ps-1">
+                    <i className="bi bi-arrow-up-right"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div className="col-xl-5 col-lg-5">
+              <div className="choose__thumbwrapper d-flex ralt">
+                <div className="thumb__item pe-4 wow fadeInDown">
+                  <img src={chooseai1} className="round16 mb-24 item__img" alt="img" />
+                  <img src={chooseai2} className="round16 item__img" alt="img" />
+                </div>
+                <div className="thumb__item thumb__space60 wow fadeInDown">
+                  <img src={chooseai3} className="round16 mb-24 item__img" alt="img" />
+                  <img src={chooseai4} className="round16 item__img" alt="img" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Element */}
+        <img src={chooseElement} className="choose__doubble" alt="element" />
+        <img src={chooseElement4} className="choose__bottom" alt="element" />
+        {/* Element */}
+      </section>
+      {/* Choose End */}
+
+
+      {/* categrory worktwo Here */}
+      <section className="categoris__section sectionbg pb-120 pt-120">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-lg-6">
+              <div className="section__title text-center mb-60">
+                <h4 className="sub ralt base mb-16 wow fadeInUp" data-wow-duration="0.5s">
+                  Categorires
+                </h4>
+                <h2 className="title mb-24 wow fadeInUp" data-wow-duration="0.7s">
+                  Trending Top Categories Uncovered
+                </h2>
+                <p className="ptext2 fz-16 fw-400 inter wow fadeInUp" data-wow-duration="0.9s">
+                  Our AI freelancer marketplace is more than just a platform. It's a community of professionals who are passionate about AI
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="row g-4 mb-40 justify-content-center">
+            <div className="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6 wow fadeInUp">
+              <div className="categoris__item round16 bgwhite border">
+                <div className="boxes">
+                  <div className="icon mb-24 ralt">
+                    <img src={ainlp} alt="icon" />
+                  </div>
+                  <div className="content">
+                    <h4 className="mb-10 title">
+                      <a href="fearuedjob.html" className="title">
+                        NLP Specialists
+                      </a>
+                    </h4>
+                    <p className="fz-16 fw-400 title inter">
+                      Our AI freelancer marketplace is more than just a platform
+                    </p>
+                  </div>
+                </div>
+                <a href="fearuedjob.html" className="d-flex readmore align-items-center gap-2">
+                  <span className="fz-16 transition fw-600 base inter">
+                    Read More
+                  </span>
+                  <span>
+                    <i className="bi bi-arrow-right transition fz-18 base"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div className="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6 wow fadeInUp">
+              <div className="categoris__item round16 bgwhite border">
+                <div className="boxes">
+                  <div className="icon mb-24 ralt">
+                    <img src={dataScient} alt="icon" />
+                  </div>
+                  <div className="content">
+                    <h4 className="mb-10 title">
+                      <a href="fearuedjob.html" className="title">
+                        Data Scientists
+                      </a>
+                    </h4>
+                    <p className="fz-16 fw-400 title inter">
+                      Our AI freelancer marketplace is more than just a platform
+                    </p>
+                  </div>
+                </div>
+                <a href="fearuedjob.html" className="d-flex readmore align-items-center gap-2">
+                  <span className="fz-16 transition fw-600 base inter">
+                    Read More
+                  </span>
+                  <span>
+                    <i className="bi bi-arrow-right transition fz-18 base"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div className="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6 wow fadeInUp">
+              <div className="categoris__item round16 bgwhite border">
+                <div className="boxes">
+                  <div className="icon mb-24 ralt">
+                    <img src={aibraind} alt="icon" />
+                  </div>
+                  <div className="content">
+                    <h4 className="mb-10 title">
+                      <a href="fearuedjob.html" className="title">
+                        Machine Learning
+                      </a>
+                    </h4>
+                    <p className="fz-16 fw-400 title inter">
+                      Our AI freelancer marketplace is more than just a platform
+                    </p>
+                  </div>
+                </div>
+                <a href="fearuedjob.html" className="d-flex readmore align-items-center gap-2">
+                  <span className="fz-16 transition fw-600 base inter">
+                    Read More
+                  </span>
+                  <span>
+                    <i className="bi bi-arrow-right transition fz-18 base"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div className="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6 wow fadeInUp">
+              <div className="categoris__item round16 bgwhite border">
+                <div className="boxes">
+                  <div className="icon mb-24 ralt">
+                    <img src={deepLearning} alt="icon" />
+                  </div>
+                  <div className="content">
+                    <h4 className="mb-10 title">
+                      <a href="fearuedjob.html" className="title">
+                        Deep Learning
+                      </a>
+                    </h4>
+                    <p className="fz-16 fw-400 title inter">
+                      Our AI freelancer marketplace is more than just a platform
+                    </p>
+                  </div>
+                </div>
+                <a href="fearuedjob.html" className="d-flex readmore align-items-center gap-2">
+                  <span className="fz-16 transition fw-600 base inter">
+                    Read More
+                  </span>
+                  <span>
+                    <i className="bi bi-arrow-right transition fz-18 base"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div className="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6 wow fadeInDown">
+              <div className="categoris__item round16 bgwhite border">
+                <div className="boxes">
+                  <div className="icon mb-24 ralt">
+                    <img src={bigrobotic} alt="icon" />
+                  </div>
+                  <div className="content">
+                    <h4 className="mb-10 title">
+                      <a href="fearuedjob.html" className="title">
+                        Robotics Engineer
+                      </a>
+                    </h4>
+                    <p className="fz-16 fw-400 title inter">
+                      Our AI freelancer marketplace is more than just a platform
+                    </p>
+                  </div>
+                </div>
+                <a href="fearuedjob.html" className="d-flex readmore align-items-center gap-2">
+                  <span className="fz-16 transition fw-600 base inter">
+                    Read More
+                  </span>
+                  <span>
+                    <i className="bi bi-arrow-right transition fz-18 base"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div className="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6 wow fadeInDown">
+              <div className="categoris__item round16 bgwhite border">
+                <div className="boxes">
+                  <div className="icon mb-24 ralt">
+                    <img src={airound} alt="icon" />
+                  </div>
+                  <div className="content">
+                    <h4 className="mb-10 title">
+                      <a href="fearuedjob.html" className="title">
+                        AI Consultants
+                      </a>
+                    </h4>
+                    <p className="fz-16 fw-400 title inter">
+                      Our AI freelancer marketplace is more than just a platform
+                    </p>
+                  </div>
+                </div>
+                <a href="fearuedjob.html" className="d-flex readmore align-items-center gap-2">
+                  <span className="fz-16 transition fw-600 base inter">
+                    Read More
+                  </span>
+                  <span>
+                    <i className="bi bi-arrow-right transition fz-18 base"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div className="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6 wow fadeInDown">
+              <div className="categoris__item round16 bgwhite border">
+                <div className="boxes">
+                  <div className="icon mb-24 ralt">
+                    <img src={chatbot} alt="icon" />
+                  </div>
+                  <div className="content">
+                    <h4 className="mb-10 title">
+                      <a href="fearuedjob.html" className="title">
+                        Chatbot Developers
+                      </a>
+                    </h4>
+                    <p className="fz-16 fw-400 title inter">
+                      Our AI freelancer marketplace is more than just a platform
+                    </p>
+                  </div>
+                </div>
+                <a href="fearuedjob.html" className="d-flex readmore align-items-center gap-2">
+                  <span className="fz-16 transition fw-600 base inter">
+                    Read More
+                  </span>
+                  <span>
+                    <i className="bi bi-arrow-right transition fz-18 base"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div className="col-xxl-3 col-xl-3 col-lg-4 col-md-6 col-sm-6 wow fadeInDown">
+              <div className="categoris__item round16 bgwhite border">
+                <div className="boxes">
+                  <div className="icon mb-24 ralt">
+                    <img src={dataAnalysis} alt="icon" />
+                  </div>
+                  <div className="content">
+                    <h4 className="mb-10 title">
+                      <a href="fearuedjob.html" className="title">
+                        Data Analysts
+                      </a>
+                    </h4>
+                    <p className="fz-16 fw-400 title inter">
+                      Our AI freelancer marketplace is more than just a platform
+                    </p>
+                  </div>
+                </div>
+                <a href="fearuedjob.html" className="d-flex readmore align-items-center gap-2">
+                  <span className="fz-16 transition fw-600 base inter">
+                    Read More
+                  </span>
+                  <span>
+                    <i className="bi bi-arrow-right transition fz-18 base"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div className="text-center">
+            <a href="fearuedjob.html" className="cmn--btn outline__btn">
+              <span>
+                See All Categories
+              </span>
+              <span className="ps-1">
+                <i className="bi bi-arrow-up-right"></i>
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+      {/* categrory worktwo End */}
+
+      {/* about section Here */}
+      <section className="about__section bg__about overhid pt-120 pb-120 header__section__two">
+        <div className="container">
+          <div className="row justify-content-between align-items-center g-4">
+            <div className="col-xxl-6 col-xl-6 col-lg-7">
+              <div className="abotus__content">
+                <div className="section__title mb-40">
+                  <h4 className="sub ralt base2 mb-16 wow fadeInUp" data-wow-duration="1.1s">
+                    About us
+                  </h4>
+                  <h2 className="text-white mb-24 wow fadeInUp" data-wow-duration="1.2s">
+                    Connecting AI Talent with Opportunities
+                  </h2>
+                  <p className="whitep fz-16 fw-400 inter wow fadeInUp" data-wow-duration="1.4s">
+                    At our AI Freelancer Marketplace, we understand that success stems from building amazing teams. We provide the platform and resources to connect you
+                  </p>
+                </div>
+                <div className="row g-4 mb-40">
+                  <div className="col-xxl-6 col-xl-9 col-lg-8 col-md-6 wow fadeInDown">
+                    <div className="perfoming__item d-flex">
+                      <div className="cmn__ibox transition d-flex align-items-center justify-content-center boxes1 round50">
+                        <img src={searchBase2} alt="machine" />
+                      </div>
+                      <div className="content">
+                        <h5 className="text-white mb-10">
+                          Access Opportunities
+                        </h5>
+                        <p className="fz-14 fw-400 inter whitep">
+                          Our marketplace provides a platform for talented AI
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-xxl-6 col-xl-9 col-lg-8 col-md-6 wow fadeInDown">
+                    <div className="perfoming__item d-flex">
+                      <div className="cmn__ibox transition d-flex align-items-center justify-content-center boxes1 round50">
+                        <img src={aibrainBase2} alt="machine" />
+                      </div>
+                      <div className="content">
+                        <h5 className="text-white mb-10">
+                          Increased Visibility
+                        </h5>
+                        <p className="fz-14 fw-400 inter whitep">
+                          By joining our marketplace, talented individuals can increase
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-xxl-6 col-xl-9 col-lg-8 col-md-6 wow fadeInDown">
+                    <div className="perfoming__item d-flex">
+                      <div className="cmn__ibox transition d-flex align-items-center justify-content-center boxes1 round50">
+                        <img src={airoundBase2} alt="machine" />
+                      </div>
+                      <div className="content">
+                        <h5 className="text-white mb-10">
+                          Access to AI Talent
+                        </h5>
+                        <p className="fz-14 fw-400 inter whitep">
+                          Our marketplace provides a curated pool of talented AI
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-xxl-6 col-xl-9 col-lg-8 col-md-6 wow fadeInDown">
+                    <div className="perfoming__item d-flex">
+                      <div className="cmn__ibox transition d-flex align-items-center justify-content-center boxes1 round50">
+                        <img src={qualityBase2} alt="machine" />
+                      </div>
+                      <div className="content">
+                        <h5 className="text-white mb-10">
+                          Quality Assurance
+                        </h5>
+                        <p className="fz-14 fw-400 inter whitep">
+                          We ensure a rigorous vetting process for talent on our
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <a href="employer-details.html" className="cmn--btn2">
+                  <span>
+                    Explore More
+                  </span>
+                  <span className="ps-1">
+                    <i className="bi bi-arrow-up-right"></i>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div className="col-xxl-5 col-xl-5 col-lg-5 wow fadeInDown">
+              <div className="about__shapethumb">
+                <img src={aboutImg} alt="perfoming" />
+                <div className="experience__box round16 d-flex align-items-center gap-3">
+                  <span className="d2 text-white">
+                    30+
+                  </span>
+                  <span className="fz-18 fw-500 inter text-white">
+                    Years of experience
+                  </span>
+                </div>
+                <img src={lineBase} className="linebase__bottom" alt="img" />
+                <img src={lineBase2} className="linebase__top" alt="img" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* about section End */}
+
+      {/* App Here */}
+      <section className="app__section ralt bg__all pb-120 pt-120">
+        <div className="container">
+          <div className="row g-4 align-items-center justify-content-between">
+            <div className="col-xl-6 col-lg-7">
+              <div className="app__content">
+                <div className="section__title mb-30">
+                  <h4 className="sub ralt base mb-16 wow fadeInDown">
+                    Download Our Apps
+                  </h4>
+                  <h2 className="title mb-24 wow fadeInUp">
+                    Get Our Mobile App for Free and Unlock a World
+                  </h2>
+                  <p className="ptext2 fz-16 fw-400 inter wow fadeInDown">
+                    Download our free mobile app today from the App Store or Google Play Store and discover a whole new level of convenience and accessibility.
+                  </p>
+                </div>
+                <div className="app__store d-flex align-items-center gap-3 flex-wrap wow fadeInDown">
+                  <a href="javascript:void(0)">
+                    <img src={appStore} alt="app" />
+                  </a>
+                  <a href="javascript:void(0)">
+                    <img src={googlePlay} alt="app" />
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div className="col-xl-5 col-lg-5">
+              <div className="app__thumb ralt">
+                <img src={app1} alt="card" className="w-100" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* App End */}
+
+      {/* Faq Here */}
+      <section className="faq__section bg__faq pb-120 pt-120 header__section__two">
+        <div className="container">
+          <div className="row flex-row-reverse g-4 align-items-center justify-content-between">
+            <div className="col-xl-6 col-lg-7">
+              <div className="faq__content">
+                <div className="section__title mb-40">
+                  <h4 className="sub ralt base2 mb-16 wow fadeInUp">
+                    Frequently Asked Questions
+                  </h4>
+                  <h2 className="text-white mb-24 wow fadeInDown">
+                    Find solutions to common questions For AIHire
+                  </h2>
+                  <p className="whitep fz-16 fw-400 inter wow fadeInUp">
+                    Welcome to our Frequently Asked Questions (FAQs) section, designed to provide you with answers to common inquiries and help you navigate our platform
+                  </p>
+                </div>
+                <div className="accordion__wrap">
+                  <div className="accordion" id="accordionExample">
+                    {/* Accordion items */}
+                    <div className="accordion-item wow fadeInDown" data-wow-duration="0.7s">
+                      <div className="accordion-header" id="headingTwo">
+                        <button
+                          className="accordion-button collapsed"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#collapseTwo"
+                          aria-expanded="false"
+                          aria-controls="collapseTwo"
+                        >
+                          How do I apply for a credit card on the marketplace?
+                        </button>
+                        <div
+                          id="collapseTwo"
+                          className="accordion-collapse collapse"
+                          aria-labelledby="headingTwo"
+                          data-bs-parent="#accordionExample"
+                        >
+                          <div className="accordion-body">
+                            <p>
+                              It refers to a list of common questions and answers related to a particular topic or product. In the case of a credit card marketplace website
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Accordion items */}
+                    <div className="accordion-item wow fadeInDown" data-wow-duration="0.9s">
+                      <h2 className="accordion-header" id="headingOne">
+                        <button
+                          className="accordion-button collapsed"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#collapseOne"
+                          aria-expanded="true"
+                          aria-controls="collapseOne"
+                        >
+                          How does the credit card marketplace work?
+                        </button>
+                      </h2>
+                      <div
+                        id="collapseOne"
+                        className="accordion-collapse collapse"
+                        aria-labelledby="headingOne"
+                        data-bs-parent="#accordionExample"
+                      >
+                        <div className="accordion-body">
+                          <p>
+                            It refers to a list of common questions and answers related to a particular topic or product. In the case of a credit card marketplace website
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Accordion items */}
+                    <div className="accordion-item wow fadeInDown" data-wow-duration="1s">
+                      <h2 className="accordion-header" id="headingThree">
+                        <button
+                          className="accordion-button collapsed"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#collapseThree"
+                          aria-expanded="false"
+                          aria-controls="collapseThree"
+                        >
+                          How can I improve my credit score?
+                        </button>
+                      </h2>
+                      <div
+                        id="collapseThree"
+                        className="accordion-collapse collapse"
+                        aria-labelledby="headingThree"
+                        data-bs-parent="#accordionExample"
+                      >
+                        <div className="accordion-body">
+                          <p>
+                            It refers to a list of common questions and answers related to a particular topic or product. In the case of a credit card marketplace website
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Accordion items */}
+                    <div className="accordion-item wow fadeInDown" data-wow-duration="1.4s">
+                      <h2 className="accordion-header" id="headingThree4">
+                        <button
+                          className="accordion-button collapsed"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#collapseThree4"
+                          aria-expanded="false"
+                          aria-controls="collapseThree"
+                        >
+                          What skills do I need to work in AI and ML?
+                        </button>
+                      </h2>
+                      <div
+                        id="collapseThree4"
+                        className="accordion-collapse collapse"
+                        aria-labelledby="headingThree4"
+                        data-bs-parent="#accordionExample"
+                      >
+                        <div className="accordion-body">
+                          <p>
+                            It refers to a list of common questions and answers related to a particular topic or product. In the case of a credit card marketplace website
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Accordion items */}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-xl-5 col-lg-5">
+              <div className="faq__thumbs ralt">
+                <div className="happy__customerbox round16">
+                  <div className="d-flex mb-10 align-items-center">
+                    <a href="#0" className="customer">
+                      <img src={ha1} alt="happy" />
+                    </a>
+                    <a href="#0" className="customer">
+                      <img src={ha2} alt="happy" />
+                    </a>
+                    <a href="#0" className="customer">
+                      <img src={ha3} alt="happy" />
+                    </a>
+                    <a href="#0" className="customer">
+                      <img src={ha4} alt="happy" />
+                    </a>
+                    <a href="#0" className="customer">
+                      <img src={ha5} alt="happy" />
+                    </a>
+                  </div>
+                  <span className="fz-18 fw-500 inter text-white">
+                    <span className="base2">500k+</span> Happy Customer
+                  </span>
+                </div>
+                <img src={faqImg} className="round16 w-100" alt="card" />
+                <div className="video__thumb d-flex align-items-center justify-content-center">
+                  <img src={faqCircle} alt="circle" />
+                  <a
+                    href="https://www.youtube.com/watch?v=wXNv-x5zVgE&ab_channel=KnotebookNetwork%27s"
+                    className="video-btn d-flex align-items-center justify-content-center"
+                  >
+                    <i className="bi bi-play"></i>
+                  </a>
+                </div>
+                <img src={faqLine} alt="img" className="faqline" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* Faq End */}
+
+      {/* task categorish Section Here */}
+      <section className="task__hiresection ralt pt-120 pb-120">
+
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-xxl-6 col-xl-8 col-lg-8">
+              <div className="section__title text-center ralt mb-60">
+                <h4 className="sub ralt base mb-16 wow fadeInUp" data-wow-duration="1.1s">
+                  Begin Your Journey
+                </h4>
+                <h2 className="title wow fadeInUp mb-24" data-wow-duration="1.2s">
+                  Get Started with AI-Hire
+                </h2>
+                <p className="pra fz-16 inter fw-400">
+                  Are you ready to embark on an exciting journey into the world of AI freelancing? Getting started with AIHire is simple and straightforward
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="row ralt g-4">
+            <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-6 wow fadeInDown">
+              <div className="task__item round16 bgwhite d-flex align-items-center">
+                <div className="thumb">
+                  <img src={task1} alt="img" />
+                </div>
+                <div className="content">
+                  <h3 className="inter title mb-24">
+                    I need a task done
+                  </h3>
+                  <p className="fz-16 fw-400 inter pra mb-40">
+                    Have a specific AI task that needs to be completed? Look no further!
+                  </p>
+                  <a href="freelancer-details.html" className="cmn--btn outline__btn">
+                    <span>
+                      View services
+                    </span>
+
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div className="col-xxl-6 col-xl-6 col-lg-6 col-md-6 wow fadeInUp">
+              <div className="task__item round16 bgwhite d-flex align-items-center">
+                <div className="thumb">
+                  <img src={task2} alt="img" />
+                </div>
+                <div className="content">
+                  <h3 className="inter title mb-24">
+                    I am a freelancer
+                  </h3>
+                  <p className="fz-16 fw-400 inter pra mb-40">
+                    Are you an AI professional looking for exciting freelance opportunities?
+                  </p>
+                  <a href="freelancer.html" className="cmn--btn outline__btn">
+                    <span>
+                      List a Service
+                    </span>
+
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {/* task categorish Section End */}
+
+
+
+      {/* Footer Section */}
+      <footer className="footer__section bgadd " style={{ background: "#13203B" }}>
+        <div className="container">
+          <div className="footer__top pt-120 pb-120">
+            <div className="row g-4">
+              <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6 wow fadeInDown">
+                <div className="footer__item">
+                  <a href="index.html" className="footer__logo mb-24 d-block">
+                    <img src={logoLisht} alt="logo" />
+                  </a>
+                  <p className="pfz-16 inter fw-400 cef__pra mb-30">
+                    Join our community of businesses, entrepreneurs, and freelancers who are passionate about AI and its potential
+                  </p>
+                  <ul className="social d-flex align-items-center">
+                    <li>
+                      <a href="javascript:void(0)">
+                        <i className="bi bi-facebook"></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="javascript:void(0)">
+                        <i className="bi bi-twitter"></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="javascript:void(0)">
+                        <i className="bi bi-pinterest"></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="javascript:void(0)">
+                        <i className="bi bi-instagram"></i>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="javascript:void(0)">
+                        <i className="bi bi-skype"></i>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div className="col-xxl-2 col-xl-2 col-lg-2 col-md-6 col-sm-6 wow fadeInUp">
+                <div className="footer__item">
+                  <a href="javascript:void(0)" className="footer__title fz-24 fw-600 inter text-white mb-24 d-block">
+                    Quick Link
+                  </a>
+                  <ul className="quick__link">
+                    <li>
+                      <a href="about.html" className="fz-16 fw-400 inter cef__pra d-block">
+                        About us
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#0" className="fz-16 fw-400 inter cef__pra d-block">
+                        Browse Job
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#0" className="fz-16 fw-400 inter cef__pra d-block">
+                        Find Talent
+                      </a>
+                    </li>
+                    <li>
+                      <a href="faqs.html" className="fz-16 fw-400 inter cef__pra d-block">
+                        FAQs
+                      </a>
+                    </li>
+                    <li>
+                      <a href="blog.html" className="fz-16 fw-400 inter cef__pra d-block">
+                        Blog
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6 wow fadeInDown">
+                <div className="footer__item">
+                  <a href="javascript:void(0)" className="footer__title fz-24 fw-600 inter text-white mb-24 d-block">
+                    Contact
+                  </a>
+                  <ul className="footer__contact">
+                    <li>
+                      <a href="javascript:void(0)" className="fz-16 d-flex align-items-center gap-3 fw-400 inter cef__pra d-block">
+                        <i className="bi bi-telephone-plus cmn__icon cmn__icon"></i>
+                        <span>
+                          (316) 555-0116
+                        </span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="javascript:void(0)" className="fz-16 d-flex align-items-center gap-3 fw-400 inter cef__pra d-block">
+                        <i className="bi bi-envelope-open cmn__icon"></i>
+                        <span>
+                          <span className="__cf_email__" data-cfemail="94fdfaf2fbd4f1ecf5f9e4f8f1baf7fbf9">[email&#160;protected]</span>
+                        </span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="javascript:void(0)" className="fz-16 d-flex align-items-center gap-3 fw-400 inter cef__pra d-block">
+                        <i className="bi bi-geo-alt cmn__icon"></i>
+                        <span>
+                          31 Brandy Way, Sutton, SM2 6SE
+                        </span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div className="col-xxl-3 col-xl-3 col-lg-3 col-md-6 col-sm-6 wow fadeInUp">
+                <div className="footer__item">
+                  <a href="javascript:void(0)" className="footer__title fz-24 fw-600 inter text-white mb-24 d-block">
+                    Newsletter
+                  </a>
+                  <p className="pfz-16 fw-400 inter cef__pra mb-24">
+                    Subscribe our newsletter to get our latest update & news
+                  </p>
+                  <form action="#0" className="d-flex align-items-center">
+                    <input type="text" placeholder="Email address" />
+                    <button type="submit" className="cmn--btn">
+                      <span>
+                        <i className="bi bi-cursor"></i>
+                      </span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="footer__bottom d-flex align-items-center">
+            <p className="fz-16 fw-400 inter text-white">
+              Copyright &copy; 2023 <a href="javascript:void(0)" className="hover">AIHire.</a> Designed By <a href="https://themeforest.net/user/pixelaxis" className="base3">Pixelaxis</a>
+            </p>
+            <ul className="help__support d-flex align-items-center">
+              <li>
+                <a href="javascript:void(0)" className="text-white fz-16 fw-400 inter">
+                  Help & Support
+                </a>
+              </li>
+              <li>
+                <a href="javascript:void(0)" className="text-white fz-16 fw-400 inter">
+                  Privacy policy
+                </a>
+              </li>
+              <li>
+                <a href="javascript:void(0)" className="text-white fz-16 fw-400 inter">
+                  Terms & Conditions
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </footer>
- 
+      {/* Footer Section */}
 
-      {/* CSS for green/red colors */}
-      <style>{`
-        .green { color: rgb(22, 239, 22); }
-        .red { color: red; }
-      `}</style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </>
   );
 };

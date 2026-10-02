@@ -17,16 +17,12 @@ const TokenMiningIncomeHistory = () => {
     const [selectedType, setSelectedType] = useState('all');
     const [isTypesLoaded, setIsTypesLoaded] = useState(false);
 
-    // Pagination state
     const [pageIndex, setPageIndex] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
-    // Get regno from sessionStorage
     const regno = sessionStorage.getItem('Regno');
 
-    // ✅ URL se type nikaalo on mount
     useEffect(() => {
-
         const params = new URLSearchParams(location.search);
         const typeFromUrl = params.get('type');
         if (typeFromUrl) {
@@ -37,11 +33,9 @@ const TokenMiningIncomeHistory = () => {
         }
     }, [location.search]);
 
-    // ✅ Fetch Income Types from API - FIXED
     const fetchIncomeTypes = async () => {
         try {
             const response = await apiClient.get('/Token/AllMiningIncome');
-
             const data = response.data;
             if (data.result === "true" && data.data) {
                 setIncomeTypes(data.data);
@@ -49,7 +43,7 @@ const TokenMiningIncomeHistory = () => {
                 setIncomeTypes([]);
             }
         } catch (err) {
-            console.error('❌ Error fetching income types:', err);
+            console.error('Error fetching income types:', err);
             toast.error('Failed to load income types');
             setIncomeTypes([]);
         } finally {
@@ -57,7 +51,6 @@ const TokenMiningIncomeHistory = () => {
         }
     };
 
-    // Format Date
     const formatDate = (dateString) => {
         if (!dateString) return '-';
         try {
@@ -74,7 +67,6 @@ const TokenMiningIncomeHistory = () => {
         }
     };
 
-    // Format Amount
     const formatAmount = (amount) => {
         return `$${parseFloat(amount || 0).toLocaleString(undefined, {
             minimumFractionDigits: 2,
@@ -82,7 +74,6 @@ const TokenMiningIncomeHistory = () => {
         })}`;
     };
 
-    // ✅ Fetch Token Mining Income History - FIXED
     const fetchTokenMiningHistory = async () => {
         if (!regno) {
             toast.error('Registration number not found');
@@ -93,29 +84,20 @@ const TokenMiningIncomeHistory = () => {
         try {
             setLoading(true);
 
-            // ✅ Build URL with params
             let url = `/Token/TokenMiningIncomeHistoryAsync?regno=${regno}&pageIndex=${pageIndex}&pageSize=${itemsPerPage}`;
-
             if (selectedType) {
                 url += `&type=${encodeURIComponent(selectedType)}`;
             }
 
-
-            // ✅ USE apiClient - NOT fetch
             const response = await apiClient.get(url);
-
             const data = response.data;
 
             if (data.result === "true" || data.result === true) {
-                // ✅ FIXED: data.data.data se access karo
                 const historyData = data.data?.data || [];
                 const totalRecords = data.data?.totalRecords || 0;
 
-                // console.log("📊 Total Records:", totalRecords);
-
                 setRecords(historyData);
 
-                // Calculate total income
                 const total = historyData.reduce((sum, item) => {
                     return sum + (parseFloat(item.mn_Amount) || parseFloat(item.amount) || 0);
                 }, 0);
@@ -126,9 +108,7 @@ const TokenMiningIncomeHistory = () => {
                 setTotalIncome(0);
             }
         } catch (err) {
-            console.error('❌ Error fetching history:', err);
-            console.error('❌ Error Response:', err.response);
-
+            console.error('Error fetching history:', err);
             const errorMsg = err.response?.data?.message || err.message || 'Something went wrong';
             toast.error(errorMsg);
             setRecords([]);
@@ -138,19 +118,16 @@ const TokenMiningIncomeHistory = () => {
         }
     };
 
-    // Fetch income types on component mount
     useEffect(() => {
         fetchIncomeTypes();
     }, []);
 
-    // ✅ Fetch history when dependencies change
     useEffect(() => {
         if (isTypesLoaded) {
             fetchTokenMiningHistory();
         }
     }, [pageIndex, itemsPerPage, selectedType, isTypesLoaded]);
 
-    // Filter records based on search term
     const filteredRecords = records.filter((row) => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -163,7 +140,6 @@ const TokenMiningIncomeHistory = () => {
         );
     });
 
-    // Pagination logic
     const totalItems = filteredRecords.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (pageIndex - 1) * itemsPerPage;
@@ -186,39 +162,32 @@ const TokenMiningIncomeHistory = () => {
         <>
             <ToastContainer position="top-right" />
             <div className="Table-container royalty-main-wrapper mb-5 p-4">
-                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-                    <h3 className="mb-0 text-dark">
-                        Statement
-                        {selectedType && selectedType !== 'all' && (
-                            <span style={{
-                                color: "#0d6efd",
-                                fontSize: "20px",
-                                fontWeight: "600",
-                                marginLeft: "10px"
-                            }}>
-                                - {selectedType}
-                            </span>
-                        )}
-                        {selectedType === 'all' && (
-                            <span style={{
-                                color: "#6c757d",
-                                fontSize: "20px",
-                                fontWeight: "500",
-                                marginLeft: "10px"
-                            }}>
-                                - All Types
-                            </span>
-                        )}
-                    </h3>
+
+                {/* ===== HEADER CARD ===== */}
+                <div className="dh-header-card">
+                    <div className="dh-header-icon">
+                        <i className="ti ti-report-money"></i>
+                    </div>
+                    <div className="dh-header-texts">
+                        <h2>
+                            Statement
+                            {selectedType && selectedType !== 'all' && (
+                                <span className="tmh-type-label"> - {selectedType}</span>
+                            )}
+                            {selectedType === 'all' && (
+                                <span className="tmh-type-label-muted"> - All Types</span>
+                            )}
+                        </h2>
+                        <p>View your token mining income records</p>
+                    </div>
                 </div>
 
-                {/* Filters Row */}
-                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3 entries-search-bar">
-                    {/* Income Type Filter */}
-                    <div className="entries-control d-flex align-items-center gap-2">
-                        <label className="text-dark mb-0">Income Type:</label>
+                {/* ===== FILTERS BAR ===== */}
+                <div className="dh-filters-bar">
+                    <div className="dh-filter-item">
+                        <label className="dh-filter-label">Income Type:</label>
                         <select
-                            className="form-select"
+                            className="dh-select"
                             value={selectedType}
                             onChange={e => {
                                 const newType = e.target.value;
@@ -231,7 +200,6 @@ const TokenMiningIncomeHistory = () => {
                                     navigate(`/dashboard/TokenMiningIncomeHistory?type=${encodeURIComponent(newType)}`);
                                 }
                             }}
-                            style={{ width: '220px' }}
                         >
                             <option value="all">All Types</option>
                             {incomeTypes.length > 0 ? (
@@ -246,19 +214,19 @@ const TokenMiningIncomeHistory = () => {
                         </select>
                     </div>
 
-                    {/* Search Records */}
-                    <div className="search-wrapper">
+                    <div className="dh-search-wrap">
+                        <i className="ti ti-search dh-search-icon"></i>
                         <input
-                            className="form-control search-input"
-                            placeholder="🔍 Search records..."
+                            className="dh-search-input"
+                            placeholder="Search records..."
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            style={{ width: '250px' }}
                         />
                     </div>
                 </div>
 
-                <div className="report-card">
+                {/* ===== TABLE CARD ===== */}
+                <div className="dh-table-card">
                     <CustomTable columns={columns} loading={loading}>
                         {currentRecords.length > 0 ? (
                             currentRecords.map((row, index) => (
@@ -268,19 +236,19 @@ const TokenMiningIncomeHistory = () => {
                                             {startIndex + index + 1}
                                         </div>
                                     </td>
-                                    <td>
+                                    <td className="tmh-date">
                                         {formatDate(row.EntryDate || row.dt_DueDate)}
                                     </td>
-                                    <td style={{ color: "#6b7280", fontSize: "13px" }}>
+                                    <td className="tmh-income-type">
                                         {row.IncomeType || "-"}
                                     </td>
-                                    <td style={{ color: "#10b981", fontWeight: "600" }}>
+                                    <td className="tmh-credit">
                                         {formatAmount(row.mn_Amount || 0)}
                                     </td>
-                                    <td style={{ color: "#c50404", fontWeight: "600" }}>
+                                    <td className="tmh-debit">
                                         {formatAmount(row.debit || 0)}
                                     </td>
-                                    <td style={{ color: "#6b7280", fontSize: "13px" }} title={row.Remark || "-"}>
+                                    <td className="tmh-remark" title={row.Remark || "-"}>
                                         {row.Remark || "-"}
                                     </td>
                                 </tr>
@@ -290,17 +258,17 @@ const TokenMiningIncomeHistory = () => {
                                 <td colSpan={columns.length} className="text-center py-4">
                                     {loading ? (
                                         <div className="d-flex justify-content-center">
-                                            <div className="spinner-border text-primary" role="status">
+                                            <div className="tmh-spinner" role="status">
                                                 <span className="visually-hidden">Loading...</span>
                                             </div>
                                         </div>
                                     ) : (
-                                        <div style={{ padding: "30px 0" }}>
-                                            <i className="ti ti-database-off" style={{ fontSize: "40px", color: "#ccc", display: "block", marginBottom: "10px" }}></i>
-                                            <div style={{ fontSize: "16px", color: "#6c757d" }}>
-                                                No records found for <strong style={{ color: "#0d6efd" }}>"{selectedType === 'all' ? 'All Types' : selectedType}"</strong>
+                                        <div className="tmh-empty-state">
+                                            <i className="ti ti-database-off"></i>
+                                            <div className="tmh-empty-title">
+                                                No records found for <strong>"{selectedType === 'all' ? 'All Types' : selectedType}"</strong>
                                             </div>
-                                            <div style={{ fontSize: "13px", color: "#999", marginTop: "5px" }}>
+                                            <div className="tmh-empty-hint">
                                                 Try selecting a different income type from the dropdown above
                                             </div>
                                         </div>
@@ -310,7 +278,6 @@ const TokenMiningIncomeHistory = () => {
                         )}
                     </CustomTable>
 
-                    {/* Pagination Component */}
                     {totalPages > 1 && (
                         <Pagination
                             currentPage={pageIndex}
@@ -321,7 +288,6 @@ const TokenMiningIncomeHistory = () => {
                     )}
                 </div>
             </div>
-
         </>
     );
 };

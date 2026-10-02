@@ -1,6 +1,3 @@
-
-// // InvestmentHistory.jsx - Original style same rakha
-// InvestmentHistory.jsx - Complete updated code with dynamic table fields map
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import apiClient from "../../api/apiClient";
@@ -35,8 +32,7 @@ const InvestmentHistory = () => {
                 );
 
                 if (res.data && res.data.result === "true") {
-                  const tradingHistoryData = res.data.response?.tradingHistory || [];
-                    
+                    const tradingHistoryData = res.data.response?.tradingHistory || [];
                     setRecords(tradingHistoryData);
                 } else {
                     setRecords([]);
@@ -54,7 +50,6 @@ const InvestmentHistory = () => {
         fetchWalletReport();
     }, [regno]);
 
-    //  Updated Filter Logic matching new response fields keys
     const filteredRecords = records.filter((row) => {
         const searchLower = searchTerm.toLowerCase();
         return (
@@ -66,14 +61,12 @@ const InvestmentHistory = () => {
         );
     });
 
-    // Pagination logic
     const totalItems = filteredRecords.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const currentRecords = filteredRecords.slice(startIndex, endIndex);
 
-    // Reset to first page when search term or items per page changes
     useEffect(() => {
         setCurrentPage(1);
     }, [searchTerm, itemsPerPage]);
@@ -87,10 +80,9 @@ const InvestmentHistory = () => {
         setCurrentPage(1);
     };
 
-    // Format clean readable dates from ISO string timestamps
     const formatDate = (dateString) => {
         if (!dateString) return "-";
-        return dateString.split('T')[0]; // Splits time chunk off
+        return dateString.split('T')[0];
     };
 
     const columns = [
@@ -104,96 +96,104 @@ const InvestmentHistory = () => {
 
     return (
         <div className="Table-container downline-main-wrapper report-container p-2 p-md-4 mb-5">
-            {/* Heading */}
-            <div className="mb-2 p-3">
-                <h3>Investment History</h3>
-            </div>
 
-            {/* Entry Filter / Global Search layout grids */}
-            <div className="entries-search-bar entries-control mb-3">
-                <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <div className="d-flex align-items-center gap-2">
-                        <label className="fw-semibold">Show entries:</label>
-                        <select
-                            className="form-select w-auto"
-                            value={itemsPerPage}
-                            onChange={handleItemsPerPageChange}
-                            style={{
-                                borderRadius: "8px",
-                                border: "1px solid rgba(102, 126, 234, 0.2)",
-                            }}
-                        >
-                            <option value={10}>10</option>
-                            <option value={25}>25</option>
-                            <option value={50}>50</option>
-                            <option value={100}>100</option>
-                        </select>
-                    </div>
-
-                    <div className="d-flex align-items-center gap-2">
-                        <input
-                            className="form-control"
-                            placeholder="Search records..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{
-                                minWidth: "250px",
-                                borderRadius: "8px",
-                                border: "1px solid rgba(102, 126, 234, 0.2)",
-                                padding: "8px 12px",
-                            }}
-                        />
-                    </div>
+            {/* ===== HEADER CARD ===== */}
+            <div className="dh-header-card">
+                <div className="dh-header-icon">
+                    <i className="ti ti-chart-line"></i>
+                </div>
+                <div className="dh-header-texts">
+                    <h2>Investment History</h2>
+                    <p>View your investment transaction records</p>
                 </div>
             </div>
 
-            {/* Table Implementation Mapping requested variables */}
-            <CustomTable columns={columns} loading={loading}>
-                {currentRecords.length > 0 ? (
-                    currentRecords.map((row, index) => (
-                        <tr key={index}>
-                            <td className="text-center ">
-                                <div className="sr-no-circle">
-                                    {startIndex + index + 1}
-                                </div>
-                            </td>
-                            <td style={{fontWeight: "500", whiteSpace: "nowrap"}}>{formatDate(row.Rdate)}</td>
-                            <td>
-                                <span className=" text-success px-3 py-2 rounded-pill" style={{fontWeight: "bold"}}>
-                                    ${row.Rkprice || 0}
-                                </span>
-                            </td>
-                            <td className="text-info  font-medium" style={{fontWeight: "bold"}}>{row.slabfine ?? "-"}</td>
-                            <td>
-                                <span className="text-success px-3 py-2 rounded-pill" style={{fontWeight: "bold"}}>
-                                    {row.BinaryBuffer || 0}
-                                </span>
-                            </td>
-                            <td>
-                                <span style={{ fontSize: '0.9rem', fontWeight: '500',whiteSpace: "nowrap" }}>
-                                    {row.remark || "-"}
-                                </span>
+            {/* ===== FILTERS BAR ===== */}
+            <div className="dh-filters-bar">
+                <div className="dh-filter-item">
+                    <label className="dh-filter-label">Show entries:</label>
+                    <select
+                        className="dh-select"
+                        value={itemsPerPage}
+                        onChange={handleItemsPerPageChange}
+                    >
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                        <option value={100}>100</option>
+                    </select>
+                </div>
+
+                <div className="dh-search-wrap">
+                    <i className="ti ti-search dh-search-icon"></i>
+                    <input
+                        className="dh-search-input"
+                        placeholder="Search records..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            {/* Error */}
+            {error && (
+                <div className="alert alert-danger mb-3">
+                    <strong>Error:</strong> {error}
+                </div>
+            )}
+
+            {/* ===== TABLE CARD ===== */}
+            <div className="dh-table-card">
+                <CustomTable columns={columns} loading={loading}>
+                    {currentRecords.length > 0 ? (
+                        currentRecords.map((row, index) => (
+                            <tr key={index}>
+                                <td className="text-center">
+                                    <div className="sr-no-circle">
+                                        {startIndex + index + 1}
+                                    </div>
+                                </td>
+                                <td style={{ fontWeight: "500", whiteSpace: "nowrap" }}>
+                                    {formatDate(row.Rdate)}
+                                </td>
+                                <td>
+                                    <span className="dh-amount-badge">
+                                        ${row.Rkprice || 0}
+                                    </span>
+                                </td>
+                                <td className="dh-roi-value">
+                                    {row.slabfine ?? "-"}
+                                </td>
+                                <td>
+                                    <span className="dh-amount-badge">
+                                        {row.BinaryBuffer || 0}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span className="dh-remark-text">
+                                        {row.remark || "-"}
+                                    </span>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan={columns.length} className="text-center py-4">
+                                {loading ? "Loading..." : "No records found"}
                             </td>
                         </tr>
-                    ))
-                ) : (
-                    <tr>
-                        <td colSpan={columns.length} className="text-center py-4">
-                          {loading ? "Loading..." : "No records found"}
-                        </td>
-                    </tr>
-                )}
-            </CustomTable>
+                    )}
+                </CustomTable>
 
-            {/* Pagination controls footer */}
-            {totalPages > 1 && (
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalRecords={totalItems}
-                    onPageChange={handlePageChange}
-                />
-            )}
+                {totalPages > 1 && (
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalRecords={totalItems}
+                        onPageChange={handlePageChange}
+                    />
+                )}
+            </div>
         </div>
     );
 };

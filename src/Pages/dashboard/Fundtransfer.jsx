@@ -1,4 +1,4 @@
-// Fundtransfer.jsx - WITH REACT-HOT-TOAST
+// Fundtransfer.jsx
 import { useState, useRef } from "react";
 import { RiP2pFill } from "react-icons/ri";
 import { FaHistory } from "react-icons/fa";
@@ -11,11 +11,12 @@ import Swal from 'sweetalert2';
 import Toast from '../../Componenets/ui/Toast';
 import "bootstrap/dist/css/bootstrap.min.css";
 
+
 const Fundtransfer = () => {
     const { userData, refreshData } = useUser();
     const navigate = useNavigate();
 
-    // ===== CARD 1: Fund Transfer (Deposit to Deposit) =====
+    // ===== CARD 1 =====
     const [amount1, setAmount1] = useState(100);
     const [investUserId1, setInvestUserId1] = useState("");
     const [checkingUser1, setCheckingUser1] = useState(false);
@@ -28,7 +29,7 @@ const Fundtransfer = () => {
     const [otpSent1, setOtpSent1] = useState(false);
     const [otpVerified1, setOtpVerified1] = useState(false);
 
-    // ===== CARD 2: Income to Deposit =====
+    // ===== CARD 2 =====
     const [amount2, setAmount2] = useState(100);
     const [transferLoading2, setTransferLoading2] = useState(false);
     const [otpLoading2, setOtpLoading2] = useState(false);
@@ -42,7 +43,6 @@ const Fundtransfer = () => {
 
     const depositOptions = [100, 300, 500, 1000, 10000, 50000];
 
-    // ===== Format Functions =====
     const formatBalance = (amount) => {
         if (amount === undefined || amount === null) return `$0.00`;
         const num = Number(amount);
@@ -84,7 +84,6 @@ const Fundtransfer = () => {
                 setValidUser1(true);
                 setUserName1(name);
                 setReceiverLoginId1(loginid);
-                // toast.success(`User found: ${name}`);
             } else {
                 setValidUser1(false);
                 setUserName1("");
@@ -101,7 +100,6 @@ const Fundtransfer = () => {
         }
     };
 
-    // ===== CARD 1: Handle User ID Change =====
     const handleUserIdChange1 = (e) => {
         const value = e.target.value;
         setInvestUserId1(value);
@@ -122,14 +120,8 @@ const Fundtransfer = () => {
     // ===== CARD 1: Send OTP =====
     const handleSendOTP1 = async () => {
         try {
-            if (!loginId || !regNo) {
-                toast.error("Login ID not found");
-                return;
-            }
-            if (!validUser1) {
-                toast.error("Please enter a valid User ID first");
-                return;
-            }
+            if (!loginId || !regNo) { toast.error("Login ID not found"); return; }
+            if (!validUser1) { toast.error("Please enter a valid User ID first"); return; }
 
             setOtpLoading1(true);
             setOtpVerified1(false);
@@ -153,14 +145,8 @@ const Fundtransfer = () => {
     // ===== CARD 1: Verify OTP =====
     const handleVerifyOTP1 = async () => {
         try {
-            if (!otp1 || otp1.length < 6) {
-                toast.error("Please enter valid 6-digit OTP");
-                return;
-            }
-            if (!loginId || !regNo) {
-                toast.error("Login ID or Registration number not found");
-                return;
-            }
+            if (!otp1 || otp1.length < 6) { toast.error("Please enter valid 6-digit OTP"); return; }
+            if (!loginId || !regNo) { toast.error("Login ID or Registration number not found"); return; }
 
             setOtpLoading1(true);
             const response = await apiClient.post('/Auth/verify-otp', null, {
@@ -182,38 +168,20 @@ const Fundtransfer = () => {
         }
     };
 
-    // ===== CARD 1: Fund Transfer (Deposit to Deposit) =====
+    // ===== CARD 1: Transfer =====
     const handleFundTransfer = async () => {
-        if (!investUserId1 || investUserId1.trim() === "") {
-            toast.error("Please enter User ID");
-            return;
-        }
-        if (!validUser1) {
-            toast.error("Please enter a valid User ID");
-            return;
-        }
-        if (!amount1 || amount1 <= 0) {
-            toast.error("Please enter valid amount");
-            return;
-        }
-        if (amount1 < 10) {
-            toast.error("Minimum transfer amount is $10");
-            return;
-        }
-        if (!otpVerified1) {
-            toast.error("Please verify OTP first");
-            return;
-        }
+        if (!investUserId1 || investUserId1.trim() === "") { toast.error("Please enter User ID"); return; }
+        if (!validUser1) { toast.error("Please enter a valid User ID"); return; }
+        if (!amount1 || amount1 <= 0) { toast.error("Please enter valid amount"); return; }
+        if (amount1 < 10) { toast.error("Minimum transfer amount is $10"); return; }
+        if (!otpVerified1) { toast.error("Please verify OTP first"); return; }
 
         const walletBalance = userData?.Depositfund || userData?.WorkingWallet || 0;
         if (amount1 > walletBalance) {
             toast.error(`Insufficient Balance. Available: ${formatBalance(walletBalance)}`);
             return;
         }
-        if (receiverLoginId1 === loginId) {
-            toast.error("Cannot transfer to yourself");
-            return;
-        }
+        if (receiverLoginId1 === loginId) { toast.error("Cannot transfer to yourself"); return; }
 
         setTransferLoading1(true);
         try {
@@ -259,10 +227,7 @@ const Fundtransfer = () => {
     // ===== CARD 2: Send OTP =====
     const handleSendOTP2 = async () => {
         try {
-            if (!loginId || !regNo) {
-                toast.error("Login ID or Registration number not found");
-                return;
-            }
+            if (!loginId || !regNo) { toast.error("Login ID or Registration number not found"); return; }
 
             setOtpLoading2(true);
             setOtpVerified2(false);
@@ -286,14 +251,8 @@ const Fundtransfer = () => {
     // ===== CARD 2: Verify OTP =====
     const handleVerifyOTP2 = async () => {
         try {
-            if (!otp2 || otp2.length < 6) {
-                toast.error("Please enter valid 6-digit OTP");
-                return;
-            }
-            if (!loginId || !regNo) {
-                toast.error("Login ID or Registration number not found");
-                return;
-            }
+            if (!otp2 || otp2.length < 6) { toast.error("Please enter valid 6-digit OTP"); return; }
+            if (!loginId || !regNo) { toast.error("Login ID or Registration number not found"); return; }
 
             setOtpLoading2(true);
             const response = await apiClient.post('/Auth/verify-otp', null, {
@@ -315,20 +274,11 @@ const Fundtransfer = () => {
         }
     };
 
-    // ===== CARD 2: Income to Deposit Transfer =====
+    // ===== CARD 2: Transfer =====
     const handleIncomeToDepositTransfer = async () => {
-        if (!amount2 || amount2 <= 0) {
-            toast.error("Please enter valid amount");
-            return;
-        }
-        if (amount2 < 10) {
-            toast.error("Minimum transfer amount is $10");
-            return;
-        }
-        if (!otpVerified2) {
-            toast.error("Please verify OTP first");
-            return;
-        }
+        if (!amount2 || amount2 <= 0) { toast.error("Please enter valid amount"); return; }
+        if (amount2 < 10) { toast.error("Minimum transfer amount is $10"); return; }
+        if (!otpVerified2) { toast.error("Please verify OTP first"); return; }
 
         const incomeBalance = userData?.WorkingWallet || 0;
         if (amount2 > incomeBalance) {
@@ -376,284 +326,285 @@ const Fundtransfer = () => {
         <>
             <Toast />
 
-            <div className="deposit-to-deposit-container">
-                <div className="container-fluid">
-                    <div className="row g-4">
+            <div className="fundtransfer-page">
 
-                        {/* ===== CARD 1: Fund Transfer ===== */}
-                        <div className="col-12 col-lg-6">
-                            <div className="transfer-card">
-                                <div className="transfer-card-header">
-                                    <div className="transfer-title">
-                                        <RiP2pFill size={24} className="transfer-icon" />
-                                        <h5>Fund Transfer</h5>
-                                    </div>
+                {/* ===== HEADER CARD ===== */}
+                <div className="dh-header-card">
+                    <div className="dh-header-icon">
+                        <i className="ti ti-transfer"></i>
+                    </div>
+                    <div className="dh-header-texts">
+                        <h2>Fund Transfer</h2>
+                        <p>Transfer funds between your wallets securely</p>
+                    </div>
+                </div>
 
-                                    <button className="btn-primary" onClick={() => gotodepositHistory("Fund Transfer")}>
-                                        <span className="d-flex">
+                <div className="row g-4">
 
-                                            History
-                                        </span>
-                                    </button>
+                    {/* ===== CARD 1: Fund Transfer ===== */}
+                    <div className="col-12 col-lg-6">
+                        <div className="ft-card">
+                            <div className="ft-card-header">
+                                <div className="ft-title">
+                                    <RiP2pFill size={24} className="ft-icon" />
+                                    <h5>Fund Transfer</h5>
                                 </div>
-                                <div className="transfer-card-body">
-                                    {/* Wallet Info */}
-                                    <div className="wallet-info">
-                                        <span className="wallet-label">Deposit Wallet</span>
-                                        <span className="wallet-amount text-primary">
-                                            {formatBalance(userData?.Depositfund || "00")}
-                                        </span>
-                                    </div>
+                                <button className="ft-history-btn" onClick={() => gotodepositHistory("Fund Transfer")}>
+                                    <FaHistory size={14} />
+                                    <span>History</span>
+                                </button>
+                            </div>
 
-                                    {/* User ID */}
-                                    <div className="form-group03">
-                                        <label className="form-label mb-1">USER ID *</label>
-                                        <input
-                                            type="text"
-                                            className="form-control-field"
-                                            value={investUserId1}
-                                            onChange={handleUserIdChange1}
-                                            placeholder="Enter User ID"
-                                        />
-                                        {checkingUser1 && (
-                                            <small className="status-msg info">⏳ Checking user...</small>
-                                        )}
-                                        {validUser1 && (
-                                            <small className="status-msg success">✓ {userName1}</small>
-                                        )}
-                                        {investUserId1 && !validUser1 && !checkingUser1 && investUserId1.trim().length >= 8 && (
-                                            <small className="status-msg error">❌ User ID not found</small>
-                                        )}
-                                    </div>
+                            <div className="ft-card-body">
+                                {/* Wallet Info */}
+                                <div className="ft-wallet-info">
+                                    <span className="ft-wallet-label">Deposit Wallet</span>
+                                    <span className="ft-wallet-amount">
+                                        {formatBalance(userData?.Depositfund || "00")}
+                                    </span>
+                                </div>
 
-                                    {/* Quick Amount */}
-                                    <div className="form-group03">
-                                        <label className="form-label mt-3 mb-1">QUICK AMOUNT</label>
-                                        <div className="quick-amount-grid">
-                                            {depositOptions.map((opt) => (
-                                                <button 
-                                                    key={opt}
-                                                    className={`quick-amount-btn ${amount1 === opt ? "active" : ""}`}
-                                                    onClick={() => setAmount1(opt)}
-                                                    type="button"
-                                                >
-                                                    ${opt}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
+                                {/* User ID */}
+                                <div className="ft-form-group">
+                                    <label className="ft-label">USER ID *</label>
+                                    <input
+                                        type="text"
+                                        className="ft-input"
+                                        value={investUserId1}
+                                        onChange={handleUserIdChange1}
+                                        placeholder="Enter User ID"
+                                    />
+                                    {checkingUser1 && (
+                                        <small className="ft-status info">Checking user...</small>
+                                    )}
+                                    {validUser1 && (
+                                        <small className="ft-status success">✓ {userName1}</small>
+                                    )}
+                                    {investUserId1 && !validUser1 && !checkingUser1 && investUserId1.trim().length >= 8 && (
+                                        <small className="ft-status error">✕ User ID not found</small>
+                                    )}
+                                </div>
 
-                                    {/* Amount Input */}
-                                    <div className="form-group03">
-                                        <label className="form-label mt-3 mb-1">AMOUNT *</label>
-                                        <div className="amount-input-wrapper">
-                                            <span className="currency-sign">$</span>
-                                            <input
-                                                type="number"
-                                                className="amount-input-field"
-                                                value={amount1}
-                                                onChange={(e) => setAmount1(Number(e.target.value))}
-                                                min="10"
-                                                placeholder="Enter amount (min $10)"
-                                            />
+                                {/* Quick Amount */}
+                                <div className="ft-form-group">
+                                    <label className="ft-label">QUICK AMOUNT</label>
+                                    <div className="ft-quick-grid">
+                                        {depositOptions.map((opt) => (
                                             <button
-                                                className="clear-input-btn"
-                                                onClick={() => setAmount1(0)}
+                                                key={opt}
+                                                className={`ft-quick-btn ${amount1 === opt ? "active" : ""}`}
+                                                onClick={() => setAmount1(opt)}
                                                 type="button"
                                             >
-                                                <IoClose />
+                                                ${opt}
                                             </button>
-                                        </div>
+                                        ))}
                                     </div>
-
-                                    {/* OTP Section */}
-                                    <div className="amount-area mt-3">
-                                        <div className="d-flex gap-2">
-                                            <div className="flex-grow-1">
-                                                <input
-                                                    type="number"
-                                                    className="amount-input"
-                                                    placeholder="Enter OTP"
-                                                    value={otp1}
-                                                    onChange={(e) => setOtp1(e.target.value)}
-                                                    disabled={!otpSent1}
-                                                />
-                                            </div>
-                                            {!otpSent1 ? (
-                                                <button
-
-                                                    className="btn btn-primary text-nowrap"
-                                                    onClick={handleSendOTP1}
-                                                    disabled={otpLoading1 || !validUser1}
-                                                >
-                                                    {otpLoading1 ? "Processing" : "Send OTP"}
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    className="btn btn-success text-nowrap"
-                                                    onClick={handleVerifyOTP1}
-                                                    disabled={otpLoading1 || otp1.length < 6}
-                                                >
-                                                    {otpLoading1 ? "Processing" : "Verify"}
-                                                </button>
-                                            )}
-                                        </div>
-                                        {otpVerified1 && (
-                                            <small className="text-success"> OTP Verified</small>
-                                        )}
-                                    </div>
-
-                                    {/* Submit Button */}
-                                    <button
-                                        className="submit-transfer-btn"
-                                        onClick={handleFundTransfer}
-                                        disabled={!validUser1 || transferLoading1 || amount1 <= 0 || !investUserId1 || !otpVerified1}
-                                    >
-                                        {transferLoading1 ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm me-2"></span>
-                                                Processing...
-                                            </>
-                                        ) : (
-                                            " Fund Transfer"
-                                        )}
-                                    </button>
                                 </div>
+
+                                {/* Amount */}
+                                <div className="ft-form-group">
+                                    <label className="ft-label">AMOUNT *</label>
+                                    <div className="ft-amount-wrapper">
+                                        <span className="ft-currency">$</span>
+                                        <input
+                                            type="number"
+                                            className="ft-amount-field"
+                                            value={amount1}
+                                            onChange={(e) => setAmount1(Number(e.target.value))}
+                                            min="10"
+                                            placeholder="Enter amount (min $10)"
+                                        />
+                                        <button
+                                            className="ft-clear-btn"
+                                            onClick={() => setAmount1(0)}
+                                            type="button"
+                                        >
+                                            <IoClose />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* OTP */}
+                                <div className="ft-otp-wrap">
+                                    <div className="ft-otp-row">
+                                        <input
+                                            type="number"
+                                            className="ft-otp-input"
+                                            placeholder="Enter OTP"
+                                            value={otp1}
+                                            onChange={(e) => setOtp1(e.target.value)}
+                                            disabled={!otpSent1}
+                                        />
+                                        {!otpSent1 ? (
+                                            <button
+                                                className="ft-otp-btn"
+                                                onClick={handleSendOTP1}
+                                                disabled={otpLoading1 || !validUser1}
+                                            >
+                                                {otpLoading1 ? "Processing" : "Send OTP"}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="ft-otp-btn ft-otp-verify"
+                                                onClick={handleVerifyOTP1}
+                                                disabled={otpLoading1 || otp1.length < 6}
+                                            >
+                                                {otpLoading1 ? "Processing" : "Verify"}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {otpVerified1 && (
+                                        <small className="ft-status success">✓ OTP Verified</small>
+                                    )}
+                                </div>
+
+                                {/* Submit */}
+                                <button
+                                    className="ft-submit-btn"
+                                    onClick={handleFundTransfer}
+                                    disabled={!validUser1 || transferLoading1 || amount1 <= 0 || !investUserId1 || !otpVerified1}
+                                >
+                                    {transferLoading1 ? (
+                                        <>
+                                            <span className="ft-spinner"></span>
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        "Fund Transfer"
+                                    )}
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        {/* ===== CARD 2: Income to Deposit ===== */}
-                        <div className="col-12 col-lg-6">
-                            <div className="transfer-card">
-                                <div className="transfer-card-header">
-                                    <div className="transfer-title">
-                                        <RiP2pFill size={24} className="transfer-icon" />
-                                        <h5>Income → Deposit</h5>
-                                    </div>
+                    {/* ===== CARD 2: Income → Deposit ===== */}
+                    <div className="col-12 col-lg-6">
+                        <div className="ft-card">
+                            <div className="ft-card-header">
+                                <div className="ft-title">
+                                    <RiP2pFill size={24} className="ft-icon ft-icon-blue" />
+                                    <h5>Income → Deposit</h5>
+                                </div>
+                                <button className="ft-history-btn" onClick={() => goToFundInvest("USDT Transfer")}>
+                                    <FaHistory size={14} />
+                                    <span>History</span>
+                                </button>
+                            </div>
 
-                                    <button className="btn-primary" onClick={() => goToFundInvest("USDT Transfer")}>
-                                        History
-                                    </button>
+                            <div className="ft-card-body">
+                                {/* Wallet Info */}
+                                <div className="ft-wallet-info">
+                                    <span className="ft-wallet-label">Income Wallet</span>
+                                    <span className="ft-wallet-amount ft-wallet-amount-blue">
+                                        ${userData?.WorkingWallet?.toFixed(2) || '0.00'}
+                                    </span>
                                 </div>
 
-                                <div className="transfer-card-body">
-                                    {/* Wallet Info */}
-                                    <div className="wallet-info">
-                                        <span className="wallet-label">Income Wallet</span>
-                                        <span className="wallet-amount" style={{ color: '#667eea' }}>
-                                            ${userData?.WorkingWallet?.toFixed(2) || '0.00'}
-                                        </span>
-                                    </div>
+                                {/* User ID (Auto) */}
+                                <div className="ft-form-group">
+                                    <label className="ft-label">USER ID</label>
+                                    <input
+                                        type="text"
+                                        className="ft-input ft-input-readonly"
+                                        value={userData?.loginid}
+                                        readOnly
+                                        disabled
+                                    />
+                                </div>
 
-                                    {/* User ID (Auto) */}
-                                    <div className="form-group03">
-                                        <label className="form-label mb-1">USER ID</label>
-                                        <input
-                                            type="text"
-                                            className="form-control-field"
-                                            value={userData?.loginid}
-                                            readOnly
-                                            disabled
-                                            style={{ color: '#667eea', fontWeight: '600' }}
-                                        />
-                                    </div>
-
-                                    {/* Quick Amount */}
-                                    <div className="form-group03">
-                                        <label className="form-label mt-3 mb-1">QUICK AMOUNT</label>
-                                        <div className="quick-amount-grid">
-                                            {depositOptions.map((opt) => (
-                                                <button
-                                                    key={opt}
-                                                    className={`quick-amount-btn ${amount2 === opt ? "active" : ""}`}
-                                                    onClick={() => setAmount2(opt)}
-                                                    type="button"
-                                                >
-                                                    ${opt}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Amount Input */}
-                                    <div className="form-group03">
-                                        <label className="form-label mt-3 mb-1">AMOUNT *</label>
-                                        <div className="amount-input-wrapper">
-                                            <span className="currency-sign">$</span>
-                                            <input
-                                                type="number"
-                                                className="amount-input-field"
-                                                value={amount2}
-                                                onChange={(e) => setAmount2(Number(e.target.value))}
-                                                min="10"
-                                                placeholder="Enter amount (min $10)"
-                                            />
+                                {/* Quick Amount */}
+                                <div className="ft-form-group">
+                                    <label className="ft-label">QUICK AMOUNT</label>
+                                    <div className="ft-quick-grid">
+                                        {depositOptions.map((opt) => (
                                             <button
-                                                className="clear-input-btn"
-                                                onClick={() => setAmount2(0)}
+                                                key={opt}
+                                                className={`ft-quick-btn ${amount2 === opt ? "active" : ""}`}
+                                                onClick={() => setAmount2(opt)}
                                                 type="button"
                                             >
-                                                <IoClose />
+                                                ${opt}
                                             </button>
-                                        </div>
+                                        ))}
                                     </div>
-
-                                    {/* OTP Section */}
-                                    <div className="amount-area mt-3">
-                                        <div className="d-flex gap-2">
-                                            <div className="flex-grow-1">
-                                                <input
-                                                    type="number"
-                                                    className="amount-input"
-                                                    placeholder="Enter OTP"
-                                                    value={otp2}
-                                                    onChange={(e) => setOtp2(e.target.value)}
-                                                    disabled={!otpSent2}
-                                                    maxLength="6"
-                                                />
-                                            </div>
-                                            {!otpSent2 ? (
-                                                <button
-                                                    className="btn btn-primary text-nowrap"
-                                                    onClick={handleSendOTP2}
-                                                    disabled={otpLoading2}
-                                                >
-                                                    {otpLoading2 ? "Processing" : "Send OTP"}
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    className="btn btn-success text-nowrap"
-                                                    onClick={handleVerifyOTP2}
-                                                    disabled={otpLoading2 || otp2.length < 6}
-                                                >
-                                                    {otpLoading2 ? "Processing" : "Verify"}
-                                                </button>
-                                            )}
-                                        </div>
-                                        {otpVerified2 && (
-                                            <small className="text-success"> OTP Verified</small>
-                                        )}
-                                    </div>
-
-                                    {/* Submit Button */}
-                                    <button
-                                        className="submit-transfer-btn"
-                                        onClick={handleIncomeToDepositTransfer}
-                                        disabled={transferLoading2 || !otpVerified2 || amount2 <= 0 || amount2 < 10}
-                                    >
-                                        {transferLoading2 ? (
-                                            <>
-                                                <span className="spinner-border spinner-border-sm me-2"></span>
-                                                Processing...
-                                            </>
-                                        ) : (
-                                            " Transfer to Deposit"
-                                        )}
-                                    </button>
                                 </div>
+
+                                {/* Amount */}
+                                <div className="ft-form-group">
+                                    <label className="ft-label">AMOUNT *</label>
+                                    <div className="ft-amount-wrapper">
+                                        <span className="ft-currency">$</span>
+                                        <input
+                                            type="number"
+                                            className="ft-amount-field"
+                                            value={amount2}
+                                            onChange={(e) => setAmount2(Number(e.target.value))}
+                                            min="10"
+                                            placeholder="Enter amount (min $10)"
+                                        />
+                                        <button
+                                            className="ft-clear-btn"
+                                            onClick={() => setAmount2(0)}
+                                            type="button"
+                                        >
+                                            <IoClose />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* OTP */}
+                                <div className="ft-otp-wrap">
+                                    <div className="ft-otp-row">
+                                        <input
+                                            type="number"
+                                            className="ft-otp-input"
+                                            placeholder="Enter OTP"
+                                            value={otp2}
+                                            onChange={(e) => setOtp2(e.target.value)}
+                                            disabled={!otpSent2}
+                                            maxLength="6"
+                                        />
+                                        {!otpSent2 ? (
+                                            <button
+                                                className="ft-otp-btn"
+                                                onClick={handleSendOTP2}
+                                                disabled={otpLoading2}
+                                            >
+                                                {otpLoading2 ? "Processing" : "Send OTP"}
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="ft-otp-btn ft-otp-verify"
+                                                onClick={handleVerifyOTP2}
+                                                disabled={otpLoading2 || otp2.length < 6}
+                                            >
+                                                {otpLoading2 ? "Processing" : "Verify"}
+                                            </button>
+                                        )}
+                                    </div>
+                                    {otpVerified2 && (
+                                        <small className="ft-status success">✓ OTP Verified</small>
+                                    )}
+                                </div>
+
+                                {/* Submit */}
+                                <button
+                                    className="ft-submit-btn"
+                                    onClick={handleIncomeToDepositTransfer}
+                                    disabled={transferLoading2 || !otpVerified2 || amount2 <= 0 || amount2 < 10}
+                                >
+                                    {transferLoading2 ? (
+                                        <>
+                                            <span className="ft-spinner"></span>
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        "Transfer to Deposit"
+                                    )}
+                                </button>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
