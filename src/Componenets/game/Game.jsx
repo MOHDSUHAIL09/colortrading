@@ -18,16 +18,20 @@ import { useColor } from '../../context/ColorContext.jsx';
 const GAME_NAME = 'WinGo 30 second';
 
 export default function Game() {
-  // ✅ Context se real data
-  const { dashboard, gameResults, clientSeconds, placeBet, fetchDashboard } = useColor();
-
+  // ✅ Context se latestResult bhi lo
+  const {
+    dashboard,
+    gameResults,
+    latestResult,
+    clientSeconds,
+    placeBet,
+    fetchDashboard,
+  } = useColor();
 
   // ✅ Real balance from server
-  const balance = Number(dashboard?.currentamt);
+  const balance = Number(dashboard?.currentamt || 0);
 
-  // ✅ Sound state (rakha)
   const [soundEnabled, setSoundEnabled] = useState(true);
-
   const [activeTab, setActiveTab] = useState('history');
 
   // Modals
@@ -37,16 +41,15 @@ export default function Game() {
   const [winModalData, setWinModalData] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // ✅ User bets — API se aayenge (filhal empty)
-  const [userBets ] = useState([]);
+  // ✅ User bets — memory me (session level)
+  const userBetsRef = useRef([]);
 
-  // ✅ Live community bets — API se aayenge (filhal empty)
-  const [liveRoundBets] = useState([]);
+  // ✅ Processed periods — duplicate modal na khule
+  const processedPeriodsRef = useRef(new Set());
 
   const toastTimerRef = useRef(null);
   const scrollAreaRef = useRef(null);
 
-  // ✅ Real values from context
   const currentPeriod = dashboard?.gameid || '------------';
   const secondsRemaining = clientSeconds;
   const isLocked = secondsRemaining <= 5;
@@ -67,19 +70,111 @@ export default function Game() {
     }, 2800);
   }, []);
 
-  // ✅ Sound toggle (rakha)
+  // ✅ Sound toggle
   const toggleSound = () => {
     const next = !soundEnabled;
     setSoundEnabled(next);
     sound.setEnabled(next);
-    sound.playClick();   // feedback
+    sound.playClick();
   };
 
-  // ✅ Bet submission — API call
+  // ✅ Bet evaluate karo
+  const evaluateBet = (bet, result) => {
+    let status = 'lost';
+    let winAmount = 0;
+
+    const resultNum = result.number;
+    const resultSize = (result.bigSmall || '').toLowerCase();
+
+    if (bet.type === 'number') {
+      if (String(bet.value) === String(resultNum)) {
+        status = 'won';
+        winAmount = bet.amount * 9;
+      }
+    } else if (bet.type === 'color') {
+      const betColor = bet.value.toLowerCase();
+      if (betColor === 'violet' && (resultNum === 0 || resultNum === 5)) {
+        status = 'won';
+        winAmount = bet.amount * 4.5;
+      } else if (betColor === 'green' && [1, 3, 7, 9].includes(resultNum)) {
+        status = 'won';
+        winAmount = bet.amount * 2;
+      } else if (betColor === 'red' && [2, 4, 6, 8].includes(resultNum)) {
+        status = 'won';
+        winAmount = bet.amount * 2;
+      }
+    } else if (bet.type === 'size') {
+      const betSize = bet.value.toLowerCase();
+      if (betSize === resultSize) {
+        status = 'won';
+        winAmount = bet.amount * 2;
+      }
+    }
+
+    return { status, winAmount };
+  };
+
+  // ✅ Latest result aane pe — evaluate + modal
+  useEffect(() => {
+    if (!latestResult?.period) return;
+
+    // Already process kiya?
+    if (processedPeriodsRef.current.has(latestResult.period)) return;
+
+    // Current round me user ki bets dhundho
+    const periodBets = userBetsRef.current.filter(
+      (b) => b.period === latestResult.period
+    );
+
+    // Koi bet nahi thi → skip
+    if (periodBets.length === 0) {
+      processedPeriodsRef.current.add(latestResult.period);
+      return;
+    }
+
+    console.log('🎯 [Eval] Evaluating', periodBets.length, 'bets for', latestResult.period);
+
+    const evaluated = periodBets.map((b) => {
+      const res = evaluateBet(b, latestResult);
+      return {
+        ...b,
+        status: res.status,
+        winAmount: res.winAmount,
+        resultNumber: latestResult.number,
+      };
+    });
+
+    console.log('🎯 [Eval] Result:', evaluated);
+
+    const hasWon = evaluated.some((b) => b.status === 'won');
+    if (hasWon) {
+      sound.playWin();
+    } else {
+      sound.playLoss();
+    }
+
+    setWinModalData({
+      bets: evaluated,
+      result: latestResult,
+    });
+
+    processedPeriodsRef.current.add(latestResult.period);
+  }, [latestResult]);
+
+  // ✅ Bet submission
   const handleConfirmBet = async (choice, totalAmount) => {
     const Regno = sessionStorage.getItem('Regno');
 
-    // ✅ gameName + betValue — bet type ke hisaab se
+    if (!Regno) {
+      alert('Session expired. Please login again.');
+      return;
+    }
+
+    if (!dashboard?.gameid) {
+      alert('Game ID not available. Please wait...');
+      return;
+    }
+
     let gameName = '';
     let betValue = '';
 
@@ -102,7 +197,6 @@ export default function Game() {
       bet: betValue,
     });
 
-    // ✅ API call
     const result = await placeBet({
       gameId: dashboard.gameid,
       gameName,
@@ -117,7 +211,20 @@ export default function Game() {
       return;
     }
 
-    // ✅ Success — sound + toast + fresh dashboard
+    // ✅ Memory me save karo (evaluation ke liye)
+    userBetsRef.current.push({
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      period: dashboard.gameid,
+      type: choice.type,
+      value: choice.value,
+      label: choice.label,
+      amount: totalAmount,
+      mode: '30s',
+      timestamp: Date.now(),
+    });
+
+    console.log('💾 [Bet Saved] Total in memory:', userBetsRef.current.length);
+
     sound.playBetPlace();
     showToast(`Bet placed: ${choice.label} (₹${totalAmount})`);
     fetchDashboard(Regno);
@@ -257,12 +364,14 @@ export default function Game() {
               {activeTab === 'chart' && (
                 <TrendChartTab history={gameResults} />
               )}
-              {activeTab === 'myHistory' && <MyHistoryTab bets={userBets} />}
+              {activeTab === 'myHistory' && (
+                <MyHistoryTab bets={userBetsRef.current} />
+              )}
               {activeTab === 'allBets' && (
                 <AllBetsTab
                   currentPeriod={currentPeriod}
                   secondsRemaining={secondsRemaining}
-                  liveBets={liveRoundBets}
+                  liveBets={[]}
                 />
               )}
             </div>
@@ -287,6 +396,7 @@ export default function Game() {
           onClose={() => setShowRulesModal(false)}
         />
 
+        {/* ✅ WIN / LOSE MODAL */}
         {winModalData && (
           <WinResultModal
             evaluatedBets={winModalData.bets}
@@ -303,7 +413,7 @@ export default function Game() {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              zIndex: 60,
+              zIndex: 99999,
               backgroundColor: 'rgba(17, 24, 39, 0.92)',
               color: '#fff',
               fontSize: '0.8125rem',
