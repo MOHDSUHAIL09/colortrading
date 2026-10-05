@@ -115,7 +115,7 @@ export const BetSlipModal = ({
       />
 
       <div
-        className={`relative z-10 w-full bg-white shadow-2xl overflow-hidden flex flex-col select-none rounded-t-2xl transition-transform duration-300 transform ${
+        className={`relative z-[9999999] w-full bg-white shadow-2xl overflow-hidden flex flex-col select-none rounded-t-2xl transition-transform duration-300 transform ${
           isOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
         style={{

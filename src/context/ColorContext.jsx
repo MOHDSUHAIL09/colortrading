@@ -15,21 +15,20 @@ export const ColorContext = createContext();
 export const ColorProvider = ({ children }) => {
   const [dashboard, setDashboard] = useState(null);
   const [gameResults, setGameResults] = useState([]);
+  const [latestResult, setLatestResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // ✅ Client-side countdown seconds
   const [clientSeconds, setClientSeconds] = useState(0);
 
   const Regno = sessionStorage.getItem("Regno");
 
   const pollingRef = useRef(null);
   const clientSecondsRef = useRef(0);
-  const isRefreshingRef = useRef(false);   // ✅ Duplicate call rokne ke liye
+  const isRefreshingRef = useRef(false);
 
   // ===================== DASHBOARD API =====================
   const fetchDashboard = useCallback(async (Regno) => {
-    console.log("🚀 [API] fetchDashboard called. Regno:", Regno);
+    console.log("🚀 [API] fetchDashboard. Regno:", Regno);
     setLoading(true);
     setError(null);
 
@@ -39,41 +38,25 @@ export const ColorProvider = ({ children }) => {
 
       if (data.result === "true" && data.response) {
         setDashboard(data.response);
-        console.log(
-          "🎉 [API] Dashboard set. GameID:",
-          data.response.gameid,
-          "Seconds:",
-          data.response.seconds
-        );
+        console.log("🎉 [Dashboard] gameId:", data.response.gameid);
         return data.response;
       } else {
         throw new Error("API returned result: false");
       }
     } catch (err) {
       console.error("❌ [Dashboard] Error:", err);
-      const msg =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        err.message ||
-        "Something went wrong";
-      setError(msg);
+      setError(err.response?.data?.message || err.message);
       setDashboard(null);
       return null;
     } finally {
       setLoading(false);
-      console.log("🏁 [Dashboard] finished");
     }
   }, []);
 
-  // ===================== GAME RESULTS API =====================
+  // ===================== GAME RESULTS API ✅ =====================
   const fetchGameResults = useCallback(
     async (pageIndex = 1, pageSize = 100) => {
-      console.log(
-        "🚀 [API] fetchGameResults. page:",
-        pageIndex,
-        "size:",
-        pageSize
-      );
+      console.log("🚀 [API] fetchGameResults");
 
       try {
         const response = await apiClient.get(
@@ -82,19 +65,48 @@ export const ColorProvider = ({ children }) => {
         const data = response.data;
 
         if (data.success && data.data?.data) {
-          setGameResults(data.data.data);
-          console.log(
-            "📦 [API] Game Results set:",
-            data.data.data.length,
-            "items"
-          );
+          const results = data.data.data;
+          setGameResults(results);
+          console.log("📦 [Results] count:", results.length);
+
+          // ✅ Latest result format karo
+          if (results.length > 0) {
+            const latest = results[0];
+
+            // Number → integer
+            const num = Number(latest.betnumber);
+
+            // Color → lowercase array
+            const colorLower = (latest.betcolor || "red").toLowerCase();
+
+            // BigSmall
+            const bigSmall = latest.BigSmallName || "Small";
+
+            setLatestResult({
+              id: latest.id,
+              period: latest.gameid,
+              game: latest.game,
+              number: num,
+              color: latest.betcolor,               // "Red"
+              colors: [colorLower],                 // ["red"]
+              bigSmall: bigSmall,                   // "Small"
+              edate: latest.edate,
+              winBigSmall: latest.WinBigSmall,
+            });
+
+            console.log("🎯 [Latest Result]:", {
+              period: latest.gameid,
+              number: num,
+              color: latest.betcolor,
+              bigSmall: bigSmall,
+            });
+          }
+
           return {
-            items: data.data.data,
+            items: results,
             totalCount: data.data.totalCount,
             pageIndex: data.data.pageIndex,
           };
-        } else {
-          throw new Error("Failed to fetch game results");
         }
       } catch (err) {
         console.error("❌ [GameResult] Error:", err);
@@ -104,18 +116,56 @@ export const ColorProvider = ({ children }) => {
     []
   );
 
+  // ===================== PLACE BET API =====================
+  const placeBet = useCallback(
+    async ({ gameId, gameName, regNo, amount, bet }) => {
+      console.log("🎯 [Bet] Placing:", { gameId, gameName, regNo, amount, bet });
+
+      try {
+        const response = await apiClient.post(`/Game/place-bet`, {
+          gameId,
+          gameName,
+          regNo,
+          amount,
+          bet,
+        });
+
+        const data = response.data;
+        console.log("✅ [Bet] Response:", data);
+
+        if (
+          data.result === "true" ||
+          data.success === true ||
+          data.statusCode === 200
+        ) {
+          return { success: true, data };
+        } else {
+          throw new Error(data.message || "Bet placement failed");
+        }
+      } catch (err) {
+        console.error("❌ [Bet] Error:", err);
+        return {
+          success: false,
+          error:
+            err.response?.data?.message ||
+            err.response?.data?.error ||
+            err.message,
+        };
+      }
+    },
+    []
+  );
+
   // ===================== CLIENT SECONDS INIT =====================
-  // Jab naya dashboard aaye, clientSeconds reset karo
   useEffect(() => {
     if (dashboard?.seconds !== undefined) {
-      console.log("⏱️ [Timer] Init clientSeconds:", dashboard.seconds);
+      console.log("⏱️ [Timer] Init:", dashboard.seconds);
       setClientSeconds(dashboard.seconds);
       clientSecondsRef.current = dashboard.seconds;
     }
   }, [dashboard?.gameid, dashboard?.seconds]);
 
   // ===================== CLIENT SECONDS TICK =====================
-  // Har second -1 karo
   useEffect(() => {
     const interval = setInterval(() => {
       setClientSeconds((prev) => {
@@ -129,23 +179,21 @@ export const ColorProvider = ({ children }) => {
   }, []);
 
   // ===================== SMART POLLING =====================
-  // Har second check: agar clientSeconds <= 1 ho, toh refresh
   useEffect(() => {
     if (!Regno) return;
 
     if (pollingRef.current) clearInterval(pollingRef.current);
 
     pollingRef.current = setInterval(async () => {
-      // ✅ Client-side seconds check karo
       if (clientSecondsRef.current <= 1 && !isRefreshingRef.current) {
-        console.log("⏰ [Polling] Timer khatam — refreshing both APIs");
+        console.log("⏰ [Polling] Timer khatam");
         isRefreshingRef.current = true;
 
         const oldGameId = dashboard?.gameid;
         const newDash = await fetchDashboard(Regno);
 
         if (newDash && newDash.gameid !== oldGameId) {
-          console.log("🆕 [Polling] New game detected:", newDash.gameid);
+          console.log("🆕 [Polling] New game:", newDash.gameid);
           await fetchGameResults(1, 100);
         }
 
@@ -160,7 +208,6 @@ export const ColorProvider = ({ children }) => {
 
   // ===================== INITIAL FETCH =====================
   useEffect(() => {
-    console.log("🔄 [Effect] Regno:", Regno);
     if (Regno) {
       fetchDashboard(Regno);
       fetchGameResults(1, 100);
@@ -172,12 +219,14 @@ export const ColorProvider = ({ children }) => {
       value={{
         dashboard,
         gameResults,
-        clientSeconds,   // ✅ Ye expose karo
+        latestResult,      // ✅ Expose
+        clientSeconds,
         loading,
         error,
         Regno,
         fetchDashboard,
         fetchGameResults,
+        placeBet,
       }}
     >
       {children}

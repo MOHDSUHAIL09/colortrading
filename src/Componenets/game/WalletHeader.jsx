@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { RotateCw, Flame } from 'lucide-react';
 import { sound } from '../../utils/audio.js';
+import { useColor } from '../../context/ColorContext.jsx';
 
-export const WalletHeader = ({
-  balance,
-  onAddChips,
-  onOpenWithdraw,
-  onOpenDeposit,
-}) => {
+
+export const WalletHeader = () => {
   const [isRotating, setIsRotating] = useState(false);
-  const [showWithdrawNotice, setShowWithdrawNotice] = useState(false);
+    const { dashboard } = useColor();
 
   const handleRefresh = () => {
     sound.playClick();
@@ -23,7 +20,7 @@ export const WalletHeader = ({
       <div className="bg-white rounded-2xl pt-4 pb-4 px-4 shadow-sm flex flex-col items-center">
         <div className="flex items-center justify-center gap-2 max-w-full">
           <span className="text-2xl sm:text-3xl font-black text-[#111827] tracking-tight font-sans truncate">
-            ₹{Number(balance).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ₹{dashboard?.currentamt}
           </span>
           <button
             onClick={handleRefresh}
@@ -50,40 +47,17 @@ export const WalletHeader = ({
 
         <div className="w-full grid grid-cols-2 gap-3 mt-4">
           <button
-            onClick={() => {
-              sound.playClick();
-              if (onOpenWithdraw) {
-                onOpenWithdraw();
-              } else {
-                setShowWithdrawNotice(true);
-                setTimeout(() => setShowWithdrawNotice(false), 2500);
-              }
-            }}
             className=" w-full py-2.5 px-4 rounded-full  border-2 border-[#097b42] text-[#097b42] text-sm font-bold transition cursor-pointer text-center" style={{background: "#e6eae1"}}
           >
             Withdraw
           </button>
 
           <button
-            onClick={() => {
-              sound.playClick();
-              if (onOpenDeposit) {
-                onOpenDeposit();
-              } else {
-                onAddChips();
-              }
-            }}
             className="w-full py-2.5 px-4 rounded-full bg-[#0c7844] hover:bg-[#0a673a] active:bg-[#085630] text-white text-sm font-bold shadow-xs transition cursor-pointer text-center"
           >
             Deposit
           </button>
         </div>
-
-        {showWithdrawNotice && (
-          <div className="mt-2 text-[11px] text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 text-center animate-fade-in">
-            Demo mode: Minimum withdrawal threshold ₹100.00
-          </div>
-        )}
       </div>
 
       {/* Notice Speaker Bar - Continuous Marquee */}

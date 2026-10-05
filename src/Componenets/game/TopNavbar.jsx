@@ -8,7 +8,7 @@ export const TopNavbar = ({
   onToggleSound,
   onBack,                                          // optional rakho
 }) => {
-  const navigate = useNavigate();                  // 👈 add
+  const navigate = useNavigate();                 
 
   const handleBack = () => {
     sound.playClick();

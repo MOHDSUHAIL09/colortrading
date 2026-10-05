@@ -39,7 +39,7 @@ const BOTTOM_NAVIGATION_STYLES = `
   user-select: none;
   padding: 0 12px 12px 12px;
   box-sizing: border-box;
-  z-index: 999999 !important;
+  z-index: 999 !important;
   pointer-events: none;
 }
 

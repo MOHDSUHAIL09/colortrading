@@ -8608,7 +8608,7 @@ ul {
 
 /* ========== MAIN CONTENT ========== */
 .main-content {
-  padding: 12px;
+  padding: 0px;
   background: #0a032a;
   flex: 1;
   transition: all 0.3s ease;
@@ -8862,9 +8862,9 @@ ul {
     padding: 0 15px;
   } */
   
-  .main-content {
+  /* .main-content {
     padding: 10px;
-  }
+  } */
   
   .navbar-nav {
     gap: 8px;
@@ -8885,8 +8885,8 @@ ul {
 /* Extra Small Mobile */
 @media (max-width: 480px) {
   .main-content {
-    padding: 2px;
-    margin-top: 7px;
+    padding: 0px;
+    /* margin-top: 7px; */
   }
   
   .brand-logo img {

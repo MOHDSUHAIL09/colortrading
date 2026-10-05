@@ -1,6 +1,6 @@
 // File: src/Componenets/game/Game.jsx
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { TopNavbar } from './TopNavbar.jsx';
 import { WalletHeader } from './WalletHeader.jsx';
 import { TicketBanner } from './TicketBanner.jsx';
@@ -12,8 +12,6 @@ import { MyHistoryTab } from './MyHistoryTab.jsx';
 import { AllBetsTab } from './AllBetsTab.jsx';
 import { HowToPlayModal } from './HowToPlayModal.jsx';
 import { WinResultModal } from './WinResultModal.jsx';
-import { DepositModal } from './DepositModal.jsx';
-import { WithdrawModal } from './WithdrawModal.jsx';
 import { sound } from '../../utils/audio.js';
 import { useColor } from '../../context/ColorContext.jsx';
 
@@ -21,38 +19,29 @@ const GAME_NAME = 'WinGo 30 second';
 
 export default function Game() {
   // ✅ Context se real data
-  const { dashboard, gameResults, clientSeconds } = useColor();
+  const { dashboard, gameResults, clientSeconds, placeBet, fetchDashboard } = useColor();
 
+
+  // ✅ Real balance from server
+  const balance = Number(dashboard?.currentamt);
+
+  // ✅ Sound state (rakha)
   const [soundEnabled, setSoundEnabled] = useState(true);
+
   const [activeTab, setActiveTab] = useState('history');
 
   // Modals
   const [selectedBetChoice, setSelectedBetChoice] = useState(null);
   const [presetMultiplier, setPresetMultiplier] = useState(1);
   const [showRulesModal, setShowRulesModal] = useState(false);
-  const [showDepositModal, setShowDepositModal] = useState(false);
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [winModalData, setWinModalData] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Balance (local)
-  const [balance, setBalance] = useState(() => {
-    try {
-      const saved = localStorage.getItem('wingo_balance');
-      return saved ? parseFloat(saved) : 1000;
-    } catch { return 1000; }
-  });
+  // ✅ User bets — API se aayenge (filhal empty)
+  const [userBets ] = useState([]);
 
-  // User bets (local)
-  const [userBets, setUserBets] = useState(() => {
-    try {
-      const saved = localStorage.getItem('wingo_bets');
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
-
-  // Live community bets (empty for now)
-  const [liveRoundBets, setLiveRoundBets] = useState([]);
+  // ✅ Live community bets — API se aayenge (filhal empty)
+  const [liveRoundBets] = useState([]);
 
   const toastTimerRef = useRef(null);
   const scrollAreaRef = useRef(null);
@@ -62,19 +51,11 @@ export default function Game() {
   const secondsRemaining = clientSeconds;
   const isLocked = secondsRemaining <= 5;
 
-  // Persist balance
-  useEffect(() => {
-    try { localStorage.setItem('wingo_balance', balance.toString()); } catch {}
-  }, [balance]);
-
-  // Persist bets
-  useEffect(() => {
-    try { localStorage.setItem('wingo_bets', JSON.stringify(userBets)); } catch {}
-  }, [userBets]);
-
   // Cleanup toast
   useEffect(() => {
-    return () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); };
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
   }, []);
 
   // Toast helper
@@ -86,54 +67,60 @@ export default function Game() {
     }, 2800);
   }, []);
 
+  // ✅ Sound toggle (rakha)
   const toggleSound = () => {
     const next = !soundEnabled;
     setSoundEnabled(next);
     sound.setEnabled(next);
+    sound.playClick();   // feedback
   };
 
-  const handleAddChips = () => {
-    setBalance((prev) => prev + 500);
-    showToast('₹500.00 Demo Chips added to your wallet!');
-  };
+  // ✅ Bet submission — API call
+  const handleConfirmBet = async (choice, totalAmount) => {
+    const Regno = sessionStorage.getItem('Regno');
 
-  // Bet submission
-  const handleConfirmBet = (choice, totalAmount, multiplier) => {
-    if (balance < totalAmount) {
-      alert('Insufficient funds!');
+    // ✅ gameName + betValue — bet type ke hisaab se
+    let gameName = '';
+    let betValue = '';
+
+    if (choice.type === 'color') {
+      gameName = 'Color';
+      betValue = choice.value.charAt(0).toUpperCase() + choice.value.slice(1);
+    } else if (choice.type === 'number') {
+      gameName = 'Number';
+      betValue = String(choice.value);
+    } else if (choice.type === 'size') {
+      gameName = 'BigSmall';
+      betValue = choice.value.charAt(0).toUpperCase() + choice.value.slice(1);
+    }
+
+    console.log('🎯 Bet details:', {
+      gameId: dashboard.gameid,
+      gameName,
+      regNo: Number(Regno),
+      amount: totalAmount,
+      bet: betValue,
+    });
+
+    // ✅ API call
+    const result = await placeBet({
+      gameId: dashboard.gameid,
+      gameName,
+      regNo: Number(Regno),
+      amount: totalAmount,
+      bet: betValue,
+    });
+
+    if (!result.success) {
+      sound.playLoss();
+      alert(`Bet failed: ${result.error}`);
       return;
     }
-    setBalance((prev) => prev - totalAmount);
 
-    const newBet = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
-      period: currentPeriod,
-      mode: '30s',
-      betType: choice.type,
-      betValue: choice.value,
-      betLabel: choice.label,
-      amount: totalAmount,
-      multiplier,
-      timestamp: Date.now(),
-      status: 'pending',
-    };
-
-    setUserBets((prev) => [newBet, ...prev]);
-
-    const userLiveBet = {
-      id: newBet.id,
-      period: currentPeriod,
-      userName: 'You (Player)',
-      isUser: true,
-      choiceType: choice.type,
-      choiceValue: choice.value,
-      choiceLabel: choice.label,
-      amount: totalAmount,
-      timestamp: Date.now(),
-    };
-    setLiveRoundBets((prev) => [userLiveBet, ...prev]);
-
+    // ✅ Success — sound + toast + fresh dashboard
+    sound.playBetPlace();
     showToast(`Bet placed: ${choice.label} (₹${totalAmount})`);
+    fetchDashboard(Regno);
   };
 
   return (
@@ -162,7 +149,14 @@ export default function Game() {
         }}
       >
         {/* TOP NAVBAR */}
-        <div style={{ flexShrink: 0, zIndex: 50, width: '100%', backgroundColor: '#0c7844' }}>
+        <div
+          style={{
+            flexShrink: 0,
+            zIndex: 50,
+            width: '100%',
+            backgroundColor: '#0c7844',
+          }}
+        >
           <TopNavbar soundEnabled={soundEnabled} onToggleSound={toggleSound} />
         </div>
 
@@ -183,18 +177,22 @@ export default function Game() {
             paddingBottom: '3rem',
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <WalletHeader
-              balance={balance}
-              onAddChips={handleAddChips}
-              onOpenWithdraw={() => setShowWithdrawModal(true)}
-              onOpenDeposit={() => setShowDepositModal(true)}
-            />
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem',
+            }}
+          >
+            <WalletHeader />
 
             <TicketBanner
               modeName={GAME_NAME}
               secondsRemaining={secondsRemaining}
-              onOpenRules={() => setShowRulesModal(true)}
+              onOpenRules={() => {
+                sound.playClick();
+                setShowRulesModal(true);
+              }}
             />
 
             <BettingBoard
@@ -242,7 +240,8 @@ export default function Game() {
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',
-                      backgroundColor: activeTab === tab.key ? '#008f53' : '#f1f5f9',
+                      backgroundColor:
+                        activeTab === tab.key ? '#008f53' : '#f1f5f9',
                       color: activeTab === tab.key ? '#fff' : '#4b5563',
                       transition: 'all 0.15s',
                     }}
@@ -255,7 +254,9 @@ export default function Game() {
 
             <div style={{ padding: '0 0.75rem 1.5rem' }}>
               {activeTab === 'history' && <GameHistoryTab />}
-              {activeTab === 'chart' && <TrendChartTab history={gameResults} />}
+              {activeTab === 'chart' && (
+                <TrendChartTab history={gameResults} />
+              )}
               {activeTab === 'myHistory' && <MyHistoryTab bets={userBets} />}
               {activeTab === 'allBets' && (
                 <AllBetsTab
@@ -281,26 +282,10 @@ export default function Game() {
           />
         )}
 
-        <DepositModal
-          isOpen={showDepositModal}
-          onClose={() => setShowDepositModal(false)}
-          onDepositSuccess={(amt) => {
-            setBalance((b) => b + amt);
-            showToast(`Recharged ₹${amt.toLocaleString()} successfully!`);
-          }}
+        <HowToPlayModal
+          isOpen={showRulesModal}
+          onClose={() => setShowRulesModal(false)}
         />
-
-        <WithdrawModal
-          isOpen={showWithdrawModal}
-          balance={balance}
-          onClose={() => setShowWithdrawModal(false)}
-          onWithdrawSuccess={(amt) => {
-            setBalance((b) => b - amt);
-            showToast(`Withdrawal of ₹${amt.toLocaleString()} submitted!`);
-          }}
-        />
-
-        <HowToPlayModal isOpen={showRulesModal} onClose={() => setShowRulesModal(false)} />
 
         {winModalData && (
           <WinResultModal
