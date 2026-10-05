@@ -95,7 +95,7 @@ export const BettingBoard = ({
           {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
             return (
               <div key={num} className="flex flex-col items-center">
-                <button
+                <button 
                   disabled={isLocked}
                   onClick={() =>
                     handlePick({

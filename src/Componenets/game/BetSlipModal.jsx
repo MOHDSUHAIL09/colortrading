@@ -103,7 +103,7 @@ export const BetSlipModal = ({
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex flex-col justify-end overflow-hidden transition-all duration-300 ${
+      className={`fixed md:absolute inset-0 z-50 flex flex-col justify-end overflow-hidden transition-all duration-300 ${
         isOpen ? 'pointer-events-auto' : 'pointer-events-none'
       }`}
     >

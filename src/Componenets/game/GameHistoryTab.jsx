@@ -1,13 +1,33 @@
-import React, { useState } from 'react';
-import { sound } from '../../utils/audio.js';
+// File: src/components/GameHistoryTab.jsx
 
-export const GameHistoryTab = ({ history }) => {
+import React, { useState, useEffect } from "react";
+import { sound } from "../../utils/audio.js";
+import { useColor } from "../../context/ColorContext.jsx";
+
+export const GameHistoryTab = () => {
+  const { gameResults, fetchGameResults } = useColor();
+
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
-  const totalPages = Math.max(1, Math.ceil(history.length / pageSize));
+  const [items, setItems] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const startIndex = (currentPage - 1) * pageSize;
-  const currentItems = history.slice(startIndex, startIndex + pageSize);
+  const pageSize = 100;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  // ✅ Page change hone pe API call
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      const res = await fetchGameResults(currentPage, pageSize);
+      if (res) {
+        setItems(res.items);
+        setTotalCount(res.totalCount);
+      }
+      setLoading(false);
+    };
+    loadData();
+  }, [currentPage, fetchGameResults]);
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-xs border border-gray-100">
@@ -21,53 +41,71 @@ export const GameHistoryTab = ({ history }) => {
 
       {/* Table Rows */}
       <div className="divide-y divide-gray-100">
-        {currentItems.map((item, idx) => {
-          const num = item.number;
-          const is0 = num === 0;
-          const is5 = num === 5;
-          const isGreen = [1, 3, 7, 9].includes(num);
+        {loading ? (
+          <div className="py-6 text-center text-sm text-gray-500">
+            Loading...
+          </div>
+        ) : items.length === 0 ? (
+          <div className="py-6 text-center text-sm text-gray-500">
+            No data available
+          </div>
+        ) : (
+          items.map((item, idx) => {
+            const num = Number(item.betnumber);  // ✅ API me string hai
+            const is0 = num === 0;
+            const is5 = num === 5;
+            const isGreen = [1, 3, 7, 9].includes(num);
 
-          let numColor = 'text-[#fe4949]';
-          if (isGreen) numColor = 'text-[#00b977]';
-          if (is0) numColor = 'text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-[#fe4949]';
-          if (is5) numColor = 'text-transparent bg-clip-text bg-gradient-to-r from-[#00b977] to-violet-600';
+            let numColor = "text-[#fe4949]";
+            if (isGreen) numColor = "text-[#00b977]";
+            if (is0)
+              numColor =
+                "text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-[#fe4949]";
+            if (is5)
+              numColor =
+                "text-transparent bg-clip-text bg-gradient-to-r from-[#00b977] to-violet-600";
 
-          return (
-            <div
-              key={`${item.period}-${idx}`}
-              className="py-3 px-4 grid grid-cols-12 text-center items-center text-xs font-medium hover:bg-gray-50/80 transition-colors"
-            >
-              <div className="col-span-4 text-left font-mono text-gray-600 font-semibold tracking-tight">
-                {item.period}
+            // ✅ Color logic — API se "Red"/"Green"/"Violet" aata hai
+            const colorMap = {
+              Red: "bg-[#fe4949]",
+              Green: "bg-[#00b977]",
+              Violet: "bg-[#b55fe6]",
+            };
+            const dotClass =
+              colorMap[item.betcolor] ;
+
+            return (
+              <div
+                key={item.id || idx}
+                className="py-3 px-4 grid grid-cols-12 text-center items-center text-xs font-medium hover:bg-gray-50/80 transition-colors"
+              >
+                {/* Period = gameid */}
+                <div className="col-span-4 text-left font-mono text-gray-600 font-semibold tracking-tight">
+                  {item.gameid}
+                </div>
+
+                {/* Number */}
+                <div className="col-span-2">
+                  <span className={`text-xl font-black ${numColor}`}>
+                    {num}
+                  </span>
+                </div>
+
+                {/* Big Small */}
+                <div className="col-span-3 text-gray-700 font-medium">
+                  {item.BigSmallName || "-"}
+                </div>
+
+                {/* Color dot */}
+                <div className="col-span-3 flex items-center justify-center gap-1.5">
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full ${dotClass} shadow-xs`}
+                  />
+                </div>
               </div>
-
-              <div className="col-span-2">
-                <span className={`text-xl font-black ${numColor}`}>
-                  {num}
-                </span>
-              </div>
-
-              <div className="col-span-3 text-gray-700 font-medium">
-                {item.bigSmall}
-              </div>
-
-              <div className="col-span-3 flex items-center justify-center gap-1.5">
-                {item.colors.map((c, colorIdx) => {
-                  let dotColor = 'bg-[#fe4949]';
-                  if (c === 'green') dotColor = 'bg-[#00b977]';
-                  if (c === 'violet') dotColor = 'bg-[#b55fe6]';
-
-                  return (
-                    <span
-                      key={colorIdx}
-                      className={`w-2.5 h-2.5 rounded-full ${dotColor} shadow-xs`}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
 
       {/* Pagination */}
@@ -80,7 +118,12 @@ export const GameHistoryTab = ({ history }) => {
           }}
           className="w-9 h-9 rounded-md bg-[#e0e0e0] hover:bg-[#d4d4d4] flex items-center justify-center text-gray-600 disabled:opacity-30 disabled:hover:bg-[#e0e0e0] transition-colors cursor-pointer"
         >
-          <svg className="w-5 h-5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <svg
+            className="w-5 h-5 stroke-[2.5]"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
@@ -97,7 +140,12 @@ export const GameHistoryTab = ({ history }) => {
           }}
           className="w-9 h-9 rounded-md bg-[#e0e0e0] hover:bg-[#d4d4d4] flex items-center justify-center text-gray-600 disabled:opacity-30 disabled:hover:bg-[#e0e0e0] transition-colors cursor-pointer"
         >
-          <svg className="w-5 h-5 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <svg
+            className="w-5 h-5 stroke-[2.5]"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+          >
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </button>

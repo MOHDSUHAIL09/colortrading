@@ -1,25 +1,33 @@
+// File: src/components/TicketBanner.jsx
+
 import React from 'react';
 import { BookOpen } from 'lucide-react';
 import { sound } from '../../utils/audio.js';
 import { LotteryBall } from './LotteryBall.jsx';
+import { useColor } from '../../context/ColorContext.jsx';
 
 export const TicketBanner = ({
   modeName,
-  period,
-  secondsRemaining,
-  recentResults = [],
+  secondsRemaining,   // ✅ Context se aa raha hai (Game.jsx se prop)
   onOpenRules,
 }) => {
+  // ✅ Context se dashboard + gameResults
+  const { dashboard, gameResults } = useColor();
+
+  // ===================== TIME CALCULATION =====================
   const minutes = Math.floor(secondsRemaining / 60);
   const seconds = secondsRemaining % 60;
 
   const mStr = String(minutes).padStart(2, '0');
   const sStr = String(seconds).padStart(2, '0');
 
-  const displayBalls = recentResults.slice(0, 5);
+  // ===================== 5 RECENT RESULTS =====================
+  const displayBalls = (gameResults || []).slice(0, 5);
 
+  // ===================== CHAMFER STYLE =====================
   const chamferStyle = {
-    clipPath: 'polygon(4px 0%, 100% 0%, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0% 100%, 0% 4px)',
+    clipPath:
+      'polygon(4px 0%, 100% 0%, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0% 100%, 0% 4px)',
   };
 
   return (
@@ -33,8 +41,8 @@ export const TicketBanner = ({
         </div>
 
         {/* 2-Column Content Layout */}
-        <div className="flex items-center justify-between relative  w-full">
-          {/* Left section */}
+        <div className="flex items-center justify-between relative w-full">
+          {/* ===================== LEFT SECTION ===================== */}
           <div className="w-1/2 pr-3 flex flex-col items-start justify-center min-w-0">
             <button
               onClick={() => {
@@ -51,44 +59,58 @@ export const TicketBanner = ({
               {modeName || 'WinGo 30 second'}
             </div>
 
+            {/* ✅ 5 Recent Results — Number Balls */}
             <div className="flex items-center gap-1 mt-2 overflow-x-hidden">
-              {displayBalls.map((res, idx) => (
-                <div key={`${res.period}-${idx}`} className="shrink-0" title={`Period ${res.period}: ${res.number}`}>
-                  <LotteryBall number={res.number} size={23} />
-                </div>
-              ))}
+              {displayBalls.length === 0 ? (
+                <span className="text-[10px] text-white/60">No results</span>
+              ) : (
+                displayBalls.map((item, idx) => (
+                  <div
+                    key={item.gameid || item.id || idx}
+                    className="shrink-0"
+                    title={`Period ${item.gameid} • Number ${item.betnumber}`}
+                  >
+                    <LotteryBall number={Number(item.betnumber)} size={23} />
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
-          {/* Right section */}
+          {/* ===================== RIGHT SECTION — TIMER ===================== */}
           <div className="w-1/2 pl-3 flex flex-col items-end justify-center min-w-0">
             <span className="text-[11px] font-semibold text-[#a7f3d0] mb-1">
               Time remaining
             </span>
 
             <div className="flex items-center gap-1 mb-1.5 shrink-0">
+              {/* Minutes tens digit */}
               <div
                 style={chamferStyle}
                 className="w-4.5 h-6.5 bg-white flex items-center justify-center text-base font-black text-[#0c7844] shadow-xs"
               >
                 {mStr[0]}
               </div>
+              {/* Minutes ones digit */}
               <div
                 style={chamferStyle}
                 className="w-4.5 h-6.5 bg-white flex items-center justify-center text-base font-black text-[#0c7844] shadow-xs"
               >
                 {mStr[1]}
               </div>
+              {/* Colon dots */}
               <div className="flex flex-col gap-1 px-0.5 justify-center">
                 <span className="w-1 h-1 bg-[#a7f3d0] rounded-xs" />
                 <span className="w-1 h-1 bg-[#a7f3d0] rounded-xs" />
               </div>
+              {/* Seconds tens digit */}
               <div
                 style={chamferStyle}
                 className="w-4.5 h-6.5 bg-white flex items-center justify-center text-base font-black text-[#0c7844] shadow-xs"
               >
                 {sStr[0]}
               </div>
+              {/* Seconds ones digit */}
               <div
                 style={chamferStyle}
                 className="w-4.5 h-6.5 bg-white flex items-center justify-center text-base font-black text-[#0c7844] shadow-xs"
@@ -97,8 +119,9 @@ export const TicketBanner = ({
               </div>
             </div>
 
+            {/* Game ID */}
             <div className="text-[12px] sm:text-[13px] font-bold tracking-tight text-white select-all">
-              {period}
+              {dashboard?.gameid || '------------'}
             </div>
           </div>
         </div>
