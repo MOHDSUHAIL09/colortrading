@@ -50,6 +50,8 @@ export const TrendChartTab = ({ history }) => {
             const winNum = row.number;
             const isBig = winNum >= 5;
 
+            
+
             return (
               <div
                 key={`${row.period}-${idx}`}

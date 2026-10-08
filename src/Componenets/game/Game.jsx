@@ -78,7 +78,7 @@ export default function Game() {
     sound.playClick();
   };
 
-  // ✅ Bet evaluate karo
+  // ✅ Bet evaluate 
   const evaluateBet = (bet, result) => {
     let status = 'lost';
     let winAmount = 0;
@@ -114,7 +114,7 @@ export default function Game() {
     return { status, winAmount };
   };
 
-  // ✅ Latest result aane pe — evaluate + modal
+  // ✅ Latest result  — evaluate + modal
   useEffect(() => {
     if (!latestResult?.period) return;
 

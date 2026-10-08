@@ -25,6 +25,8 @@ export const ColorProvider = ({ children }) => {
   const pollingRef = useRef(null);
   const clientSecondsRef = useRef(0);
   const isRefreshingRef = useRef(false);
+  const currentGameIdRef = useRef(null);       // ✅ Current gameId track
+  const closedGamesRef = useRef(new Set());    // ✅ Already closed games
 
   // ===================== DASHBOARD API =====================
   const fetchDashboard = useCallback(async (Regno) => {
@@ -38,6 +40,7 @@ export const ColorProvider = ({ children }) => {
 
       if (data.result === "true" && data.response) {
         setDashboard(data.response);
+        currentGameIdRef.current = data.response.gameid;   // ✅ Ref update
         console.log("🎉 [Dashboard] gameId:", data.response.gameid);
         return data.response;
       } else {
@@ -53,7 +56,7 @@ export const ColorProvider = ({ children }) => {
     }
   }, []);
 
-  // ===================== GAME RESULTS API ✅ =====================
+  // ===================== GAME RESULTS API =====================
   const fetchGameResults = useCallback(
     async (pageIndex = 1, pageSize = 100) => {
       console.log("🚀 [API] fetchGameResults");
@@ -69,17 +72,10 @@ export const ColorProvider = ({ children }) => {
           setGameResults(results);
           console.log("📦 [Results] count:", results.length);
 
-          // ✅ Latest result format karo
           if (results.length > 0) {
             const latest = results[0];
-
-            // Number → integer
             const num = Number(latest.betnumber);
-
-            // Color → lowercase array
             const colorLower = (latest.betcolor || "red").toLowerCase();
-
-            // BigSmall
             const bigSmall = latest.BigSmallName || "Small";
 
             setLatestResult({
@@ -87,19 +83,14 @@ export const ColorProvider = ({ children }) => {
               period: latest.gameid,
               game: latest.game,
               number: num,
-              color: latest.betcolor,               // "Red"
-              colors: [colorLower],                 // ["red"]
-              bigSmall: bigSmall,                   // "Small"
+              color: latest.betcolor,
+              colors: [colorLower],
+              bigSmall: bigSmall,
               edate: latest.edate,
               winBigSmall: latest.WinBigSmall,
             });
 
-            console.log("🎯 [Latest Result]:", {
-              period: latest.gameid,
-              number: num,
-              color: latest.betcolor,
-              bigSmall: bigSmall,
-            });
+            console.log("🎯 [Latest Result]:", latest.gameid, num);
           }
 
           return {
@@ -156,6 +147,33 @@ export const ColorProvider = ({ children }) => {
     []
   );
 
+  // ===================== CLOSE BET API ✅ =====================
+  const closeBet = useCallback(async (uniqueId) => {
+    console.log("🔒 [CloseBet] Calling for:", uniqueId);
+
+
+    try {
+      const response = await apiClient.post(`/Game/CloseBet`, {
+        regno: 0,
+        gamename: "0",
+        unique_id: String(uniqueId),
+      });
+
+      const data = response.data;
+      console.log("✅ [CloseBet] Response:", data);
+      return { success: true, data };
+    } catch (err) {
+      console.error("❌ [CloseBet] Error:", err);
+      return {
+        success: false,
+        error:
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message,
+      };
+    }
+  }, []);
+
   // ===================== CLIENT SECONDS INIT =====================
   useEffect(() => {
     if (dashboard?.seconds !== undefined) {
@@ -165,18 +183,33 @@ export const ColorProvider = ({ children }) => {
     }
   }, [dashboard?.gameid, dashboard?.seconds]);
 
-  // ===================== CLIENT SECONDS TICK =====================
+  // ===================== CLIENT SECONDS TICK + AUTO CLOSEBET =====================
   useEffect(() => {
     const interval = setInterval(() => {
       setClientSeconds((prev) => {
         const next = prev > 0 ? prev - 1 : 0;
         clientSecondsRef.current = next;
+
+        // ✅ Jab 4 second bache — CloseBet call karo
+        if (next === 4) {
+          const currentGameId = currentGameIdRef.current;
+
+          if (
+            currentGameId &&
+            !closedGamesRef.current.has(currentGameId)
+          ) {
+            console.log(" [Auto CloseBet] 4s left. gameId:", currentGameId);
+            closedGamesRef.current.add(currentGameId);
+            closeBet(currentGameId);
+          }
+        }
+
         return next;
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [closeBet]);
 
   // ===================== SMART POLLING =====================
   useEffect(() => {
@@ -186,10 +219,10 @@ export const ColorProvider = ({ children }) => {
 
     pollingRef.current = setInterval(async () => {
       if (clientSecondsRef.current <= 1 && !isRefreshingRef.current) {
-        console.log("⏰ [Polling] Timer khatam");
+        console.log("⏰ [Polling] ");
         isRefreshingRef.current = true;
 
-        const oldGameId = dashboard?.gameid;
+        const oldGameId = currentGameIdRef.current;
         const newDash = await fetchDashboard(Regno);
 
         if (newDash && newDash.gameid !== oldGameId) {
@@ -204,7 +237,7 @@ export const ColorProvider = ({ children }) => {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
-  }, [Regno, dashboard?.gameid, fetchDashboard, fetchGameResults]);
+  }, [Regno, fetchDashboard, fetchGameResults]);
 
   // ===================== INITIAL FETCH =====================
   useEffect(() => {
@@ -219,7 +252,7 @@ export const ColorProvider = ({ children }) => {
       value={{
         dashboard,
         gameResults,
-        latestResult,      // ✅ Expose
+        latestResult,
         clientSeconds,
         loading,
         error,
@@ -227,6 +260,7 @@ export const ColorProvider = ({ children }) => {
         fetchDashboard,
         fetchGameResults,
         placeBet,
+        closeBet,        // ✅ Expose
       }}
     >
       {children}
