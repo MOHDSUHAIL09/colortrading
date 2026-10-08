@@ -150,7 +150,6 @@ export default function LoginForm({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
-          {/* Login ID */}
           <div>
             <label
               className="block text-xs sm:text-sm font-medium text-slate-300 mb-2"
@@ -175,15 +174,12 @@ export default function LoginForm({
                 onBlur={() => setBotMood('idle')}
                 placeholder="your login id"
                 className={`w-full pr-4 py-3 sm:py-3.5 bg-slate-950/60 text-white placeholder-slate-500 rounded-xl border border-white/10 text-sm focus:outline-none transition-all ${themeConfig.ringClass}`}
-                style={{
-                  paddingLeft: '44px',
-                }}
+                style={{ paddingLeft: '44px' }}
               />
             </div>
           </div>
 
-          {/* Password */}
- 
+          <div>
             <label
               className="block text-xs sm:text-sm font-medium text-slate-300 mb-2"
               htmlFor="login-password"
@@ -228,35 +224,38 @@ export default function LoginForm({
                 )}
               </button>
             </div>
-      
+          </div>
 
-{/* ✅ Forgot Password — button ke upar */}
-<div className="d-flex align-items-center gap-1 ">
-  <span className="text-xs sm:text-sm text-slate-400">Forgot password ? </span>
-  <button
-    type="button"
-    onClick={onForgotPassword}
-    className="bg-transparent border-0 p-0 text-primary fw-semibold"
-    style={{ color: '#667eea', cursor: 'pointer' }}
-  >
-    Reset Here
-  </button>
-</div>
-                    {/* ✅ Register Here — button ke neeche, halka gap */}
-            <div className="text-xs sm:text-sm text-slate-400">
-              Don&apos;t have an account yet?{' '}
-              <button
-                type="button"
-                onClick={onSwitchToRegister}
-                className="font-semibold  hover:underline ml-1"
-                style={{ color: '#667eea', cursor: 'pointer' }}
-              >
-                Register Here
-              </button>
-            </div>
-    
+          <div className="flex items-center gap-1">
+            <span className="text-xs sm:text-sm text-slate-400">Forgot password ? </span>
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="bg-transparent border-0 p-0 font-semibold"
+              style={{ color: '#667eea', cursor: 'pointer' }}
+            >
+              Reset Here
+            </button>
+          </div>
 
-          {/* Submit Button — gradient */}
+          <div className="text-xs sm:text-sm text-slate-400">
+            Don&apos;t have an account yet?{' '}
+            <button
+              type="button"
+              onClick={onSwitchToRegister}
+              className="font-semibold hover:underline ml-1"
+              style={{
+                color: '#667eea',
+                cursor: 'pointer',
+                background: 'transparent',
+                border: 'none',
+                padding: 0,
+              }}
+            >
+              Register Here
+            </button>
+          </div>
+
           <button
             type="submit"
             disabled={isLoading}
@@ -276,7 +275,7 @@ export default function LoginForm({
               </>
             ) : (
               <>
-                <span>Sign In to Terminal</span>
+                <span>Log in</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

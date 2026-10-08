@@ -1,35 +1,38 @@
 // File: src/components/authComponent/Auth.jsx
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ThreeBackground from './ThreeBackground';
 import BotPanel from './BotPanel';
 import Card3D from './Card3D';
 import { THEME_CONFIGS } from './themes';
 import { playCardFlip } from './sound';
-import { useUser } from '../../context/UserContext'; // ✅ import
+import { useUser } from '../../context/UserContext';
 
 export default function Auth() {
   const [theme] = useState('cyber');
   const [botMood, setBotMood] = useState('tracking');
-  const [activeView, setActiveView] = useState('login');
   const [tiltEnabled] = useState(true);
 
   const themeConfig = THEME_CONFIGS[theme];
   const navigate = useNavigate();
-  const { loginUser } = useUser(); // ✅ context se loginUser lo
+  const location = useLocation();
+  const { loginUser } = useUser();
+
+  // ✅ URL se initial view set karo (key re-mount ki wajah se har baar fresh chalega)
+  const [activeView, setActiveView] = useState(
+    location.pathname === '/signup' ? 'register' : 'login'
+  );
 
   const handleLoginSuccess = (userFromApi) => {
     setBotMood('celebrating');
 
-    // ✅ STEP 1: Context update — sessionStorage set + isAuthenticated = true
     if (userFromApi) {
       loginUser(userFromApi);
     } else {
       console.warn('⚠️ onLoginSuccess called without user data');
     }
 
-    // ✅ STEP 2: DIRECT dashboard — no setTimeout, no waiting
     navigate('/dashboard', { replace: true });
   };
 

@@ -1,6 +1,7 @@
 // File: src/components/authComponent/Card3D.jsx
 
 import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { THEME_CONFIGS } from './themes';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
@@ -17,6 +18,7 @@ export default function Card3D({
 }) {
   const themeConfig = THEME_CONFIGS[theme];
   const containerRef = useRef(null);
+  const navigate = useNavigate();
 
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
@@ -51,6 +53,12 @@ export default function Card3D({
     playCardFlip();
     setActiveView(target);
     setBotMood('idle');
+
+    if (target === 'register') {
+      navigate('/signup', { replace: true });
+    } else if (target === 'login') {
+      navigate('/login', { replace: true });
+    }
   };
 
   const isFlipped = activeView === 'register';
@@ -65,7 +73,6 @@ export default function Card3D({
       onMouseLeave={handleMouseLeave}
       className="relative w-full max-w-[530px] lg:max-w-[550px] perspective-1200 mx-auto"
     >
-      {/* 3D Flipping Card Body */}
       <div
         id="card3d-flip-inner"
         className="relative w-full transition-transform duration-700 transform-style-3d ease-out"
@@ -75,10 +82,7 @@ export default function Card3D({
           }deg)`,
         }}
       >
-        {/* ==================================================== */}
-        {/* FRONT FACE: Sign In / Forgot Password                */}
-        {/* ✅ Relative — content ke hisaab se height lega       */}
-        {/* ==================================================== */}
+        {/* FRONT FACE */}
         <div
           id="card-front-face"
           className="relative w-full backface-hidden bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-7 sm:p-9 md:p-10 shadow-2xl flex flex-col justify-between overflow-hidden"
@@ -118,10 +122,7 @@ export default function Card3D({
           )}
         </div>
 
-        {/* ==================================================== */}
-        {/* BACK FACE: Register Form (Rotated 180deg)            */}
-        {/* ✅ Absolute overlay — front ke upar aayega           */}
-        {/* ==================================================== */}
+        {/* BACK FACE */}
         <div
           id="card-back-face"
           className="absolute top-0 left-0 w-full backface-hidden rotate-y-180 bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-7 sm:p-9 md:p-10 shadow-2xl flex flex-col justify-between overflow-hidden"

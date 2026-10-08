@@ -36,3 +36,28 @@ html, body {
     will-change: transform;
   }
 }
+
+
+/* ============================================
+   3D CARD FLIP UTILITIES — MUST HAVE
+   ============================================ */
+
+.perspective-1200 {
+  perspective: 1200px !important;
+  -webkit-perspective: 1200px !important;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d !important;
+  -webkit-transform-style: preserve-3d !important;
+}
+
+.backface-hidden {
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg) !important;
+}
+
