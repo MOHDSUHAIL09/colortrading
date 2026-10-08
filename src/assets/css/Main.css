@@ -7976,6 +7976,7 @@
   padding: 0 15px;
   height: calc(100vh - 170px);
   border-radius: 7px;
+  margin-top: 12px;
 }
 .left-sidebar .scroll-sidebar .simplebar-track.simplebar-horizontal {
   visibility: hidden !important;
@@ -11105,3 +11106,24 @@ button {
   opacity: 0 !important;
 }
 
+
+/* Placeholder color — light gray */
+input::placeholder {
+  color: #94a3b8 !important;   /* slate-400 */
+  opacity: 1 !important;
+}
+
+input::-webkit-input-placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+input::-moz-placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+input:-ms-input-placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
