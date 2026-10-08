@@ -21,18 +21,27 @@ export default function LoginForm({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // ✅ Ek hi error message — top pe box mein dikhega
   const [errorMessage, setErrorMessage] = useState('');
+
+  // ✅ Field-wise errors — sirf client validation ke liye (input ke neeche)
+  const [fieldErrors, setFieldErrors] = useState({ loginId: '', password: '' });
+
+  // ================= HANDLERS =================
 
   const handleLoginIdChange = (e) => {
     setLoginId(e.target.value);
-    setErrorMessage('');
+    setErrorMessage('');   // ✅ top error clear
+    setFieldErrors((prev) => ({ ...prev, loginId: '' }));
     playTypingClick();
     setBotMood('typing');
   };
 
   const handlePasswordChange = (e) => {
     setPassword(e.target.value);
-    setErrorMessage('');
+    setErrorMessage('');   // ✅ top error clear
+    setFieldErrors((prev) => ({ ...prev, password: '' }));
     playTypingClick();
     setBotMood(showPassword ? 'peeking' : 'hiding_eyes');
   };
@@ -49,25 +58,55 @@ export default function LoginForm({
     else { playHidingSound(); setBotMood('hiding_eyes'); }
   };
 
-  const showError = (msg) => {
-    setErrorMessage(Array.isArray(msg) ? msg.join(', ') : msg);
+  // ✅ Server error — sirf TOP pe ek hi box mein dikhao
+  const showServerError = (msg) => {
+    const errorMsg = Array.isArray(msg)
+      ? msg.join(', ')
+      : String(msg || 'Invalid Login Credentials.');
+
+    setErrorMessage(errorMsg);          // ✅ sirf top box
+    setFieldErrors({ loginId: '', password: '' });  // ✅ field errors clear
     playErrorBuzz();
     setBotMood('error');
     setTimeout(() => setBotMood('idle'), 1200);
   };
 
+  // ================= SUBMIT =================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    setFieldErrors({ loginId: '', password: '' });
 
-    if (!loginId.trim() || loginId.trim().length < 3) {
-      return showError('Login ID must be at least 3 characters.');
+    // ✅ Client-side validation (field-wise)
+    let hasClientError = false;
+    const clientErrors = { loginId: '', password: '' };
+
+    if (!loginId.trim()) {
+      clientErrors.loginId = 'Login ID is required.';
+      hasClientError = true;
+    } else if (loginId.trim().length < 3) {
+      clientErrors.loginId = 'Login ID must be at least 3 characters.';
+      hasClientError = true;
+    } else if (!/^[a-zA-Z0-9]+$/.test(loginId.trim())) {
+      clientErrors.loginId = 'Login ID can only contain letters and numbers.';
+      hasClientError = true;
     }
-    if (!/^[a-zA-Z0-9]+$/.test(loginId.trim())) {
-      return showError('Login ID can only contain letters and numbers.');
+
+    if (!password) {
+      clientErrors.password = 'Password is required.';
+      hasClientError = true;
+    } else if (password.length < 8) {
+      clientErrors.password = 'Password must be at least 8 characters.';
+      hasClientError = true;
     }
-    if (!password || password.length < 8) {
-      return showError('Password must be at least 8 characters.');
+
+    if (hasClientError) {
+      setFieldErrors(clientErrors);
+      playErrorBuzz();
+      setBotMood('error');
+      setTimeout(() => setBotMood('idle'), 1200);
+      return;
     }
 
     setIsLoading(true);
@@ -106,28 +145,38 @@ export default function LoginForm({
 
         playSuccessChime();
         setBotMood('celebrating');
-
         onLoginSuccess?.(session);
       } else {
-        showError(data?.message || 'Invalid login details.');
+        // ❌ API ne result: false diya
+        const msg = data?.message || 'Invalid Login Credentials.';
+        showServerError(msg);
       }
     } catch (error) {
-      console.error('Login Error:', error);
       const rd = error?.response?.data;
 
-      let msg = '';
-      if (rd?.message) msg = Array.isArray(rd.message) ? rd.message.join(', ') : rd.message;
-      else if (rd?.title) msg = rd.title;
-      else if (rd?.errors) msg = Object.values(rd.errors).flat().join(', ');
-      else if (error.code === 'ECONNABORTED') msg = 'Request timed out. Please try again.';
-      else if (!error.response) msg = 'Check your connection.';
-      else msg = 'Login failed. Please try again.';
+      let msg = 'Invalid Login Credentials.';
 
-      showError(msg);
+      if (rd?.message) {
+        msg = Array.isArray(rd.message) ? rd.message.join(', ') : String(rd.message);
+      } else if (rd?.title) {
+        msg = String(rd.title);
+      } else if (rd?.errors) {
+        msg = Object.values(rd.errors).flat().join(', ');
+      } else if (error?.message && error.message !== 'Network Error') {
+        msg = error.message;
+      } else if (error?.code === 'ECONNABORTED') {
+        msg = 'Request timed out. Please try again.';
+      } else if (!error?.response) {
+        msg = 'Check your connection.';
+      }
+
+      showServerError(msg);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // ================= RENDER =================
 
   return (
     <div id="login-form-container" className="flex flex-col h-full">
@@ -139,17 +188,30 @@ export default function LoginForm({
           </p>
         </div>
 
+        {/* ✅ SINGLE ERROR BOX — sirf yahan dikhega */}
         {errorMessage && (
           <div
-            id="login-error-alert"
-            className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs sm:text-sm flex items-center gap-2 animate-shake"
+            style={{
+              marginBottom: '16px',
+              padding: '10px 12px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              color: '#fca5a5',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              lineHeight: 1.4,
+            }}
           >
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+            <AlertCircle size={16} style={{ flexShrink: 0, color: '#f87171' }} />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6" autoComplete="off" noValidate>
+          {/* ================= Login ID ================= */}
           <div>
             <label
               className="block text-xs sm:text-sm font-medium text-slate-300 mb-2"
@@ -167,18 +229,39 @@ export default function LoginForm({
               <input
                 id="login-id"
                 type="text"
-                required
+                autoComplete="off"
                 value={loginId}
                 onChange={handleLoginIdChange}
                 onFocus={() => setBotMood('typing')}
                 onBlur={() => setBotMood('idle')}
                 placeholder="your login id"
-                className={`w-full pr-4 py-3 sm:py-3.5 bg-slate-950/60 text-white placeholder-slate-500 rounded-xl border border-white/10 text-sm focus:outline-none transition-all ${themeConfig.ringClass}`}
-                style={{ paddingLeft: '44px' }}
+                className="w-full pr-4 py-3 sm:py-3.5 bg-slate-950/60 text-white placeholder-slate-500 rounded-xl border text-sm focus:outline-none transition-all"
+                style={{
+                  paddingLeft: '44px',
+                  borderColor: fieldErrors.loginId ? '#ef4444' : 'rgba(255,255,255,0.1)',
+                }}
               />
             </div>
+            {/* ✅ Client validation error — input ke neeche */}
+            {fieldErrors.loginId && (
+              <p
+                style={{
+                  marginTop: '6px',
+                  fontSize: '12px',
+                  color: '#f87171',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  lineHeight: 1.4,
+                }}
+              >
+                <AlertCircle size={14} style={{ flexShrink: 0 }} />
+                <span>{fieldErrors.loginId}</span>
+              </p>
+            )}
           </div>
 
+          {/* ================= Password ================= */}
           <div>
             <label
               className="block text-xs sm:text-sm font-medium text-slate-300 mb-2"
@@ -196,18 +279,19 @@ export default function LoginForm({
               <input
                 id="login-password"
                 type={showPassword ? 'text' : 'password'}
-                required
+                autoComplete="new-password"
                 value={password}
                 onChange={handlePasswordChange}
                 onFocus={handlePasswordFocus}
                 onBlur={handlePasswordBlur}
                 placeholder="••••••••••••"
-                className={`w-full bg-slate-950/60 text-white placeholder-slate-500 rounded-xl border border-white/10 text-sm focus:outline-none transition-all ${themeConfig.ringClass}`}
+                className="w-full bg-slate-950/60 text-white placeholder-slate-500 rounded-xl border text-sm focus:outline-none transition-all"
                 style={{
                   paddingLeft: '44px',
                   paddingRight: '48px',
                   paddingTop: '12px',
                   paddingBottom: '12px',
+                  borderColor: fieldErrors.password ? '#ef4444' : 'rgba(255,255,255,0.1)',
                 }}
               />
               <button
@@ -224,6 +308,23 @@ export default function LoginForm({
                 )}
               </button>
             </div>
+            {/* ✅ Client validation error — input ke neeche */}
+            {fieldErrors.password && (
+              <p
+                style={{
+                  marginTop: '6px',
+                  fontSize: '12px',
+                  color: '#f87171',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  lineHeight: 1.4,
+                }}
+              >
+                <AlertCircle size={14} style={{ flexShrink: 0 }} />
+                <span>{fieldErrors.password}</span>
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-1">
